@@ -176,10 +176,10 @@ elif [ -f /etc/default/grub ]; then
         fi
     }
 
-    log "INFO" "Aplicando preferências do GRUB (Timeout 0, Hidden)..."
+    log "INFO" "Aplicando preferências do GRUB (Timeout 1, Hidden)..."
     set_grub_key "GRUB_TIMEOUT_STYLE" "menu"
-    set_grub_key "GRUB_TIMEOUT" "0"
-    set_grub_key "GRUB_RECORDFAIL_TIMEOUT" "0"
+    set_grub_key "GRUB_TIMEOUT" "1"
+    set_grub_key "GRUB_RECORDFAIL_TIMEOUT" "1"
     set_grub_key "GRUB_DISABLE_OS_PROBER" "true"
     set_grub_key "GRUB_DISABLE_SUBMENU" "y"
 

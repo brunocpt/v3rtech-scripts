@@ -30,11 +30,44 @@ load_apps_csv() {
     local line_count=0
 
     # Lê linha por linha
-    while IFS='|' read -r active category name desc pkg_deb pkg_arch pkg_fed flatpak_id method || [ -n "$active" ]; do
-
+    while read -r raw_line || [ -n "$raw_line" ]; do
         # Ignora linhas de comentário (#) ou linhas vazias
-        [[ "$active" =~ ^#.*$ ]] && continue
-        [[ -z "$active" ]] && continue
+        [[ "$raw_line" =~ ^#.*$ ]] && continue
+        [[ -z "$raw_line" ]] && continue
+
+        # Validação de Estrutura: Verifica se tem 9 colunas
+        # Usa conversão para array para contar
+        IFS='|' read -r -a cols <<< "$raw_line"
+        
+        # Nota: read -a pode ignorar campos vazios no final dependendo da versão, 
+        # mas para nosso caso (9 campos fixos), se o usuário esquecer pipes, vai dar errado.
+        # Uma abordagem mais segura para contar separadores:
+        num_pipes=$(echo "$raw_line" | tr -cd '|' | wc -c)
+        
+        # Esperamos 8 pipes para 9 colunas
+        if [ "$num_pipes" -ne 8 ]; then
+            log "WARN" "CSV Malformado (Esperado 9 colunas/8 pipes): $raw_line"
+            continue
+        fi
+
+        # Parsing das variáveis via Array
+        active="${cols[0]}"
+        category="${cols[1]}"
+        name="${cols[2]}"
+        desc="${cols[3]}"
+        pkg_deb="${cols[4]}"
+        pkg_arch="${cols[5]}"
+        pkg_fed="${cols[6]}"
+        flatpak_id="${cols[7]}"
+        method="${cols[8]}"
+
+        # Validação Extra: Método não deve ser nulo (pois é a última coluna)
+        if [ -z "$method" ]; then
+             # Se o método for vazio na string original "||", ele entra como vazio no array.
+             # Mas se faltou a coluna, o array seria menor.
+             # Como já validamos os pipes, garantimos a estrutura.
+             true 
+        fi
 
         # Limpa espaços em branco extras (trim)
         name=$(echo "$name" | xargs)

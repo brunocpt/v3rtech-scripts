@@ -26,7 +26,7 @@ O **V3RTECH Scripts** é uma suíte de automação modular e inteligente projeta
 
 1.  **Clone o repositório** (ou baixe e extraia o zip):
     ```bash
-    git clone [https://github.com/SEU_USUARIO/v3rtech-scripts.git](https://github.com/SEU_USUARIO/v3rtech-scripts.git)
+    git clone [https://github.com/brunocpt/v3rtech-scripts.git](https://github.com/brunocpt/v3rtech-scripts.git)
     cd v3rtech-scripts
     ```
 
