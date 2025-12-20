@@ -1,0 +1,102 @@
+# ARQUIVO DE DEFINIÇÃO DE APPS - V3RTECH SCRIPTS
+# Separador: | (Pipe)
+# Colunas: ATIVO|CATEGORIA|NOME|DESCRICAO|PKG_DEBIAN|PKG_ARCH|PKG_FEDORA|FLATPAK_ID|METODO
+# METODO: native (tenta repo, fallback flatpak), flatpak (força), pipx (python), custom (script proprio)
+
+# --- NAVEGADORES (Browser Wars) ---
+TRUE|Internet|Wavebox|Navegador focado em trabalho|wavebox|wavebox|wavebox|io.wavebox.Wavebox|native
+TRUE|Internet|Google Chrome|Navegador do Google|google-chrome-stable|google-chrome|google-chrome-stable|com.google.Chrome|native
+TRUE|Internet|Firefox|Navegador Mozilla|firefox|firefox|firefox|org.mozilla.firefox|native
+TRUE|Internet|Brave|Navegador Privacidade|brave-browser|brave-bin|brave-browser|com.brave.Browser|native
+TRUE|Internet|Vivaldi|Navegador Power User|vivaldi-stable|vivaldi|vivaldi|com.vivaldi.Vivaldi|native
+TRUE|Internet|Opera|Navegador com VPN|opera-stable|opera|opera-stable|com.opera.Opera|native
+TRUE|Internet|Microsoft Edge|Navegador Microsoft|microsoft-edge-stable|microsoft-edge-stable-bin|microsoft-edge-stable|com.microsoft.Edge|native
+
+# --- NUVEM E TRANSFERÊNCIA ---
+TRUE|Nuvem|Nextcloud|Sync Nextcloud|nextcloud-desktop|nextcloud-client|nextcloud-client|com.nextcloud.desktopclient.nextcloud|native
+TRUE|Nuvem|RClone|Cloud CLI|rclone|rclone|rclone||native
+FALSE|Nuvem|Filezilla|Cliente FTP|filezilla|filezilla|filezilla|org.filezilla.FileZilla|native
+
+# --- COMUNICAÇÃO ---
+FALSE|Comunicação|Discord|Chat e Voz|discord|discord|discord|com.discordapp.Discord|flatpak
+FALSE|Comunicação|MailViewer|Visualizador EML/MSG||||io.github.alescdb.mailviewer|flatpak
+
+# --- DESENVOLVIMENTO & TERMINAL ---
+FALSE|Dev|VS Code|Editor Microsoft|code|visual-studio-code-bin|code|com.visualstudio.code|native
+TRUE|Dev|Antigravity|Ambiente Google (VSCode)|antigravity-auto-updater|||com.google.Antigravity|native
+TRUE|Dev|Docker|Containers|docker.io docker-compose|docker docker-compose|docker docker-compose||native
+FALSE|Dev|DBeaver|Cliente SQL|dbeaver-ce|dbeaver|dbeaver|io.dbeaver.DBeaverCommunity|native
+FALSE|Dev|Postman|Plataforma API|postman|postman-bin|postman|com.getpostman.Postman|native
+FALSE|Dev|Terminator|Terminal Avançado|terminator|terminator|terminator||native
+TRUE|Dev|Guake|Terminal Drop-down|guake|guake|guake||native
+TRUE|Dev|Geany|Editor Leve|geany geany-plugins|geany geany-plugins|geany geany-plugins||native
+TRUE|Dev|Git Tools|Git e GitHub CLI|git gh|git github-cli|git gh||native
+TRUE|Dev|Dev Utils|JQ, CCache, Duf, Eza|jq ccache duf eza|jq ccache duf eza|jq ccache duf eza||native
+
+# --- ESCRITÓRIO E PRODUTIVIDADE ---
+TRUE|Escritório|LibreOffice|Suíte Office|libreoffice|libreoffice-fresh|libreoffice|org.libreoffice.LibreOffice|native
+TRUE|Escritório|Obsidian|Knowledge Base||obsidian|obsidian|md.obsidian.Obsidian|flatpak
+TRUE|Escritório|Calibre|E-books|calibre|calibre|calibre|com.calibre_ebook.calibre|native
+TRUE|Escritório|Zotero|Gestão Bibliográfica||zotero-bin|zotero|org.zotero.Zotero|flatpak
+TRUE|Escritório|XMind|Mapas Mentais||xmind|xmind|net.xmind.XMind8|flatpak
+TRUE|Escritório|Camunda Modeler|Modelagem BPMN||camunda-modeler-bin|camunda-modeler|com.camunda.CamundaModeler|flatpak
+TRUE|Escritório|Draw.io|Diagramas|drawio|drawio-desktop|drawio|com.jgraph.drawio.desktop|native
+TRUE|Escritório|Corretores PT-BR|Dicionários|aspell-pt aspell-pt-br hunspell-pt-br mythes-pt-br hyphen-pt-br wportuguese|aspell-pt hunspell-pt mythes-pt hyphen-pt|aspell-pt hunspell-pt mythes-pt hyphen-pt||native
+
+# --- PDF E OCR ---
+TRUE|Escritório|Sejda PDF|Editor PDF Desktop||sejda-desktop|sejda-desktop|com.sejda.Sejda|flatpak
+TRUE|Escritório|OCRmyPDF|OCR em PDFs|ocrmypdf ghostscript jbig2dec|ocrmypdf ghostscript jbig2dec|ocrmypdf ghostscript jbig2dec||native
+TRUE|Escritório|Tesseract OCR|Motor OCR (Multi-lang)|tesseract-ocr tesseract-ocr-por tesseract-ocr-eng tesseract-ocr-fra tesseract-ocr-spa|tesseract tesseract-data-por tesseract-data-eng tesseract-data-fra tesseract-data-spa|tesseract tesseract-langpack-por tesseract-langpack-eng tesseract-langpack-fra tesseract-langpack-spa||native
+
+# --- DESIGN & IMAGEM ---
+TRUE|Design|Inkscape|Vetorial|inkscape|inkscape|inkscape|org.inkscape.Inkscape|native
+TRUE|Design|GIMP|Imagens|gimp|gimp|gimp|org.gimp.GIMP|native
+FALSE|Design|Upscayl|Upscaling IA||upscayl-bin|upscayl|org.upscayl.Upscayl|flatpak
+FALSE|Design|Penpot|Prototipagem||||com.authormore.penpotdesktop|flatpak
+FALSE|Design|FreeCAD|Modelagem 3D|freecad|freecad|freecad|org.freecad.FreeCAD|native
+FALSE|Design|Scribus|Desktop Publishing|scribus|scribus|scribus|net.scribus.Scribus|native
+FALSE|Design|WebP Converter|Conversor WebP||||io.itsterminal.WebPConverter|flatpak
+TRUE|Design|ImageMagick|Manipulação CLI|imagemagick|imagemagick|imagemagick||native
+
+# --- MULTIMÍDIA ---
+TRUE|Multimídia|VLC|Player|vlc|vlc|vlc|org.videolan.VLC|native
+TRUE|Multimídia|OBS Studio|Streaming|obs-studio|obs-studio|obs-studio|com.obsproject.Studio|native
+FALSE|Multimídia|Spotify|Música|spotify-client|spotify|spotify-client|com.spotify.Client|flatpak
+TRUE|Multimídia|Filebot|Organizador (Exceção)||||net.filebot.FileBot|flatpak
+FALSE|Multimídia|MuseAmp|Player estilo Winamp||||io.github.tapscodes.MuseAmp|flatpak
+TRUE|Multimídia|MusicBrainz Picard|Tagger de Música|picard|picard|picard|org.musicbrainz.Picard|native
+TRUE|Multimídia|Avidemux|Editor de Vídeo|avidemux|avidemux-qt|avidemux|org.avidemux.Avidemux|native
+TRUE|Multimídia|MKVToolNix|Ferramentas MKV|mkvtoolnix|mkvtoolnix-cli mkvtoolnix-gui|mkvtoolnix|org.bunkus.mkvtoolnix-gui|native
+
+# --- JOGOS ---
+FALSE|Jogos|Steam|Loja de Jogos|steam-installer|steam|steam|com.valvesoftware.Steam|native
+FALSE|Jogos|Bottles|Wine Manager (Windows Apps)||||com.usebottles.bottles|flatpak
+FALSE|Jogos|Extreme Tux Racer|Corrida|extremetuxracer|extremetuxracer|extremetuxracer||native
+FALSE|Jogos|SuperTuxKart|Kart|supertuxkart|supertuxkart|supertuxkart|net.supertuxkart.SuperTuxKart|native
+FALSE|Jogos|Chromium BSU|Arcade Space Shooter|chromium-bsu|chromium-bsu|chromium-bsu||native
+FALSE|Jogos|Tiny Wii Backup|Backup Manager Wii||||it.mq1.TinyWiiBackupManager|flatpak
+
+# --- UTILITÁRIOS E SISTEMA ---
+TRUE|Sistema|Gparted|Partições|gparted|gparted|gparted|org.gnome.PartitionEditor|native
+TRUE|Sistema|Remmina|Acesso Remoto|remmina|remmina|remmina|org.remmina.Remmina|native
+TRUE|Sistema|FlameShot|Screenshot|flameshot|flameshot|flameshot|org.flameshot.Flameshot|native
+TRUE|Sistema|ZRAM|Compressão RAM|zram-tools|zram-generator|zram-generator||native
+FALSE|Utils|ISO Image Writer|Gravador USB||||org.kde.isoimagewriter|flatpak
+FALSE|Utils|Letterpress|Conversor ASCII||||io.gitlab.gregorni.Letterpress|flatpak
+FALSE|Utils|SaveDesktop|Salvar estado janelas||||io.github.vikdevelop.SaveDesktop|flatpak
+TRUE|Utils|7Zip e Rar|Compactação|p7zip-full p7zip-rar unrar arj|p7zip unrar arj|p7zip p7zip-plugins unrar arj||native
+TRUE|Utils|Grsync|Rsync GUI|grsync|grsync|grsync||native
+
+# --- IMPRESSÃO & DRIVERS (Descobertos no script pack-geral) ---
+TRUE|Impressão|CUPS Base|Sistema de Impressão|cups cups-backend-bjnp|cups|cups||native
+TRUE|Impressão|Drivers HP|Drivers para HP|printer-driver-hpijs hpijs-ppds|hplip|hplip||native
+TRUE|Impressão|Drivers Epson|Drivers para Epson|printer-driver-escpr escputil|epson-inkjet-printer-escpr|epson-inkjet-printer-escpr||native
+TRUE|Impressão|Gutenprint|Drivers Genéricos|printer-driver-gutenprint|gutenprint|gutenprint||native
+
+# --- IA E CLI (Pipx) ---
+TRUE|IA|OpenAI Whisper|Reconhecimento de Fala||||openai-whisper|pipx
+TRUE|IA|Subliminal|Baixador de Legendas||||subliminal|pipx
+FALSE|IA|YT-DLP|Downloader de Vídeos||||yt-dlp|pipx
+
+# --- CUSTOM SCRIPTS ---
+FALSE|Utils|Ventoy|Criador USB Bootável||||ventoy|custom

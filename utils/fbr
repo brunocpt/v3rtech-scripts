@@ -1,0 +1,72 @@
+#!/bin/bash
+
+# Diretório de log
+log_file="$HOME/fbr.log"
+
+# Definindo os diretórios
+src_dir="/mnt/trabalho/Videos/"
+
+# Função para escrever no log
+log_message() {
+  local message=$1
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $message" >> "$log_file"
+}
+
+# Função para renomear legendas após o filebot
+rename_subtitles_after_filebot() {
+  local dir="$1"
+
+  # Renomeia TUDO que terminar em .srt para .pt-BR.srt
+  find "$dir" -type f -iname "*.srt" | while read -r subtitle_file; do
+    local base_name="${subtitle_file%.srt}"
+    local new_name="${base_name}.pt-BR.srt"
+    if [[ "$subtitle_file" != "$new_name" ]]; then
+      mv -f "$subtitle_file" "$new_name"
+      log_message "Arquivo de legenda renomeado (após o filebot): $subtitle_file -> $new_name"
+    fi
+  done
+
+  log_message "Renomeação de legendas concluída no diretório: $dir"
+}
+
+# Início do log da operação
+log_message "Iniciando operação FBR - Renomeando arquivos de legenda em $src_dir"
+
+# Executa o filebot para renomear os arquivos de mídia e legendas
+log_message "Executando filebot para renomeação de mídia e legendas"
+for dir in "$src_dir"/*/; do
+  category=$(basename "$dir")
+  case "$category" in
+    "Criancas"|"SeriesCriancas")
+      flatpak run net.filebot.FileBot -rename "$dir" --format "{n} ({y})/{n} ({y}) [{vf}]" --db TheMovieDB --lang pt -non-strict >> "$log_file" 2>&1 || {
+        log_message "Erro ao executar o filebot no diretório $category"
+      }
+      ;;
+    "TVSeries")
+      flatpak run net.filebot.FileBot -rename "$dir" --format "{n}/Season {s.pad(2)}/{n}.s{s.pad(2)}e{e.pad(2)}.{t}.[{airdate.format('yyyy.MM.dd')}]" --db TheTVDB -non-strict >> "$log_file" 2>&1 || {
+        log_message "Erro ao executar o filebot no diretório $category"
+      }
+      ;;
+    "XXX")
+      log_message "Diretório $category não processado"
+      ;;
+    *)
+      flatpak run net.filebot.FileBot -rename "$dir" --format "{n} ({y})/{n} ({y}) [{vf}]" --db TheMovieDB --lang en -non-strict >> "$log_file" 2>&1 || {
+        log_message "Erro ao executar o filebot no diretório $category"
+      }
+      ;;
+  esac
+done
+
+# Renomeia legendas após o filebot
+log_message "Renomeando legendas após a execução do filebot"
+rename_subtitles_after_filebot "$src_dir"
+
+# Finalização do log da operação
+log_message "Operação FBR concluída com sucesso"
+
+# Exibe resumo da operação
+#zenity --info --text="Operação FBR concluída com sucesso. Verifique o log para detalhes: $log_file" --timeout=10
+
+exit 0
+

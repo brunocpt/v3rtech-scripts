@@ -1,0 +1,31 @@
+# Arquivos de Sistema e IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Logs de Execução (Não subir logs da sua máquina)
+*.log
+
+# Backups gerados pelos scripts
+*.bak
+*.bak.*
+*.backup
+*.backup.*
+*.old
+*.orig
+*.tmp
+*.zip
+*.tar.gz
+
+# Arquivos de Configuração Temporários
+/configs/.git-credentials
+/core/env-custom.sh
+
+# Se você quiser ignorar os zips de configuração pessoal (Recomendado se tiver senhas)
+# Mas se eles forem templates genéricos, mantenha comentado (com #)
+# *.zip
+# *.tar.gz
+
+# Diretórios de teste ou build temporários
+/tmp/
+/build/

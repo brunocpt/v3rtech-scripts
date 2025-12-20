@@ -1,0 +1,10 @@
+# DNS-320L - Modal
+//DNS-320L/Volume_1           /mnt/LAN/DNS320L       cifs  credentials=/etc/configuracoes/conf/credenciais-lan,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=2.0  0  0
+
+# TrueNAS V3RTECH - Bruno
+//truenas-v3rtech-local/AppData       /mnt/LAN/AppData       cifs  credentials=/etc/configuracoes/conf/credenciais-lan,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+//truenas-v3rtech-local/Backup        /mnt/LAN/Backup        cifs  credentials=/etc/configuracoes/conf/credenciais-lan,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+//truenas-v3rtech-local/Downloads     /mnt/LAN/Downloads     cifs  credentials=/etc/configuracoes/conf/credenciais-lan,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+//truenas-v3rtech-local/Musicas       /mnt/LAN/Musicas       cifs  credentials=/etc/configuracoes/conf/credenciais-lan,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+//truenas-v3rtech-local/SOs           /mnt/LAN/SOs           cifs  credentials=/etc/configuracoes/conf/credenciais-lan,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+//truenas-v3rtech-local/Videos        /mnt/LAN/Videos        cifs  credentials=/etc/configuracoes/conf/credenciais-lan,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0

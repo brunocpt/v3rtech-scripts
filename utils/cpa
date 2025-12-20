@@ -1,0 +1,134 @@
+#!/bin/bash
+
+# ========================================
+# Script de Cópia e Espelhamento com YAD
+# REVISÃO: Corrigido o fechamento automático da janela de progresso.
+# ========================================
+
+# --- Variáveis e Limpeza ---
+YAD_FIFO="/tmp/yad_task_runner_fifo_$$"
+# Função de limpeza para ser chamada na saída do script
+cleanup() {
+    rm -f "$YAD_FIFO"
+}
+trap cleanup EXIT
+
+# Função para registrar o que está acontecendo com data e hora
+log() {
+    echo "[$(date +'%H:%M:%S')] $1"
+}
+
+# --- Interface de seleção de tarefas ---
+# Retorna ao formato original do checklist para permitir múltiplas seleções
+selecionadas_raw=$(yad --list --checklist --title="Cópia e espelhamento de arquivos" \
+  --width=800 --height=500 --center \
+  --text="<big><b>Selecione as tarefas a serem executadas</b></big>" \
+  --column="Selecionar" --column="Tarefa" \
+  --separator='|' \
+  FALSE "CPD - Baixar Torrents de Servidor de Media Local" \
+  FALSE "CPV - Mover Videos para Servidor de Streaming" \
+  FALSE "CP-DNS320L - Espelha Cloud para DNS320L" \
+  FALSE "CP-MIRROR - Espelhar Trabalho para Mirror" \
+  FALSE "CP-PLAYLIST - Espelhar Playlists para pendrive" \
+  FALSE "CP-VENTOY - Copiar imagens ISO e scripts Linux para HD Externo Ventoy" \
+  FALSE "YTMP3 - Baixa músicas das playlists do Youtube" \
+  --button="Executar Tarefas:0" --button="Cancelar:1" 2>/dev/null)
+
+# Se o usuário pressionar Cancelar, fechar a janela ou não selecionar nada
+if [[ $? -ne 0 || -z "$selecionadas_raw" ]]; then
+    echo "Operação cancelada pelo usuário."
+    exit 0
+fi
+
+# Filtra a saída bruta do YAD para extrair apenas os nomes das tarefas,
+# que são os campos pares quando o separador é '|'.
+selecionadas=$(echo "$selecionadas_raw" | awk -F'|' '{for (i=2; i<=NF; i+=2) printf "%s\n", $i}')
+
+# Verifica novamente se, após o filtro, há alguma seleção válida
+if [ -z "$selecionadas" ]; then
+    echo "Nenhuma tarefa foi selecionada."
+    exit 0
+fi
+
+
+# --- Função que executa as tarefas e gera o log ---
+run_tasks() {
+    # Redireciona toda a saída (stdout e stderr) para o pipe do YAD
+    exec >&1 2>&1
+
+    log "Iniciando execução das tarefas selecionadas..."
+    echo ""
+
+    # Usa mapfile para ler as linhas da seleção em um array de forma segura.
+    mapfile -t tarefas <<< "$selecionadas"
+
+    for tarefa in "${tarefas[@]}"; do
+        # Pula entradas vazias
+        if [ -z "$tarefa" ]; then
+            continue
+        fi
+
+        log "Iniciando tarefa: '$tarefa'"
+        echo "------------------------------------------------------------"
+
+        # O case executa o script correspondente.
+        # A saída do script será capturada e exibida na janela de log.
+        case "$tarefa" in
+            "CPD - Baixar Torrents de Servidor de Media Local")
+                /usr/local/share/scripts/Geral/cpd.sh
+                ;;
+            "CPV - Mover Videos para Servidor de Streaming")
+                /usr/local/share/scripts/Geral/cpv.sh
+                ;;
+            "CP-DNS320L - Espelha Cloud para DNS320L")
+                /usr/local/share/scripts/Geral/cp-dns320l.sh
+                ;;
+            "CP-MIRROR - Espelhar Trabalho para Mirror")
+                /usr/local/share/scripts/Geral/cpmirror.sh
+                ;;
+            "CP-PLAYLIST - Espelhar Playlists para pendrive")
+                /usr/local/share/scripts/Geral/cpplay.sh
+                ;;
+            "CP-VENTOY - Copiar imagens ISO e scripts Linux para HD Externo Ventoy")
+                /usr/local/share/scripts/Geral/cpventoy.sh
+                ;;
+            "YTMP3 - Baixa músicas das playlists do Youtube")
+                /usr/local/share/scripts/Geral/ytmp3.sh
+                ;;
+        esac
+
+        log "Tarefa '$tarefa' concluída."
+        echo "============================================================"
+        echo ""
+    done
+
+    log "Todas as tarefas foram processadas."
+}
+
+# --- Execução e feedback ---
+
+# Cria o FIFO (named pipe) para comunicação
+mkfifo "$YAD_FIFO"
+
+# Inicia a janela de log do YAD em background, lendo do FIFO
+yad --text-info --tail --title="Executando Tarefas..." \
+    --width=800 --height=600 \
+    --button="Fechar:1" 2>/dev/null < "$YAD_FIFO" &
+YAD_PID=$!
+
+# Executa as tarefas e envia a saída para o FIFO.
+# O script irá esperar aqui até que run_tasks termine.
+run_tasks > "$YAD_FIFO"
+
+# Após a conclusão, a janela permanece aberta.
+# Espera 10 segundos.
+log "Aguardando 5 segundos antes de fechar..." > "$YAD_FIFO"
+sleep 5
+
+# Fecha a janela de log do YAD de forma segura, se ainda estiver aberta.
+if ps -p $YAD_PID > /dev/null 2>&1; then
+   kill $YAD_PID
+fi
+
+exit 0
+

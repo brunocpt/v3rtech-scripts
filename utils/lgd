@@ -1,0 +1,36 @@
+#!/bin/bash
+# Baixa legendas
+
+# Definir o diretório raiz do pyenv
+#export PYENV_ROOT="$HOME/.pyenv"
+#export PATH="$PYENV_ROOT/bin:$PATH"
+
+# Inicializar o pyenv
+#if command -v pyenv 1>/dev/null 2>&1; then
+#    eval "$(pyenv init --path)"
+#    eval "$(pyenv init -)"
+#    eval "$(pyenv virtualenv-init -)"
+#else
+#    echo "pyenv não está instalado ou não está no PATH."
+#    exit 1
+#fi
+
+# Ativar o ambiente virtual
+#pyenv activate subliminal-env
+
+#if [ $? -ne 0 ]; then
+#    echo "Falha ao ativar o ambiente virtual 'subliminal-env'."
+#    exit 1
+#fi
+
+echo "Baixando legendas em português..."
+
+flatpak run net.filebot.FileBot -script fn:suball -r -non-strict --lang pob /mnt/trabalho/Downloads/
+subliminal download --language pt-br /mnt/trabalho/Downloads/
+
+# Desativar o ambiente virtual após a execução (opcional)
+#pyenv deactivate
+
+echo
+echo "Pronto!"
+

@@ -1,0 +1,87 @@
+# === Pastas e arquivos criados por sistemas de sincronização ===
+_gsdata*
+.sync*
+.!sync*
+.owncloud*
+.own*
+.share_info
+.sti*
+@quarantine
+
+# === Arquivos e extensões temporárias ou de conflito ===
+*.bak
+*.tmp
+*.temp
+*.part
+*.partial
+*.old
+*.swp
+*.swo
+*.~*
+*.u1conflict
+*.conflict
+*onflict*
+*NEWER*
+*OLDER*
+
+# === Arquivos incompletos de navegador ou downloaders ===
+*.crdownload
+*.aria2
+*.torrent
+*.aria2c
+
+# === Arquivos e pastas do Windows ===
+desktop.ini
+thumbs.db
+$RECYCLE.BIN/
+System Volume Information/
+pagefile.sys
+swapfile.sys
+hiberfil.sys
+
+# === Pastas específicas de sistemas operacionais ===
+lost+found/
+Macintosh HD/
+Macintosh*/
+.VSCode*
+.Trash*/
+.Trashes/
+.AppleDouble/
+.DS_Store
+
+# === Arquivos de configuração ou índice duplicado ===
+*.ini
+file.*
+file.???/
+
+# === Arquivos e pastas de máquinas virtuais ===
+VirtualBox*/
+VirtualBox VMs/
+VirtualHD/
+VBox/
+*.vdi
+*.vmdk
+*.nvram
+*.vmem
+*.vmx
+
+# === Pastas temporárias e caches comuns ===
+tmp/
+.cache/
+.CACHE/
+__pycache__/
+*.log
+*.bakup
+node_modules/
+venv/
+.env/
+.idea/
+*.pid
+
+# === Bundles e pacotes gráficos desnecessários ===
+*/All-Purpose-Modern-Bundle-Complete*/
+*.psd
+*.ai
+*.sketch
+*.xcf
+
