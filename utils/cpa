@@ -75,25 +75,25 @@ run_tasks() {
         # A saída do script será capturada e exibida na janela de log.
         case "$tarefa" in
             "CPD - Baixar Torrents de Servidor de Media Local")
-                /usr/local/share/scripts/Geral/cpd.sh
+                /usr/local/share/scripts/v3rtech-scripts/utils/cpd.sh
                 ;;
             "CPV - Mover Videos para Servidor de Streaming")
-                /usr/local/share/scripts/Geral/cpv.sh
+                /usr/local/share/scripts/v3rtech-scripts/utils/cpv.sh
                 ;;
             "CP-DNS320L - Espelha Cloud para DNS320L")
-                /usr/local/share/scripts/Geral/cp-dns320l.sh
+                /usr/local/share/scripts/v3rtech-scripts/utils/cp-dns320l.sh
                 ;;
             "CP-MIRROR - Espelhar Trabalho para Mirror")
-                /usr/local/share/scripts/Geral/cpmirror.sh
+                /usr/local/share/scripts/v3rtech-scripts/utils/cpmirror.sh
                 ;;
             "CP-PLAYLIST - Espelhar Playlists para pendrive")
-                /usr/local/share/scripts/Geral/cpplay.sh
+                /usr/local/share/scripts/v3rtech-scripts/utils/cpplay.sh
                 ;;
             "CP-VENTOY - Copiar imagens ISO e scripts Linux para HD Externo Ventoy")
-                /usr/local/share/scripts/Geral/cpventoy.sh
+                /usr/local/share/scripts/v3rtech-scripts/utils/cpventoy.sh
                 ;;
             "YTMP3 - Baixa músicas das playlists do Youtube")
-                /usr/local/share/scripts/Geral/ytmp3.sh
+                /usr/local/share/scripts/v3rtech-scripts/utils/ytmp3.sh
                 ;;
         esac
 

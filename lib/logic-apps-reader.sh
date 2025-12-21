@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: lib/logic-apps-reader.sh
-# Versão: 11.1.0 (Multi-Package Fix)
+# Versão: 11.4.0 (Flatpak Global + Credenciais Filebot)
 # Descrição: Define lógica de instalação e integra alias 'i'.
 # ==============================================================================
 
@@ -30,6 +30,147 @@ fi
 declare -A APP_MAP_NATIVE
 declare -A APP_MAP_FLATPAK
 declare -A APP_MAP_METHOD
+
+# ==============================================================================
+# FUNÇÃO: Instalar Flatpak
+# ==============================================================================
+install_flatpak() {
+    local flatpak_id="$1"
+    
+    if [ -z "$flatpak_id" ]; then
+        log "WARN" "ID do Flatpak não fornecido"
+        return 1
+    fi
+    
+    # Verifica se flatpak está instalado
+    if ! command -v flatpak &>/dev/null; then
+        log "INFO" "Flatpak não encontrado. Instalando..."
+        
+        case "$DISTRO_FAMILY" in
+            debian|ubuntu|linuxmint|pop|neon|siduction|lingmo)
+                $SUDO apt install -y flatpak
+                ;;
+            arch|manjaro|endeavouros|biglinux)
+                $SUDO pacman -S --noconfirm flatpak
+                ;;
+            fedora|redhat|almalinux|nobara)
+                $SUDO dnf install -y flatpak
+                ;;
+            *)
+                log "ERROR" "Distribuição não suportada para Flatpak"
+                return 1
+                ;;
+        esac
+    fi
+    
+    # Instala o Flatpak
+    log "INFO" "Instalando Flatpak: $flatpak_id"
+    if $SUDO flatpak install -y flathub "$flatpak_id"; then
+        log "SUCCESS" "✓ Flatpak instalado: $flatpak_id"
+        return 0
+    else
+        log "ERROR" "Falha ao instalar Flatpak: $flatpak_id"
+        return 1
+    fi
+}
+
+# ==============================================================================
+# FUNÇÃO: Configurar Flatpak Globalmente
+# ==============================================================================
+configure_flatpak_global() {
+    log "INFO" "Configurando permissões padrão do Flatpak..."
+    
+    # Acesso a temas do sistema
+    $SUDO flatpak override --filesystem=/usr/share/themes 2>/dev/null || true
+    
+    # Acesso a configurações GTK
+    $SUDO flatpak override --filesystem=xdg-config/gtk-3.0:ro 2>/dev/null || true
+    $SUDO flatpak override --filesystem=xdg-config/gtk-4.0:ro 2>/dev/null || true
+    
+    # Acesso a pastas de trabalho
+    $SUDO flatpak override --filesystem=/mnt/trabalho 2>/dev/null || true
+    
+    # Acesso a scripts locais
+    $SUDO flatpak override --filesystem=/usr/local 2>/dev/null || true
+    
+    # Permissões de bus (notificações e tray)
+    $SUDO flatpak override --talk-name=org.kde.StatusNotifierWatcher 2>/dev/null || true
+    $SUDO flatpak override --talk-name=org.freedesktop.Notifications 2>/dev/null || true
+    $SUDO flatpak override --socket=system-bus 2>/dev/null || true
+    $SUDO flatpak override --socket=session-bus 2>/dev/null || true
+    
+    log "SUCCESS" "✓ Overrides do Flatpak aplicados"
+}
+
+# ==============================================================================
+# FUNÇÃO: Pós-Instalação de Filebot
+# ==============================================================================
+post_install_filebot() {
+    log "INFO" "Verificando se Filebot está instalado..."
+    
+    # Testa se Filebot está instalado
+    if ! flatpak list --app 2>/dev/null | grep -q "net.filebot.FileBot"; then
+        log "WARN" "Filebot não está instalado, pulando pós-instalação"
+        return 0
+    fi
+    
+    log "INFO" "Configurando Filebot..."
+    
+    # 1. Aplicar licença (se existir)
+    LICENSE_FILE="/usr/local/share/scripts/v3rtech-scripts/configs/FileBot_License_PX10290120.psm"
+    
+    if [ -f "$LICENSE_FILE" ]; then
+        log "INFO" "Aplicando licença do Filebot..."
+        if flatpak run net.filebot.FileBot --license "$LICENSE_FILE" 2>/dev/null; then
+            log "SUCCESS" "✓ Licença aplicada"
+        else
+            log "WARN" "⚠ Falha ao aplicar licença (pode ser normal se já estiver aplicada)"
+        fi
+    else
+        log "DEBUG" "Arquivo de licença não encontrado: $LICENSE_FILE"
+    fi
+    
+    # 2. Configurar OpenSubtitles v2
+    log "INFO" "Configurando OpenSubtitles v2..."
+    if flatpak run net.filebot.FileBot -script fn:properties --def net.filebot.WebServices.OpenSubtitles.v2=true 2>/dev/null; then
+        log "SUCCESS" "✓ OpenSubtitles v2 configurado"
+    else
+        log "WARN" "⚠ Falha ao configurar OpenSubtitles v2"
+    fi
+    
+    # 3. Configurar credenciais OpenSubtitles (se fornecidas)
+    # Lê credenciais do arquivo de configuração
+    OSDB_CONFIG="/usr/local/share/scripts/v3rtech-scripts/configs/filebot-osdb.conf"
+    
+    if [ -f "$OSDB_CONFIG" ]; then
+        log "INFO" "Lendo credenciais OpenSubtitles..."
+        
+        # Carrega arquivo de configuração (formato: OSDB_USER=... OSDB_PWD=...)
+        source "$OSDB_CONFIG"
+        
+        if [ -n "$OSDB_USER" ] && [ -n "$OSDB_PWD" ]; then
+            log "INFO" "Configurando credenciais OpenSubtitles..."
+            if flatpak run net.filebot.FileBot -script fn:configure \
+                --def osdbUser="$OSDB_USER" \
+                --def osdbPwd="$OSDB_PWD" 2>/dev/null; then
+                log "SUCCESS" "✓ Credenciais OpenSubtitles configuradas"
+            else
+                log "WARN" "⚠ Falha ao configurar credenciais OpenSubtitles"
+            fi
+        else
+            log "DEBUG" "Credenciais OpenSubtitles não configuradas no arquivo"
+        fi
+    else
+        log "DEBUG" "Arquivo de configuração não encontrado: $OSDB_CONFIG"
+        log "INFO" "Para configurar credenciais, crie o arquivo:"
+        log "INFO" "  $OSDB_CONFIG"
+        log "INFO" "Com o conteúdo:"
+        log "INFO" "  OSDB_USER=\"seu_usuario\""
+        log "INFO" "  OSDB_PWD=\"sua_senha\""
+    fi
+    
+    log "SUCCESS" "✓ Filebot configurado com sucesso"
+}
 
 # --- 1. FUNÇÃO DE DEFINIÇÃO (Modo Lógico) ---
 add_app() {
@@ -107,9 +248,9 @@ install_app_by_name() {
                     if i $pkg_native; then installed=true; fi
 
                 # Fallbacks manuais (caso o alias falhe ou não exista)
-                elif command -v apt &>/dev/null; then sudo apt install -y $pkg_native && installed=true;
-                elif command -v pacman &>/dev/null; then sudo pacman -S --noconfirm $pkg_native && installed=true;
-                elif command -v dnf &>/dev/null; then sudo dnf install -y $pkg_native && installed=true;
+                elif command -v apt &>/dev/null; then $SUDO apt install -y $pkg_native && installed=true;
+                elif command -v pacman &>/dev/null; then $SUDO pacman -S --noconfirm $pkg_native && installed=true;
+                elif command -v dnf &>/dev/null; then $SUDO dnf install -y $pkg_native && installed=true;
                 fi
             fi
 
@@ -122,3 +263,32 @@ install_app_by_name() {
             ;;
     esac
 }
+
+# --- 4. INTERFACE DE SELEÇÃO ---
+select_and_install_apps() {
+    log "INFO" "Iniciando seleção de aplicativos..."
+    
+    # Carrega banco de dados
+    load_apps_database
+    
+    # Configura Flatpak globalmente (uma única vez)
+    if command -v flatpak &>/dev/null; then
+        configure_flatpak_global
+    fi
+    
+    # Aqui você pode adicionar lógica para selecionar e instalar apps
+    # Por exemplo, via YAD ou linha de comando
+    log "INFO" "Aplicativos prontos para instalação"
+}
+
+# --- 5. FUNÇÃO DE PÓS-INSTALAÇÃO ---
+post_install_apps() {
+    log "INFO" "Executando pós-instalação..."
+    
+    # Configura Filebot se estiver instalado
+    post_install_filebot
+    
+    log "SUCCESS" "✓ Pós-instalação concluída"
+}
+
+log "SUCCESS" "Motor de instalação carregado"

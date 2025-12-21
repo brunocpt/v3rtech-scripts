@@ -106,6 +106,7 @@ SELECTION=$(yad --title="Restauração de Configurações" \
     FALSE "WAVEBOX" FALSE "RAMBOX" FALSE "FERDIUM" FALSE "NEXTCLOUD" \
     FALSE "FILEZILLA" FALSE "TRANSMISSION" FALSE "OBSIDIAN" FALSE "ZOTERO" \
     FALSE "MASTER_PDF" FALSE "PICARD" FALSE "VSCODE" FALSE "SYSTEM_SETTINGS" FALSE "KWALLET" \
+    FALSE "GEANY" FALSE "ANTIGRAVITY" \
     --button="Selecionar Todos:2" --button="Desmarcar Todos:3" --button="Iniciar:0" --button="Cancelar:1")
 
 EXIT_CODE=$?
@@ -268,6 +269,16 @@ for app in "${selected_apps[@]}"; do
         "PICARD")
             restore_app "PICARD (Flatpak)" "$DEST_DIR/picard-flatpak-$USERNAME.zip" && ((SUCCESS++)) || true
             restore_app "PICARD (Nativo)" "$DEST_DIR/picard-$USERNAME.zip" && ((SUCCESS++)) || true
+            ;;
+        "GEANY")
+            # Tenta restaurar versão nativa
+            restore_app "GEANY (Nativo)" "$DEST_DIR/geany-$USERNAME.zip" && ((SUCCESS++)) || true
+            ;;
+        "ANTIGRAVITY")
+            # Tenta restaurar versão flatpak
+            restore_app "ANTIGRAVITY (Flatpak)" "$DEST_DIR/antigravity-flatpak-$USERNAME.zip" && ((SUCCESS++)) || true
+            # Tenta restaurar versão nativa
+            restore_app "ANTIGRAVITY (Nativo)" "$DEST_DIR/antigravity-$USERNAME.zip" && ((SUCCESS++)) || true
             ;;
         "VSCODE")
             restore_app "VSCODE (Flatpak)" "$DEST_DIR/vscode-flatpak-$USERNAME.zip" && ((SUCCESS++)) || true

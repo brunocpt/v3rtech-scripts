@@ -27,7 +27,7 @@ USERNAME="$USER"
 declare -a APP_LIST=(
     "BRAVE" "CHROME" "EDGE" "FALKON" "FIREFOX" "FLOORP" "VIVALDI" "OPERA" "ZEN BROWSER" "CALIBRE"
     "WAVEBOX" "RAMBOX" "FERDIUM" "NEXTCLOUD" "FILEZILLA" "TRANSMISSION" "OBSIDIAN" "ZOTERO" "TINTERO"
-    "MASTER_PDF" "PICARD" "VSCODE" "ANTIGRAVITY" "PYCHARM" "DBEAVER" "POSTMAN" "REMMINA" "SYSTEM_SETTINGS"
+    "MASTER_PDF" "PICARD" "VSCODE" "ANTIGRAVITY" "GEANY" "PYCHARM" "DBEAVER" "POSTMAN" "REMMINA" "SYSTEM_SETTINGS"
 )
 
 # --- FUNÇÕES AUXILIARES ---
@@ -284,6 +284,10 @@ for app in "${selected_apps[@]}"; do
         "ANTIGRAVITY")
             killall antigravity &>/dev/null; sleep 1
             backup_zip "ANTIGRAVITY" "$TMP_DIR/antigravity-${USERNAME}.zip" ".antigravity" ".config/Antigravity" -x ".config/Antigravity/CachedData/*" ".config/Antigravity/CachedExtensionVSIXs/*"
+            ;;
+        "GEANY")
+            killall geany &>/dev/null; sleep 1
+            backup_zip "GEANY" "$TMP_DIR/geany-${USERNAME}.zip" ".config/geany"
             ;;
         "PYCHARM")
             killall pycharm.sh pycharm &>/dev/null; sleep 1

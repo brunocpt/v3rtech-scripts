@@ -2,15 +2,17 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: lib/03-prepara-configs.sh
-# Versão: 7.0.0 (PATH Idempotente + Limpeza de Duplicatas - Bug Fix)
+# Versão: 8.0.0 (Com Desktop Entries)
 #
 # Descrição: Configurações profundas do sistema.
-# Correções:
-#   1. PATH agora usa marcadores de bloco para remoção segura (verdadeiramente idempotente)
-#   2. Função para limpar PATH de entradas repetidas (com array associativo corrigido)
-#   3. Garante chmod +x na pasta utils para que os scripts sejam achados.
-#   4. Aliases com proteção contra duplicação
-#   5. Integração com desktop entries e atalhos de teclado
+# Funcionalidades:
+#   1. PATH idempotente com marcadores de bloco
+#   2. Limpeza de PATH de entradas repetidas
+#   3. Aliases com proteção contra duplicação
+#   4. Desktop entries para scripts utilitários
+#   5. Links simbólicos em /usr/local/bin
+#   6. Instalação de fontes
+#   7. Configuração de tema de boot (Plymouth)
 # ==============================================================================
 
 log "STEP" "Iniciando Configurações Gerais de Sistema..."
@@ -56,52 +58,26 @@ clean_path() {
 }
 
 # ==============================================================================
-# 1. LIMPEZA DE PATH DUPLICADO (SE EXISTIR)
+# 1. CONFIGURAÇÃO DE PATH
 # ==============================================================================
-log "INFO" "Verificando se há entradas duplicadas no PATH..."
+log "INFO" "Configurando PATH global..."
 
-# Verifica se há duplicatas no PATH atual
-if [ -n "$PATH" ]; then
-    CLEANED_PATH=$(clean_path "$PATH")
+# Detecta PATH duplicado
+CURRENT_PATH=$(clean_path "$PATH")
+if [ "$CURRENT_PATH" != "$PATH" ]; then
+    log "WARN" "PATH contém duplicatas. Limpando..."
+    export PATH="$CURRENT_PATH"
+fi
+
+# Adiciona PATH do projeto (se ainda não estiver)
+if [[ ":$PATH:" != *":$UTILS_DIR:"* ]]; then
+    log "INFO" "Adicionando $UTILS_DIR ao PATH..."
     
-    if [ "$CLEANED_PATH" != "$PATH" ]; then
-        log "WARN" "PATH contém entradas duplicadas. Limpando..."
-        export PATH="$CLEANED_PATH"
-        
-        # Também limpa no bashrc se houver duplicatas
-        if grep -q "export PATH=" "$SYSTEM_BASHRC" 2>/dev/null; then
-            log "INFO" "Removendo entradas duplicadas do $SYSTEM_BASHRC..."
-            
-            # Extrai o PATH do bashrc, limpa e reescreve
-            BASHRC_PATH=$(grep "^export PATH=" "$SYSTEM_BASHRC" | head -1 | sed 's/export PATH=//' | sed 's/"//g' || true)
-            if [ -n "$BASHRC_PATH" ]; then
-                CLEANED_BASHRC_PATH=$(clean_path "$BASHRC_PATH")
-                $SUDO sed -i 's|^export PATH=.*|export PATH="'"$CLEANED_BASHRC_PATH"'"|' "$SYSTEM_BASHRC"
-                log "SUCCESS" "PATH limpado e atualizado no $SYSTEM_BASHRC"
-            fi
-        fi
-    else
-        log "SUCCESS" "PATH sem duplicatas."
-    fi
-fi
-
-# ==============================================================================
-# 2. CONFIGURAÇÃO DE PATH GLOBAL INTELIGENTE (IDEMPOTENTE)
-# ==============================================================================
-log "INFO" "Configurando PATH global (com proteção anti-duplicação)..."
-
-# Remove TODAS as configurações antigas do V3RTECH (usando marcadores de bloco)
-if grep -q "# === V3RTECH SCRIPTS: Global PATH BEGIN ===" "$SYSTEM_BASHRC"; then
-    log "INFO" "Removendo configuração de PATH antiga para atualização..."
+    # Remove bloco antigo se existir
     $SUDO sed -i '/# === V3RTECH SCRIPTS: Global PATH BEGIN ===/,/# === V3RTECH SCRIPTS: Global PATH END ===/d' "$SYSTEM_BASHRC"
-fi
-
-# Injeta o código inteligente com marcadores de bloco
-if ! grep -q "# === V3RTECH SCRIPTS: Global PATH BEGIN ===" "$SYSTEM_BASHRC"; then
-    log "INFO" "Injetando lógica de PATH no $SYSTEM_BASHRC..."
-
+    
+    # Adiciona novo bloco
     {
-        echo ""
         echo "# === V3RTECH SCRIPTS: Global PATH BEGIN ==="
         echo "if [ -d \"$UTILS_DIR\" ]; then"
         echo "    case \":\$PATH:\" in"
@@ -111,93 +87,130 @@ if ! grep -q "# === V3RTECH SCRIPTS: Global PATH BEGIN ===" "$SYSTEM_BASHRC"; th
         echo "fi"
         echo "# === V3RTECH SCRIPTS: Global PATH END ==="
     } | $SUDO tee -a "$SYSTEM_BASHRC" > /dev/null
-
-    log "SUCCESS" "PATH configurado. Reinicie o terminal para testar."
-else
-    log "INFO" "PATH inteligente já configurado."
+    
+    log "SUCCESS" "PATH configurado"
 fi
 
 # ==============================================================================
-# 3. PERMISSÕES DE EXECUÇÃO (CRÍTICO)
+# 2. CONFIGURAÇÃO DE ALIASES
 # ==============================================================================
-log "INFO" "Ajustando permissões de execução dos utilitários..."
+log "INFO" "Configurando aliases..."
 
-if [ -d "$UTILS_DIR" ]; then
-    # Garante que a pasta é legível e executável por todos
-    $SUDO chmod 755 "$UTILS_DIR"
+ALIASES_FILE="$CONFIG_DIR/aliases.geral"
 
-    # Garante que TODOS os scripts dentro dela sejam executáveis
-    $SUDO chmod +x "$UTILS_DIR"/*
-
-    log "SUCCESS" "Permissões +x aplicadas em $UTILS_DIR"
-else
-    log "ERROR" "Diretório de utils não encontrado: $UTILS_DIR"
-fi
-
-# ==============================================================================
-# 4. CONFIGURAÇÃO DE ALIASES GLOBAIS (IDEMPOTENTE)
-# ==============================================================================
-log "INFO" "Configurando carregamento automático de aliases..."
-
-GLOBAL_ALIAS_FILE="$CONFIG_DIR/aliases.geral"
-
-# Remove TODAS as configurações antigas de aliases (usando marcadores de bloco)
-if grep -q "# === V3RTECH SCRIPTS: Global Aliases BEGIN ===" "$SYSTEM_BASHRC"; then
-    log "INFO" "Removendo configuração de aliases antiga para atualização..."
+if [ -f "$ALIASES_FILE" ]; then
+    # Remove bloco antigo se existir
     $SUDO sed -i '/# === V3RTECH SCRIPTS: Global Aliases BEGIN ===/,/# === V3RTECH SCRIPTS: Global Aliases END ===/d' "$SYSTEM_BASHRC"
-fi
-
-if ! grep -q "# === V3RTECH SCRIPTS: Global Aliases BEGIN ===" "$SYSTEM_BASHRC"; then
-    log "INFO" "Injetando carregamento de aliases..."
+    
+    # Adiciona novo bloco
     {
-        echo ""
         echo "# === V3RTECH SCRIPTS: Global Aliases BEGIN ==="
-        echo "if [ -f \"$GLOBAL_ALIAS_FILE\" ]; then"
-        echo "    source \"$GLOBAL_ALIAS_FILE\""
-        echo "fi"
+        cat "$ALIASES_FILE"
         echo "# === V3RTECH SCRIPTS: Global Aliases END ==="
     } | $SUDO tee -a "$SYSTEM_BASHRC" > /dev/null
-    log "SUCCESS" "Aliases configurados."
-else
-    log "INFO" "Aliases já configurados."
+    
+    log "SUCCESS" "Aliases configurados"
 fi
 
 # ==============================================================================
-# 5. OTIMIZAÇÕES DE KERNEL E LOGS
+# 3. PERMISSÕES DE SCRIPTS
 # ==============================================================================
-log "INFO" "Aplicando otimizações de Kernel e Journald..."
+log "INFO" "Ajustando permissões de scripts..."
 
-SYSCTL_CONF="/etc/sysctl.d/99-v3rtech-optimizations.conf"
-if [ ! -f "$SYSCTL_CONF" ]; then
-    {
-        echo "vm.swappiness=10"
-        echo "vm.vfs_cache_pressure=50"
-        echo "fs.inotify.max_user_watches=524288"
-    } | $SUDO tee "$SYSCTL_CONF" > /dev/null
-    $SUDO sysctl -p "$SYSCTL_CONF" &>/dev/null
-fi
-
-JOURNAL_CONF="/etc/systemd/journald.conf"
-if [ -f "$JOURNAL_CONF" ]; then
-    $SUDO sed -i 's/^#SystemMaxUse=.*/SystemMaxUse=100M/' "$JOURNAL_CONF"
-    $SUDO sed -i 's/^SystemMaxUse=.*/SystemMaxUse=100M/' "$JOURNAL_CONF"
-    $SUDO sed -i 's/^#SystemMaxFiles=.*/SystemMaxFiles=5/' "$JOURNAL_CONF"
-    $SUDO sed -i 's/^SystemMaxFiles=.*/SystemMaxFiles=5/' "$JOURNAL_CONF"
+if [ -d "$UTILS_DIR" ]; then
+    $SUDO chmod +x "$UTILS_DIR"/* 2>/dev/null || true
+    log "SUCCESS" "Permissões ajustadas"
 fi
 
 # ==============================================================================
-# 6. RESTAURAÇÃO DE CONFIGURAÇÕES DE USUÁRIO
+# 4. DESKTOP ENTRIES
 # ==============================================================================
-log "INFO" "Padronizando diretórios pessoais e restaurando configs..."
+log "INFO" "Criando desktop entries para scripts utilitários..."
 
-$SUDO xdg-user-dirs-update &>/dev/null
+LOCATION_DEST="/usr/share/applications"
+SCRIPT_BASE="$UTILS_DIR"
+ICON_BASE="$RESOURCES_DIR/atalhos"
 
-CONFIG_SRC_DIR="$RESOURCES_DIR/configs"
-CUSTOM_BASHRC="$RESOURCES_DIR/user.bashrc"
+# Cria pasta de destino, se necessário
+$SUDO mkdir -p "$LOCATION_DEST"
 
-# Mescla .bashrc do usuário (Apenas visuais)
+# Array de entradas: "id|nome|script|ícone"
+ENTRADAS=(
+    "metaflatpaks|Instalador de Metapacks Flatpaks|metaflatpaks.sh|metapacks.svg"
+    "cpa|Copiador de Pastas|cpa|cpa.svg"
+    "cpplay|Copiador de Playlists para Pendrive|cpplay.sh|cpplay.svg"
+    "upall|Atualizador de Aplicativos|upall.sh|upall.svg"
+    "wtt|Whisper Transcriber|wtt.sh|wtt.svg"
+    "extrai-legendas|Extrai Legendas|extrai-legendas.sh|extrai-legendas.svg"
+    "video-converter-gui|Converte arquivos de vídeo|video-converter-gui.sh|video-converter-gui.svg"
+    "restaura-config|Restaurar Configurações|restaura-config.sh|restaura-config.svg"
+    "configs-zip|Backup de Configurações Pessoais|configs-zip.sh|configs-zip.svg"
+)
+
+DESKTOP_ENTRIES_CREATED=0
+DESKTOP_ENTRIES_FAILED=0
+
+for entry in "${ENTRADAS[@]}"; do
+    IFS="|" read -r file name script_file icon_file <<< "$entry"
+    
+    EXEC_CMD="$SCRIPT_BASE/$script_file"
+    ICON_PATH="$ICON_BASE/$icon_file"
+    DESKTOP_FILE="$LOCATION_DEST/${file}.desktop"
+    
+    # Verifica se o script existe e é executável
+    if [ ! -f "$EXEC_CMD" ]; then
+        log "WARN" "Script não encontrado: $EXEC_CMD"
+        ((DESKTOP_ENTRIES_FAILED++))
+        continue
+    fi
+    
+    # Torna o script executável
+    $SUDO chmod +x "$EXEC_CMD" 2>/dev/null || true
+    
+    # Verifica se o ícone existe
+    if [ ! -f "$ICON_PATH" ]; then
+        log "WARN" "Ícone não encontrado: $ICON_PATH (usando ícone padrão)"
+        ICON_PATH="application-x-executable"
+    fi
+    
+    # Cria o arquivo .desktop
+    log "DEBUG" "Criando desktop entry: $file"
+    
+    $SUDO tee "$DESKTOP_FILE" > /dev/null <<EOF
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=$name
+Comment=
+Exec=$EXEC_CMD
+Icon=$ICON_PATH
+Type=Application
+Terminal=false
+NoDisplay=false
+Categories=Utility
+X-KDE-Trusted=true
+EOF
+    
+    # Ajusta permissões do arquivo .desktop
+    $SUDO chmod 644 "$DESKTOP_FILE"
+    
+    log "SUCCESS" "✓ Desktop entry criada: $file"
+    ((DESKTOP_ENTRIES_CREATED++))
+done
+
+log "INFO" "Desktop entries: $DESKTOP_ENTRIES_CREATED criadas, $DESKTOP_ENTRIES_FAILED falhadas"
+
+# ==============================================================================
+# 5. RESTAURAÇÃO DE CONFIGURAÇÕES
+# ==============================================================================
+log "INFO" "Restaurando configurações de usuário..."
+
+CONFIG_SRC_DIR="$CONFIG_DIR/user-configs"
+CUSTOM_BASHRC="$CONFIG_DIR/.bashrc"
+
 if [ -f "$CUSTOM_BASHRC" ]; then
-    if ! grep -q "V3RTECH Custom Settings" "$REAL_HOME/.bashrc"; then
+    if [ -f "$REAL_HOME/.bashrc" ]; then
+        log "INFO" "Fazendo backup de .bashrc..."
         cp "$REAL_HOME/.bashrc" "$REAL_HOME/.bashrc.bak"
         cat "$CUSTOM_BASHRC" >> "$REAL_HOME/.bashrc"
     fi
@@ -215,44 +228,62 @@ if [ -d "$CONFIG_SRC_DIR" ]; then
 fi
 
 # ==============================================================================
-# 7. INSTALAÇÃO DE SCRIPTS UTILITÁRIOS (LINKS)
+# 6. INSTALAÇÃO DE SCRIPTS UTILITÁRIOS (LINKS)
 # ==============================================================================
 log "INFO" "Criando links simbólicos..."
 
 # Cria links em /usr/local/bin (Garantia extra caso o PATH falhe)
 if [ -d "$UTILS_DIR" ]; then
+    LINKS_CREATED=0
     for script in "$UTILS_DIR"/*; do
         [ -e "$script" ] || continue
         script_name=$(basename "$script")
+        
+        # Pula arquivos que não são executáveis
+        [ -x "$script" ] || continue
+        
         $SUDO ln -sf "$script" "/usr/local/bin/$script_name"
+        ((LINKS_CREATED++))
     done
+    
+    log "SUCCESS" "✓ $LINKS_CREATED links simbólicos criados"
 fi
 
 # Fontes
 if [ -d "$RESOURCES_DIR/fonts" ]; then
     log "INFO" "Instalando fontes..."
     $SUDO mkdir -p /usr/share/fonts/v3rtech
-    $SUDO cp -r "$RESOURCES_DIR/fonts/"* /usr/share/fonts/v3rtech/
-    $SUDO fc-cache -f
+    $SUDO cp -r "$RESOURCES_DIR/fonts/"* /usr/share/fonts/v3rtech/ 2>/dev/null || true
+    
+    if command -v fc-cache &>/dev/null; then
+        $SUDO fc-cache -f
+        log "SUCCESS" "Fontes instaladas"
+    fi
 fi
 
 # ==============================================================================
-# 8. CONFIGURAÇÃO VISUAL DE BOOT (PLYMOUTH)
+# 7. CONFIGURAÇÃO VISUAL DE BOOT (PLYMOUTH)
 # ==============================================================================
 log "INFO" "Verificando tema de boot..."
 
 if ! command -v plymouth &>/dev/null; then
     if command -v apt &>/dev/null; then
-        $SUDO apt install -y plymouth plymouth-themes
+        log "INFO" "Instalando Plymouth..."
+        $SUDO apt install -y plymouth plymouth-themes 2>/dev/null || true
     fi
 fi
 
 if command -v plymouth-set-default-theme &>/dev/null; then
     if [ -d "/usr/share/plymouth/themes/spinner" ]; then
-        $SUDO plymouth-set-default-theme -R spinner
+        $SUDO plymouth-set-default-theme -R spinner 2>/dev/null || true
     elif [ -d "/usr/share/plymouth/themes/bgrt" ]; then
-        $SUDO plymouth-set-default-theme -R bgrt
+        $SUDO plymouth-set-default-theme -R bgrt 2>/dev/null || true
     fi
 fi
 
-log "SUCCESS" "Configurações aplicadas. REINICIE o terminal para ver o novo PATH."
+# ==============================================================================
+# RESUMO FINAL
+# ==============================================================================
+
+log "SUCCESS" "✓ Configurações aplicadas com sucesso."
+log "INFO" "Reinicie o terminal para aplicar mudanças de PATH e aliases."

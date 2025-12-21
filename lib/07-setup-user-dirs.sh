@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: lib/07-setup-user-dirs.sh
-# Versão: 2.0.0 (Melhorado - Com Bookmarks e Links Simbólicos)
+# Versão: 2.3.0 (Corrigido - Sem Loop de Atalhos Simbólicos)
 # Descrição: Configura diretórios do usuário, links simbólicos, bookmarks GTK
 # Compatível com: Arch, Debian/Ubuntu, Fedora
 # ==============================================================================
@@ -10,7 +10,7 @@
 log "INFO" "Configurando diretórios do usuário e bookmarks..."
 
 # Valida se o usuário está definido
-if [ -z "$REAL_USER" ] || [ -z "$HOME" ]; then
+if [ -z "$REAL_USER" ] || [ -z "$REAL_HOME" ]; then
     log "WARN" "Variáveis REAL_USER ou REAL_HOME não definidas"
     return 1
 fi
@@ -22,12 +22,12 @@ fi
 log "INFO" "Criando diretórios essenciais..."
 
 # Diretórios do usuário
-mkdir -p "$HOME"/{.backup,.config/autostart,.config/systemd/user}
-mkdir -p "$HOME"/{Desktop,Documents,Pictures,Music,Videos}
-mkdir -p "$HOME"/.local/bin
+mkdir -p "$REAL_HOME"/{.backup,.config/autostart,.config/systemd/user}
+mkdir -p "$REAL_HOME"/{Desktop,Documents,Pictures,Music,Videos}
+mkdir -p "$REAL_HOME"/.local/bin
 
 # Diretórios do sistema
-$SUDO mkdir -p /etc/sudoers.d /mnt/LAN
+$SUDO mkdir -p /etc/sudoers.d
 $SUDO chmod 755 /usr/local/bin
 
 log "SUCCESS" "Diretórios criados"
@@ -38,38 +38,78 @@ log "SUCCESS" "Diretórios criados"
 
 log "INFO" "Configurando links simbólicos para pastas estratégicas..."
 
+# Função auxiliar para criar links simbólicos sem loops
+create_safe_symlink() {
+    local target="$1"
+    local link_path="$2"
+    local link_name="$3"
+    
+    # Verifica se o alvo existe
+    if [ ! -d "$target" ]; then
+        log "DEBUG" "Alvo não existe: $target"
+        return 1
+    fi
+    
+    # Resolve o caminho real do alvo (sem links simbólicos)
+    local target_real=$(cd "$target" 2>/dev/null && pwd -P)
+    
+    # Resolve o caminho real do link (se ele já existir)
+    local link_real=""
+    if [ -L "$link_path" ]; then
+        link_real=$(cd "$(dirname "$link_path")" 2>/dev/null && pwd -P)/$(basename "$(readlink "$link_path")")
+    fi
+    
+    # Verifica se o link já aponta para o alvo correto
+    if [ "$link_real" = "$target_real" ]; then
+        log "DEBUG" "Link já existe e está correto: $link_name"
+        return 0
+    fi
+    
+    # Verifica se criar este link causaria um loop (alvo contém o link)
+    if [[ "$target_real" == "$link_path"* ]]; then
+        log "WARN" "⚠ Loop detectado! Não criando link: $link_name"
+        log "WARN" "  Alvo: $target_real"
+        log "WARN" "  Link: $link_path"
+        return 1
+    fi
+    
+    # Remove link antigo se existir
+    if [ -L "$link_path" ]; then
+        rm -f "$link_path"
+    fi
+    
+    # Cria o novo link
+    if ln -sf "$target" "$link_path"; then
+        log "SUCCESS" "Link criado: $link_name → $target"
+        return 0
+    else
+        log "WARN" "⚠ Falha ao criar link: $link_name"
+        return 1
+    fi
+}
+
 # Remove diretórios padrão (se existirem como diretórios reais)
-if [ -d "$HOME/Downloads" ] && [ ! -L "$HOME/Downloads" ]; then
-    rm -rf "$HOME/Downloads"
+if [ -d "$REAL_HOME/Downloads" ] && [ ! -L "$REAL_HOME/Downloads" ]; then
+    rm -rf "$REAL_HOME/Downloads"
 fi
 
-# Cria links simbólicos para pastas de rede (se existirem)
-if [ -d "/mnt/trabalho/Downloads" ]; then
-    ln -sf "/mnt/trabalho/Downloads" "$HOME/Downloads"
-    log "SUCCESS" "Link criado: ~/Downloads → /mnt/trabalho/Downloads"
-else
-    mkdir -p "$HOME/Downloads"
+# Link para pasta Downloads
+create_safe_symlink "/mnt/trabalho/Downloads" "$REAL_HOME/Downloads" "~/Downloads"
+
+# Se Downloads não foi criado como link, cria como diretório
+if [ ! -e "$REAL_HOME/Downloads" ]; then
+    mkdir -p "$REAL_HOME/Downloads"
     log "INFO" "Diretório local criado: ~/Downloads"
 fi
 
 # Link para pasta de trabalho
-if [ -d "/mnt/trabalho" ]; then
-    mkdir -p "$HOME"
-    ln -sf "/mnt/trabalho" "$HOME/Trabalho"
-    log "SUCCESS" "Link criado: Trabalho → /mnt/trabalho"
-fi
+create_safe_symlink "/mnt/trabalho" "$REAL_HOME/Desktop/Trabalho" "~/Desktop/Trabalho"
 
-# Link para pasta Cloud
-if [ -d "/mnt/trabalho/Cloud" ]; then
-    ln -sf "/mnt/trabalho/Cloud" "$HOME/Cloud"
-    log "SUCCESS" "Link criado: Cloud → /mnt/trabalho/Cloud"
-fi
+# Link para pasta Cloud (COM PROTEÇÃO CONTRA LOOP)
+create_safe_symlink "/mnt/trabalho/Cloud" "$REAL_HOME/Desktop/Cloud" "~/Desktop/Cloud"
 
 # Link para pasta de Backup
-if [ -d "/mnt/trabalho/Backup" ]; then
-    ln -sf "/mnt/trabalho/Backup" "$HOME/Backup"
-    log "SUCCESS" "Link criado: Backup → /mnt/trabalho/Backup"
-fi
+create_safe_symlink "/mnt/trabalho/Backup" "$REAL_HOME/Desktop/Backup" "~/Desktop/Backup"
 
 # ==============================================================================
 # 3. CONFIGURAÇÃO DE BOOKMARKS GTK (Nautilus, Thunar, etc)
@@ -78,7 +118,7 @@ fi
 log "INFO" "Configurando bookmarks GTK..."
 
 # Arquivo de bookmarks do GTK
-GTK_BOOKMARKS="$HOME/.local/share/gtk-3.0/bookmarks"
+GTK_BOOKMARKS="$REAL_HOME/.local/share/gtk-3.0/bookmarks"
 
 # Cria diretório se não existir
 mkdir -p "$(dirname "$GTK_BOOKMARKS")"
@@ -86,37 +126,52 @@ mkdir -p "$(dirname "$GTK_BOOKMARKS")"
 # Remove arquivo antigo se existir
 [ -f "$GTK_BOOKMARKS" ] && rm -f "$GTK_BOOKMARKS"
 
-# Adiciona bookmarks (formato: file:///path Nome)
-{
-    echo "file://$HOME Desktop"
-    echo "file://$HOME/Downloads Downloads"
-    echo "file://$HOME/Documents Documentos"
-    echo "file://$HOME/Pictures Imagens"
-    echo "file://$HOME/Music Música"
-    echo "file://$HOME/Videos Vídeos"
-    
-    # Adiciona bookmarks de rede (se existirem)
-    if [ -d "/mnt/trabalho" ]; then
-        echo "file:///mnt/trabalho Trabalho"
-    fi
-    
-    if [ -d "/mnt/trabalho/Cloud" ]; then
-        echo "file:///mnt/trabalho/Cloud Cloud"
-    fi
-    
-    if [ -d "/mnt/trabalho/Downloads" ]; then
-        echo "file:///mnt/trabalho/Downloads Downloads (Rede)"
-    fi
-    
-    if [ -d "/mnt/trabalho/Backup" ]; then
-        echo "file:///mnt/trabalho/Backup Backup"
-    fi
-    
-    if [ -d "/mnt/LAN" ]; then
-        echo "file:///mnt/LAN Rede LAN"
-    fi
-} > "$GTK_BOOKMARKS"
+# Verifica se existe arquivo de bookmarks no projeto
+BOOKMARKS_SOURCE="$BASE_DIR/configs/bookmarks"
 
+if [ -f "$BOOKMARKS_SOURCE" ]; then
+    # Copia arquivo de bookmarks do projeto
+    log "INFO" "Copiando arquivo de bookmarks de $BOOKMARKS_SOURCE..."
+    cp "$BOOKMARKS_SOURCE" "$GTK_BOOKMARKS"
+    log "SUCCESS" "Arquivo de bookmarks copiado"
+else
+    # Cria bookmarks padrão se arquivo não existir
+    log "INFO" "Arquivo de bookmarks não encontrado, criando padrão..."
+    
+    {
+        echo "file://$REAL_HOME Desktop"
+        echo "file://$REAL_HOME/Downloads Downloads"
+        echo "file://$REAL_HOME/Documents Documentos"
+        echo "file://$REAL_HOME/Pictures Imagens"
+        echo "file://$REAL_HOME/Music Música"
+        echo "file://$REAL_HOME/Videos Vídeos"
+        
+        # Adiciona bookmarks de rede (se existirem)
+        if [ -d "/mnt/trabalho" ]; then
+            echo "file:///mnt/trabalho Trabalho"
+        fi
+        
+        if [ -d "/mnt/trabalho/Cloud" ]; then
+            echo "file:///mnt/trabalho/Cloud Cloud"
+        fi
+        
+        if [ -d "/mnt/trabalho/Downloads" ]; then
+            echo "file:///mnt/trabalho/Downloads Downloads (Rede)"
+        fi
+        
+        if [ -d "/mnt/trabalho/Backup" ]; then
+            echo "file:///mnt/trabalho/Backup Backup"
+        fi
+        
+        if [ -d "/mnt/LAN" ]; then
+            echo "file:///mnt/LAN Rede LAN"
+        fi
+    } > "$GTK_BOOKMARKS"
+    
+    log "SUCCESS" "Bookmarks padrão criados"
+fi
+
+# Ajusta permissões
 chown "$REAL_USER:$REAL_USER" "$GTK_BOOKMARKS"
 chmod 644 "$GTK_BOOKMARKS"
 
@@ -129,7 +184,7 @@ log "SUCCESS" "Bookmarks GTK configurados"
 log "INFO" "Configurando diretórios XDG..."
 
 # Arquivo de configuração XDG
-XDG_DIRS="$HOME/.config/user-dirs.dirs"
+XDG_DIRS="$REAL_HOME/.config/user-dirs.dirs"
 
 # Cria arquivo de configuração XDG
 mkdir -p "$(dirname "$XDG_DIRS")"
@@ -162,8 +217,8 @@ log "SUCCESS" "Diretórios XDG configurados"
 # ==============================================================================
 
 log "INFO" "Criando arquivo .hushlogin para login silencioso..."
-touch "$HOME/.hushlogin"
-chown "$REAL_USER:$REAL_USER" "$HOME/.hushlogin"
+touch "$REAL_HOME/.hushlogin"
+chown "$REAL_USER:$REAL_USER" "$REAL_HOME/.hushlogin"
 log "SUCCESS" "Login silencioso configurado"
 
 # ==============================================================================
@@ -212,25 +267,13 @@ fi
 log "SUCCESS" "FUSE configurado"
 
 # ==============================================================================
-# 8. ESTRUTURA DE REDE (OPCIONAL)
-# ==============================================================================
-
-log "INFO" "Verificando estrutura de rede (/mnt/LAN)..."
-
-# Cria estrutura de diretórios de rede
-$SUDO mkdir -p /mnt/LAN/{DNS320L,AppData,Backup,Cloud,Downloads,Musicas,SOs,Videos}
-$SUDO chown -R "$REAL_USER:$REAL_USER" /mnt/LAN 2>/dev/null || true
-
-log "SUCCESS" "Estrutura de rede verificada"
-
-# ==============================================================================
-# 9. PERMISSÕES FINAIS
+# 8. PERMISSÕES FINAIS
 # ==============================================================================
 
 log "INFO" "Ajustando permissões finais..."
 
 # Garante que o usuário é proprietário de seu home
-$SUDO chown -R "$REAL_USER:$REAL_USER" "$HOME"
+$SUDO chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME"
 
 # Permissões de scripts locais
 $SUDO chmod -R 755 /usr/local/share/scripts/ 2>/dev/null || true

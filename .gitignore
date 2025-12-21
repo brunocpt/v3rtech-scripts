@@ -29,3 +29,4 @@
 # Diretórios de teste ou build temporários
 /tmp/
 /build/
+configs/filebot-osdb.conf

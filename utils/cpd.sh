@@ -64,7 +64,7 @@ mount_point="/mnt/LAN/Downloads/"
     log_message "Executando o script de limpeza do Transmission..."
     echo "#Executando limpeza do Transmission..."
 
-    /usr/local/share/scripts/Geral/truenas_transmission_clear.sh
+    /usr/local/share/scripts/v3rtech-scripts/utils/truenas_transmission_clear.sh
     if [[ $? -ne 0 ]]; then
         log_message "ERRO ao executar o script de limpeza do Transmission."
         echo "#!!! ERRO ao limpar o query do Transmission. Abortando. !!!"
@@ -78,7 +78,7 @@ mount_point="/mnt/LAN/Downloads/"
     echo "#Movendo arquivos de '$src_dir'..."
     log_message "Iniciando rsync de $src_dir para $dest_dir"
 
-    rsync -rltD --update --remove-source-files --exclude-from=/usr/local/share/scripts/Geral/exclude-list.txt --info=name1 "$src_dir" "$dest_dir" | while IFS= read -r line; do
+    rsync -rltD --update --remove-source-files --exclude-from=/usr/local/share/scripts/v3rtech-scripts/configs/exclude-list.txt --info=name1 "$src_dir" "$dest_dir" | while IFS= read -r line; do
         [ -n "$line" ] && echo "#$line"
     done
 

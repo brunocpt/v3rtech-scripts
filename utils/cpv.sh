@@ -64,7 +64,7 @@ mount_dir "$mount_point"
   echo "#Etapa 1 concluída. Iniciando transferência de arquivos..."
   log_message "Iniciando Etapa 2: Transferência com rsync."
 
-  rsync -rltD --info=name1 --update --remove-source-files --exclude-from=/usr/local/share/scripts/Geral/exclude-list.txt "$src_dir" "$dest_dir" | while IFS= read -r line; do
+  rsync -rltD --info=name1 --update --remove-source-files --exclude-from=/usr/local/share/scripts/v3rtech-scripts/configs/exclude-list.txt "$src_dir" "$dest_dir" | while IFS= read -r line; do
       [ -n "$line" ] && echo "#$line"
   done
 

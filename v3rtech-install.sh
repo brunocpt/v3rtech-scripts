@@ -2,10 +2,11 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: v3rtech-install.sh (Script Mestre Consolidado)
-# Versão: 1.6.1
+# Versão: 1.6.3 (Final - Rsync Mirror com Verificação)
 #
 # Descrição: Orquestrador principal da automação de pós-instalação.
 # Novidades: Auto-instalação no disco, Confirmação de Distro e VM Hook.
+# Correção: Usa rsync com mirror para cópia completa e confiável
 #
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -40,7 +41,7 @@ if [[ $EUID -eq 0 ]]; then
 fi
 
 setup_log
-log "INFO" "Inicializando V3RTECH Scripts v1.6.0..."
+log "INFO" "Inicializando V3RTECH Scripts v1.6.3..."
 
 # --- LÓGICA DE AUTO-INSTALAÇÃO ---
 # Se o script não estiver rodando do local definitivo, ele se instala.
@@ -52,14 +53,79 @@ if [[ "$SCRIPT_DIR" != "$TARGET_DIR" ]]; then
     # Valida sudo antes de copiar
     if ! sudo -v; then die "Falha no sudo. Impossível instalar."; fi
 
-    # Cria diretório e copia
-    log "INFO" "Copiando arquivos para $TARGET_DIR..."
-    sudo mkdir -p "$TARGET_DIR"
-    sudo cp -r "$SCRIPT_DIR/"* "$TARGET_DIR/"
+    # ==============================================================================
+    # VERIFICAÇÃO E INSTALAÇÃO DO RSYNC
+    # ==============================================================================
+    
+    log "INFO" "Verificando disponibilidade do rsync..."
+    
+    if ! command -v rsync &>/dev/null; then
+        log "WARN" "rsync não encontrado. Instalando..."
+        
+        case "$DISTRO_FAMILY" in
+            debian)
+                log "INFO" "Instalando rsync via apt..."
+                sudo apt update
+                sudo apt install -y rsync || die "Falha ao instalar rsync em Debian/Ubuntu"
+                ;;
+            arch)
+                log "INFO" "Instalando rsync via pacman..."
+                sudo pacman -Sy --noconfirm rsync || die "Falha ao instalar rsync em Arch Linux"
+                ;;
+            fedora)
+                log "INFO" "Instalando rsync via dnf..."
+                sudo dnf install -y rsync || die "Falha ao instalar rsync em Fedora"
+                ;;
+            *)
+                die "Distro não suportada ou rsync não disponível"
+                ;;
+        esac
+        
+        # Verifica novamente
+        if ! command -v rsync &>/dev/null; then
+            die "rsync não pôde ser instalado. Não é possível continuar."
+        fi
+        log "SUCCESS" "rsync instalado com sucesso."
+    else
+        log "SUCCESS" "rsync encontrado e disponível."
+    fi
 
-    # Ajusta permissões
+    # ==============================================================================
+    # CÓPIA COM RSYNC (MIRROR)
+    # ==============================================================================
+    
+    log "INFO" "Copiando arquivos para $TARGET_DIR usando rsync..."
+    
+    # Cria diretório destino
+    sudo mkdir -p "$TARGET_DIR"
+    
+    # Usa rsync com opções de mirror:
+    # -a: archive mode (preserva permissões, timestamps, etc)
+    # -v: verbose
+    # --delete: remove arquivos no destino que não existem na origem (mirror)
+    # --exclude: exclui arquivos/diretórios específicos
+    # --checksum: verifica integridade por checksum (mais seguro)
+    if sudo rsync -av \
+        --delete \
+        --exclude='.git' \
+        --exclude='.gitignore' \
+        --exclude='*.log' \
+        --exclude='.vscode' \
+        --checksum \
+        "$SCRIPT_DIR/" "$TARGET_DIR/"; then
+        
+        log "SUCCESS" "Arquivos copiados com sucesso via rsync."
+    else
+        die "Falha ao copiar arquivos com rsync."
+    fi
+
+    # Ajusta permissões finais
+    log "INFO" "Ajustando permissões..."
     sudo chown -R root:root "$TARGET_DIR"
     sudo chmod -R 755 "$TARGET_DIR"
+    
+    # Garante que scripts em utils/ são executáveis
+    sudo chmod +x "$TARGET_DIR/utils"/* 2>/dev/null || true
 
     # Adiciona ao PATH do usuário se não existir
     if ! grep -q "$TARGET_DIR" "$HOME/.bashrc"; then
@@ -68,6 +134,14 @@ if [[ "$SCRIPT_DIR" != "$TARGET_DIR" ]]; then
 
     log "SUCCESS" "Instalação concluída em $TARGET_DIR."
     log "INFO" "Continuando execução a partir da mídia atual..."
+    
+    # Atualiza BASE_DIR, LIB_DIR, etc para apontar para o novo local
+    BASE_DIR="$TARGET_DIR"
+    LIB_DIR="$TARGET_DIR/lib"
+    CONFIGS_DIR="$TARGET_DIR/configs"
+    DATA_DIR="$TARGET_DIR/data"
+    RESOURCES_DIR="$TARGET_DIR/resources"
+    UTILS_DIR="$TARGET_DIR/utils"
 fi
 
 # Sudo Keep-Alive
