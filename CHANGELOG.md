@@ -2,6 +2,42 @@
 
 Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 
+## [3.2.0] - 2025-12-21 (Sessão 3 - Whisper e Filebot Finalizados)
+
+### ✨ Adicionado
+
+#### Instalação de Whisper
+- **Script `11-setup-whisper.sh`** (NOVO): Instalação especializada de OpenAI Whisper com:
+  - Detecção automática de GPU (NVIDIA/AMD/None)
+  - Limpeza de instalações anteriores
+  - Instalação com flag `--force`
+  - Injeção automática de CUDA para NVIDIA
+  - Criação de link simbólico em `/usr/bin/whisper`
+  - Verificação de sucesso
+  - Criação de diretório de cache
+- **Função `post_install_whisper()`** em `logic-apps-reader.sh`: Reconfiguração automática de Whisper
+
+### 🛠️ Corrigido
+
+#### Bugs Críticos (Sessão 3)
+
+17. **Bug de Licença do Filebot Não Aplicada** (MÉDIO):
+    - **Problema:** Comando `flatpak run net.filebot.FileBot --license /caminho` não funcionava
+    - **Solução:** Usar `cat /caminho | flatpak run net.filebot.FileBot --license`
+    - **Resultado:** Licença agora aplicada corretamente
+
+18. **Bug de Whisper Não Instalado Corretamente** (CRÍTICO):
+    - **Problema:** Instalação simples de Whisper sem limpeza, --force, GPU, CUDA ou link simbólico
+    - **Causa:** Script apenas fazia `pipx install openai-whisper` sem configurações adicionais
+    - **Solução:** Implementado script especializado `11-setup-whisper.sh` com:
+      - Detecção de GPU (NVIDIA/AMD/None)
+      - Limpeza de instalações anteriores
+      - Instalação com `--force`
+      - Injeção de CUDA para NVIDIA
+      - Link simbólico em `/usr/bin/whisper`
+      - Verificação de sucesso
+    - **Resultado:** Whisper instala corretamente com suporte a GPU
+
 ## [3.1.0] - 2025-12-21 (Sessão 2 - Correções Finais)
 
 ### 💥 Mudanças Críticas (Breaking Changes)
@@ -125,11 +161,11 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 
 ### 📊 Estatísticas
 
-- **Bugs Corrigidos:** 8 (sessão 1) + 8 (sessão 2) = **16 total**
-- **Novos Scripts:** 10 (sessão 1) + 0 (sessão 2) = **10 total**
-- **Scripts Melhorados:** 5 (sessão 1) + 3 (sessão 2) = **8 total**
-- **Novas Funcionalidades:** 8 (sessão 1) + 6 (sessão 2) = **14 total**
-- **Documentos Atualizados:** 3 (sessão 1) + 6 (sessão 2) = **9 total**
+- **Bugs Corrigidos:** 8 (sessão 1) + 8 (sessão 2) + 2 (sessão 3) = **18 total**
+- **Novos Scripts:** 10 (sessão 1) + 0 (sessão 2) + 1 (sessão 3) = **11 total**
+- **Scripts Melhorados:** 5 (sessão 1) + 3 (sessão 2) + 1 (sessão 3) = **9 total**
+- **Novas Funcionalidades:** 8 (sessão 1) + 6 (sessão 2) + 2 (sessão 3) = **16 total**
+- **Documentos Atualizados:** 3 (sessão 1) + 6 (sessão 2) + 2 (sessão 3) = **11 total**
 
 ### 🔄 Fluxo de Execução Completo
 
@@ -227,6 +263,6 @@ v3rtech-install.sh
 
 ---
 
-**Versão Atual:** 3.1.0
+**Versão Atual:** 3.2.0
 **Status:** ✅ Estável
 **Última Atualização:** 2025-12-21

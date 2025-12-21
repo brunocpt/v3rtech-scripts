@@ -1,10 +1,10 @@
 # DNS-320L - Modal
-//DNS-320L/Volume_1           /mnt/LAN/DNS320L       cifs  credentials=username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=2.0  0  0
+//DNS-320L/Volume_1           /mnt/LAN/DNS320L       cifs  username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=2.0  0  0
 
 # TrueNAS V3RTECH - Bruno
-//truenas-v3rtech-local/AppData       /mnt/LAN/AppData       cifs  credentials=username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
-//truenas-v3rtech-local/Backup        /mnt/LAN/Backup        cifs  credentials=username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
-//truenas-v3rtech-local/Downloads     /mnt/LAN/Downloads     cifs  credentials=username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
-//truenas-v3rtech-local/Musicas       /mnt/LAN/Musicas       cifs  credentials=username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
-//truenas-v3rtech-local/SOs           /mnt/LAN/SOs           cifs  credentials=username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
-//truenas-v3rtech-local/Videos        /mnt/LAN/Videos        cifs  credentials=username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+//truenas-v3rtech-local/AppData       /mnt/LAN/AppData       cifs  username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+//truenas-v3rtech-local/Backup        /mnt/LAN/Backup        cifs  username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+//truenas-v3rtech-local/Downloads     /mnt/LAN/Downloads     cifs  username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+//truenas-v3rtech-local/Musicas       /mnt/LAN/Musicas       cifs  username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+//truenas-v3rtech-local/SOs           /mnt/LAN/SOs           cifs  username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+//truenas-v3rtech-local/Videos        /mnt/LAN/Videos        cifs  username=bruno,password=br100171,uid=1000,gid=1000,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0

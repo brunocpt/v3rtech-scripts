@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: lib/logic-apps-reader.sh
-# Versão: 11.4.0 (Flatpak Global + Credenciais Filebot)
+# Versão: 11.5.0 (Com Suporte Especializado a Whisper)
 # Descrição: Define lógica de instalação e integra alias 'i'.
 # ==============================================================================
 
@@ -30,6 +30,19 @@ fi
 declare -A APP_MAP_NATIVE
 declare -A APP_MAP_FLATPAK
 declare -A APP_MAP_METHOD
+
+# ==============================================================================
+# FUNÇÃO: Detectar GPU
+# ==============================================================================
+detect_gpu() {
+    if lspci 2>/dev/null | grep -i 'NVIDIA' &>/dev/null; then
+        echo "nvidia"
+    elif lspci 2>/dev/null | grep -i 'AMD' | grep -i 'VGA' &>/dev/null; then
+        echo "amd"
+    else
+        echo "none"
+    fi
+}
 
 # ==============================================================================
 # FUNÇÃO: Instalar Flatpak
@@ -162,14 +175,74 @@ post_install_filebot() {
         fi
     else
         log "DEBUG" "Arquivo de configuração não encontrado: $OSDB_CONFIG"
-        log "INFO" "Para configurar credenciais, crie o arquivo:"
-        log "INFO" "  $OSDB_CONFIG"
-        log "INFO" "Com o conteúdo:"
-        log "INFO" "  OSDB_USER=\"seu_usuario\""
-        log "INFO" "  OSDB_PWD=\"sua_senha\""
     fi
     
     log "SUCCESS" "✓ Filebot configurado com sucesso"
+}
+
+# ==============================================================================
+# FUNÇÃO: Pós-Instalação de Whisper
+# ==============================================================================
+post_install_whisper() {
+    log "INFO" "Verificando se Whisper está instalado..."
+    
+    # Testa se Whisper está instalado
+    if ! command -v whisper &>/dev/null; then
+        log "WARN" "Whisper não está instalado, pulando pós-instalação"
+        return 0
+    fi
+    
+    log "INFO" "Configurando Whisper..."
+    
+    # Detecta GPU
+    local GPU=$(detect_gpu)
+    log "INFO" "GPU detectada: $GPU"
+    
+    # Remove instalações anteriores
+    log "INFO" "Removendo instalações anteriores do Whisper..."
+    pipx uninstall whisper 2>/dev/null || true
+    pipx uninstall openai-whisper 2>/dev/null || true
+    rm -f "$HOME/.local/bin/whisper" 2>/dev/null || true
+    
+    # Reinstala com --force
+    log "INFO" "Reinstalando openai-whisper com --force..."
+    if pipx install openai-whisper --force 2>/dev/null; then
+        log "SUCCESS" "✓ OpenAI Whisper reinstalado"
+    else
+        log "WARN" "⚠ Falha ao reinstalar OpenAI Whisper"
+        return 1
+    fi
+    
+    # Se NVIDIA: injeta dependências CUDA
+    if [ "$GPU" = "nvidia" ]; then
+        log "INFO" "GPU NVIDIA detectada. Instalando suporte CUDA..."
+        if pipx inject openai-whisper torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 2>/dev/null; then
+            log "SUCCESS" "✓ Suporte CUDA instalado"
+        else
+            log "WARN" "⚠ Falha ao instalar suporte CUDA (pode continuar com CPU)"
+        fi
+    else
+        log "INFO" "Nenhuma GPU NVIDIA detectada. Usando CPU."
+    fi
+    
+    # Cria link simbólico em /usr/bin (se não existir)
+    if [ ! -f /usr/bin/whisper ]; then
+        log "INFO" "Criando link simbólico para whisper em /usr/bin..."
+        if $SUDO ln -s "$HOME/.local/bin/whisper" /usr/bin/whisper 2>/dev/null; then
+            log "SUCCESS" "✓ Link simbólico criado"
+        else
+            log "WARN" "⚠ Falha ao criar link simbólico"
+        fi
+    fi
+    
+    # Cria diretório de cache
+    local MODELS_DIR="$HOME/.cache/whisper"
+    if [ ! -d "$MODELS_DIR" ]; then
+        log "INFO" "Criando diretório de cache para modelos do Whisper..."
+        mkdir -p "$MODELS_DIR"
+    fi
+    
+    log "SUCCESS" "✓ Whisper configurado com sucesso"
 }
 
 # --- 1. FUNÇÃO DE DEFINIÇÃO (Modo Lógico) ---
@@ -287,6 +360,9 @@ post_install_apps() {
     
     # Configura Filebot se estiver instalado
     post_install_filebot
+    
+    # Configura Whisper se estiver instalado
+    post_install_whisper
     
     log "SUCCESS" "✓ Pós-instalação concluída"
 }
