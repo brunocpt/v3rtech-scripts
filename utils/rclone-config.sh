@@ -4,13 +4,13 @@
 
 echo "Configurando Rclone..."
 
-USER_CONFIG_DIR="/usr/local/share/scripts"
+USER_CONFIG_DIR="/usr/local/share/scripts/v3rtech-scripts"
 
 if command -v rclone &> /dev/null && [ "$USER" = "bruno" ]; then
 
   # Copia configuração do Rclone
   mkdir -p "$HOME/.config/rclone"
-  cat "$USER_CONFIG_DIR/config/rclone.conf" | tee "$HOME/.config/rclone/rclone.conf" && echo "OK: Configuração do Rclone copiada." || echo "Aviso: rclone.conf não encontrado em ${USER_CONFIG_DIR}/config/ ou falha na cópia."
+  cat "$USER_CONFIG_DIR/configs/rclone.conf" | tee "$HOME/.config/rclone/rclone.conf" && echo "OK: Configuração do Rclone copiada." || echo "Aviso: rclone.conf não encontrado em ${USER_CONFIG_DIR}/config/ ou falha na cópia."
 
   echo "Configurando montagens de SharePoint via systemd user services (Rclone)..."
 

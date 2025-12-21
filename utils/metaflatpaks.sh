@@ -37,12 +37,12 @@ fi
 
 # Lista de scripts e caminhos (sem .sh nos scripts de /Geral)
 declare -A SCRIPT_PATHS=(
-  [internet]="/usr/local/share/scripts/Geral/fpk-internet.sh"
-  [office]="/usr/local/share/scripts/Geral/fpk-office.sh"
-  [multimidia]="/usr/local/share/scripts/Geral/fpk-multimidia.sh"
-  [games]="/usr/local/share/scripts/Geral/fpk-games.sh"
-  [devs]="/usr/local/share/scripts/Geral/fpk-devs.sh"
-  [system]="/usr/local/share/scripts/Geral/fpk-system.sh"
+  [internet]="/usr/local/share/scripts/v3rtech-scripts/utils/fpk-internet.sh"
+  [office]="/usr/local/share/scripts/v3rtech-scripts/utils/fpk-office.sh"
+  [multimidia]="/usr/local/share/scripts/v3rtech-scripts/utils/fpk-multimidia.sh"
+  [games]="/usr/local/share/scripts/v3rtech-scripts/utils/fpk-games.sh"
+  [devs]="/usr/local/share/scripts/v3rtech-scripts/utils/fpk-devs.sh"
+  [system]="/usr/local/share/scripts/v3rtech-scripts/utils/fpk-system.sh"
 )
 
 # Comandos a executar
@@ -70,10 +70,10 @@ SCRIPT_TEMP=$(mktemp)
   done
 
   echo "echo '===== Criando atalhos para aplicativos Flatpak instalados...'"
-  echo "[ -x /usr/local/share/scripts/Geral/fpk-gera-atalhos.sh ] && /usr/local/share/scripts/Geral/fpk-gera-atalhos.sh || echo 'Script de geração de atalhos não encontrado ou sem permissão.'"
+  echo "[ -x /usr/local/share/scripts/v3rtech-scripts/utils/fpk-gera-atalhos.sh ] && /usr/local/share/scripts/v3rtech-scripts/utils/fpk-gera-atalhos.sh || echo 'Script de geração de atalhos não encontrado ou sem permissão.'"
 
   echo "echo '===== Removendo atalhos órfãos de aplicativos Flatpak desinstalados...'"
-  echo "[ -x /usr/local/share/scripts/Geral/fpk-limpa-atalhos-orfãos.sh ] && /usr/local/share/scripts/Geral/fpk-limpa-atalhos-orfãos.sh || echo 'Script de limpeza de atalhos órfãos não encontrado ou sem permissão.'"
+  echo "[ -x /usr/local/share/scripts/v3rtech-scripts/utils/fpk-limpa-atalhos-orfãos.sh ] && /usr/local/share/scripts/v3rtech-scripts/utils/fpk-limpa-atalhos-orfãos.sh || echo 'Script de limpeza de atalhos órfãos não encontrado ou sem permissão.'"
 
   echo "echo '===== Instalação concluída. Fechando em 10 segundos...'"
   echo "sleep 10"
