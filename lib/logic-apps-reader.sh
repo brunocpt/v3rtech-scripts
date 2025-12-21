@@ -2,146 +2,120 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: lib/logic-apps-reader.sh
-# Versão: 1.0.0
-#
-# Descrição: Lê o arquivo data/apps.csv e processa as informações.
-# Gera arrays para a interface gráfica e para a lógica de instalação.
-#
-# Autor: V3RTECH Tecnologia, Consultoria e Inovação
-# Website: https://v3rtech.com.br/
+# Versão: 11.0.0 (Path Corrected)
+# Descrição: Define lógica de instalação e integra alias 'i'.
 # ==============================================================================
 
-CSV_FILE="$DATA_DIR/apps.csv"
+# --- HABILITA ALIASES NO SCRIPT ---
+# Essencial para que o comando 'i' definido no aliases.geral funcione aqui.
+shopt -s expand_aliases
 
-# Arrays globais para armazenar os dados carregados
-declare -a APP_LIST_YAD=()    # Formato para o YAD (TRUE, Internet, Chrome...)
-declare -A APP_MAP_NATIVE     # Mapeia Nome -> Pacote Nativo (Baseado na Distro)
-declare -A APP_MAP_FLATPAK    # Mapeia Nome -> ID Flatpak
-declare -A APP_MAP_METHOD     # Mapeia Nome -> Método (native, flatpak, pipx)
+# --- CARREGA ALIASES ---
+# CORREÇÃO: Busca na pasta 'configs' (irmã da pasta lib ou data)
+# Tenta caminho relativo (durante desenvolvimento/teste)
+ALIASES_FILE="$(dirname "${BASH_SOURCE[0]}")/../configs/aliases.geral"
 
-# Função para carregar e processar o CSV
-load_apps_csv() {
-    log "INFO" "Lendo banco de dados de aplicativos: $CSV_FILE"
+# Se não achar, tenta caminho absoluto de instalação
+if [ ! -f "$ALIASES_FILE" ]; then
+    ALIASES_FILE="/usr/local/share/scripts/v3rtech-scripts/configs/aliases.geral"
+fi
 
-    if [ ! -f "$CSV_FILE" ]; then
-        die "Arquivo de dados $CSV_FILE não encontrado."
-    fi
+if [ -f "$ALIASES_FILE" ]; then
+    source "$ALIASES_FILE"
+else
+    log "WARN" "Aliases não encontrados em $ALIASES_FILE. O comando 'i' pode falhar."
+fi
 
-    local line_count=0
+# Arrays Globais
+declare -A APP_MAP_NATIVE
+declare -A APP_MAP_FLATPAK
+declare -A APP_MAP_METHOD
 
-    # Lê linha por linha
-    while read -r raw_line || [ -n "$raw_line" ]; do
-        # Ignora linhas de comentário (#) ou linhas vazias
-        [[ "$raw_line" =~ ^#.*$ ]] && continue
-        [[ -z "$raw_line" ]] && continue
+# --- 1. FUNÇÃO DE DEFINIÇÃO (Modo Lógico) ---
+add_app() {
+    local active="$1"
+    local category="$2"
+    local name="$3"
+    local desc="$4"
+    local pkg_deb="$5"
+    local pkg_arch="$6"
+    local pkg_fed="$7"
+    local flatpak_id="$8"
+    local method="$9"
 
-        # Validação de Estrutura: Verifica se tem 9 colunas
-        # Usa conversão para array para contar
-        IFS='|' read -r -a cols <<< "$raw_line"
-        
-        # Nota: read -a pode ignorar campos vazios no final dependendo da versão, 
-        # mas para nosso caso (9 campos fixos), se o usuário esquecer pipes, vai dar errado.
-        # Uma abordagem mais segura para contar separadores:
-        num_pipes=$(echo "$raw_line" | tr -cd '|' | wc -c)
-        
-        # Esperamos 8 pipes para 9 colunas
-        if [ "$num_pipes" -ne 8 ]; then
-            log "WARN" "CSV Malformado (Esperado 9 colunas/8 pipes): $raw_line"
-            continue
-        fi
+    local native_pkg=""
+    case "${DISTRO_FAMILY:-debian}" in
+        debian|ubuntu|linuxmint|pop|neon|siduction|lingmo) native_pkg="$pkg_deb" ;;
+        arch|manjaro|endeavouros|biglinux)                 native_pkg="$pkg_arch" ;;
+        fedora|redhat|almalinux|nobara)                    native_pkg="$pkg_fed" ;;
+        *)                                                 native_pkg="$pkg_deb" ;;
+    esac
 
-        # Parsing das variáveis via Array
-        active="${cols[0]}"
-        category="${cols[1]}"
-        name="${cols[2]}"
-        desc="${cols[3]}"
-        pkg_deb="${cols[4]}"
-        pkg_arch="${cols[5]}"
-        pkg_fed="${cols[6]}"
-        flatpak_id="${cols[7]}"
-        method="${cols[8]}"
-
-        # Validação Extra: Método não deve ser nulo (pois é a última coluna)
-        if [ -z "$method" ]; then
-             # Se o método for vazio na string original "||", ele entra como vazio no array.
-             # Mas se faltou a coluna, o array seria menor.
-             # Como já validamos os pipes, garantimos a estrutura.
-             true 
-        fi
-
-        # Limpa espaços em branco extras (trim)
-        name=$(echo "$name" | xargs)
-        method=$(echo "$method" | xargs)
-
-        # 1. Determina o nome do pacote nativo baseado na distro detectada
-        local native_pkg=""
-        case "$DISTRO_FAMILY" in
-            debian) native_pkg="$pkg_deb" ;;
-            arch)   native_pkg="$pkg_arch" ;;
-            fedora) native_pkg="$pkg_fed" ;;
-        esac
-
-        # 2. Popula os Arrays Associativos (Mapas)
-        # Usamos o NOME como chave única
-        APP_MAP_NATIVE["$name"]="$native_pkg"
-        APP_MAP_FLATPAK["$name"]="$flatpak_id"
-        APP_MAP_METHOD["$name"]="$method"
-
-        # 3. Prepara a linha para o YAD (UI)
-        # O formato do YAD checkbox list é: BOOL "Categoria" "Nome" "Descrição"
-        # Adicionamos ao array linear
-        APP_LIST_YAD+=("$active" "$category" "$name" "$desc")
-
-        ((line_count++))
-
-    done < "$CSV_FILE"
-
-    log "SUCCESS" "Carregados $line_count aplicativos do banco de dados."
+    APP_MAP_NATIVE["$name"]="$native_pkg"
+    APP_MAP_FLATPAK["$name"]="$flatpak_id"
+    APP_MAP_METHOD["$name"]="$method"
 }
 
-# Função Auxiliar: Instala um app pelo NOME (chave do CSV)
+# --- 2. CARREGAMENTO DO BANCO DE DADOS ---
+load_apps_database() {
+    log "INFO" "Carregando lógica de instalação..."
+    local db_path="${DATA_DIR:-data}/apps-data.sh"
+    if [ ! -f "$db_path" ]; then db_path="lib/apps-data.sh"; fi
+
+    if [ -f "$db_path" ]; then
+        source "$db_path"
+        log "SUCCESS" "Dados carregados."
+    else
+        log "ERROR" "Arquivo de dados não encontrado: $db_path"
+        return 1
+    fi
+}
+
+# --- 3. MOTOR DE INSTALAÇÃO ---
 install_app_by_name() {
     local app_name="$1"
     local method="${APP_MAP_METHOD[$app_name]}"
     local pkg_native="${APP_MAP_NATIVE[$app_name]}"
     local pkg_flatpak="${APP_MAP_FLATPAK[$app_name]}"
 
-    log "STEP" "Processando: $app_name (Método: $method)"
+    method=$(echo "$method" | xargs)
+    log "STEP" "Instalando: $app_name (Método: $method)"
 
     case "$method" in
         pipx)
-            # Instalação Python Isolada
-            install_pipx "${app_name,,}" # converte nome para minúsculo como fallback de nome de pacote
+            if command -v install_pipx &>/dev/null; then install_pipx "${app_name,,}";
+            elif command -v pipx &>/dev/null; then pipx install "${app_name,,}";
+            else log "WARN" "Pipx ausente. Pulando $app_name"; fi
             ;;
-
         flatpak)
-            # Força Flatpak (ex: Filebot)
-            if [ -n "$pkg_flatpak" ]; then
-                install_flatpak "$pkg_flatpak"
-            else
-                log "ERROR" "App $app_name configurado como Flatpak, mas sem ID no CSV."
-            fi
+            [ -n "$pkg_flatpak" ] && install_flatpak "$pkg_flatpak"
             ;;
-
+        custom)
+            local script_path="/usr/local/bin/${pkg_native}"
+            if command -v "$pkg_native" &>/dev/null; then "$pkg_native";
+            elif [ -f "$script_path" ]; then "$script_path";
+            else log "WARN" "Script customizado não encontrado: $pkg_native"; fi
+            ;;
         native|*)
-            # Tenta Nativo -> Fallback Flatpak
             local installed=false
-
-            # 1. Tenta Nativo se houver pacote definido para a distro
             if [ -n "$pkg_native" ]; then
-                if i "$pkg_native"; then
-                    installed=true
-                else
-                    log "WARN" "Falha na instalação nativa de $app_name. Tentando fallback..."
+                # Verifica se 'i' é um alias ou função válida
+                if type i &>/dev/null; then
+                    log "INFO" "Usando comando 'i' para instalar: $pkg_native"
+                    if i "$pkg_native"; then installed=true; fi
+
+                # Fallbacks manuais (caso o alias falhe ou não exista)
+                elif command -v apt &>/dev/null; then sudo apt install -y $pkg_native && installed=true;
+                elif command -v pacman &>/dev/null; then sudo pacman -S --noconfirm $pkg_native && installed=true;
+                elif command -v dnf &>/dev/null; then sudo dnf install -y $pkg_native && installed=true;
                 fi
             fi
 
-            # 2. Fallback para Flatpak se nativo falhou ou não existe
             if [ "$installed" = false ] && [ -n "$pkg_flatpak" ]; then
-                log "INFO" "Usando Flatpak como fallback para $app_name."
+                log "INFO" "Fallback para Flatpak..."
                 install_flatpak "$pkg_flatpak"
             elif [ "$installed" = false ]; then
-                log "ERROR" "Não foi possível instalar $app_name (Sem nativo válido e sem ID Flatpak)."
+                log "ERROR" "Falha na instalação de $app_name"
             fi
             ;;
     esac

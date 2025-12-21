@@ -1,0 +1,269 @@
+#!/bin/bash
+# ==============================================================================
+# Projeto: v3rtech-scripts
+# Arquivo: aliases.geral
+# Local de Instalação: .../v3rtech-scripts/configs/aliases.geral
+# Versão: 2.0.0 (Optimized & Refactored)
+# Descrição: Aliases globais, funções de utilidade e atalhos por distribuição.
+# ==============================================================================
+
+# ==============================================================================
+# 1. NAVEGAÇÃO E SISTEMA DE ARQUIVOS
+# ==============================================================================
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias c='clear'
+alias mkdir='mkdir -pv'
+
+# Listagem Inteligente (Eza > Ls)
+if command -v eza >/dev/null 2>&1; then
+    alias ll='eza -lia --icons --group-directories-first'
+    alias lli='eza -lia --icons --group-directories-first --inode'
+else
+    alias ll='ls -la --group-directories-first --color=auto -h'
+    alias lli='ls -lia --group-directories-first --color=auto -h'
+fi
+
+# ==============================================================================
+# 2. DIAGNÓSTICO E MANUTENÇÃO DE SISTEMA
+# ==============================================================================
+alias prune-empty-dirs='find . -type d -empty -delete'
+alias usage='du -h --max-depth=1 | sort -rh'
+alias diskspace='du -h --max-depth=2 | sort -hr | less'
+alias lsblk='lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,UUID -e 7'
+alias df='df -h -x tmpfs -x devtmpfs --total'
+alias free='free -ht'
+alias mount='sudo mount'
+alias umount='sudo umount'
+
+# Rede
+alias wget='wget -c'
+alias myip='curl ipv4.icanhazip.com'
+alias ifconfig='ip addr'
+alias ix='inxi -CGIMm'
+
+# Pesquisa e Logs
+alias grep='grep --color=auto'
+alias findy='find . -name'
+alias diff='colordiff'
+alias hg='history | grep '
+alias tp='sudo tail -f /var/log/auth.log /var/log/syslog /var/log/mail.info /var/log/mail.err 2>/dev/null'
+
+# Energia
+alias reboot='sudo reboot'
+alias sdown='sudo shutdown -h'
+
+# Shell Reload
+if [[ -n $ZSH_VERSION ]]; then
+    alias src='exec zsh'
+    alias reload='exec zsh'
+else
+    alias src='exec bash'
+    alias reload='exec bash'
+fi
+
+# ==============================================================================
+# 3. FUNÇÕES UTILITÁRIAS (OCR)
+# ==============================================================================
+
+# OCR Simples (Força Português)
+ocrbr() {
+    local input="$1"
+    local output="${input%.pdf}_ocr.pdf"
+    [ -z "$input" ] && { echo "Uso: ocrbr arquivo.pdf"; return 1; }
+
+    echo "[INFO] Iniciando OCR (PT-BR) em: $input"
+    ocrmypdf --language por --optimize 3 --force-ocr --output-type pdf "$input" "$output"
+}
+
+# OCR Automático (Detecta Idioma)
+ocrauto() {
+    local input="$1"
+    local output="${input%.pdf}_ocr.pdf"
+    [ -z "$input" ] && { echo "Uso: ocrauto arquivo.pdf"; return 1; }
+
+    # Cria arquivo temporário seguro
+    local tmpimg
+    tmpimg=$(mktemp --suffix=.png)
+
+    # Extrai preview da primeira página
+    pdftoppm -png -f 1 -singlefile "$input" "${tmpimg%.png}" &>/dev/null
+
+    # Detecta idioma (PT, EN, ES)
+    local lang_detect
+    lang_detect=$(tesseract "$tmpimg" stdout -l por+eng+spa --psm 6 2>/dev/null | \
+        head -n 200 | tr '[:upper:]' '[:lower:]' | \
+        grep -Eo '\b(de|que|el|la|and|the|um|uma|los|las|is|are)\b' | \
+        sort | uniq -c | sort -nr | head -1 | awk '{print $2}')
+
+    # Limpa temp
+    rm -f "$tmpimg"
+
+    local lang="por"
+    case "$lang_detect" in
+        the|and|is|are)         lang="eng" ;;
+        el|la|los|las|que|de)   lang="spa" ;;
+        *)                      lang="por" ;;
+    esac
+
+    echo "[INFO] Idioma detectado: $lang"
+    echo "[INFO] Gerando OCR: $input -> $output"
+
+    ocrmypdf --language "$lang" --optimize 3 --force-ocr --output-type pdf "$input" "$output"
+}
+
+# ==============================================================================
+# 4. APLICATIVOS E DESENVOLVIMENTO
+# ==============================================================================
+
+# VS Code
+alias codeproj='code /mnt/trabalho/Cloud/DEV/Projetos/Projetos.code-workspace'
+
+# Terminais
+alias gnome-terminal='gnome-terminal --maximize'
+alias tilix='tilix --maximize'
+
+# YouTube-DL (Credenciais mantidas conforme original)
+alias ytdl='yt-dlp -u brunocpt@gmail.com -p bpky@310517 --cookies=/mnt/trabalho/Cloud/Compartilhado/Linux/config/youtubedlcookie.txt --prefer-free-formats --format mp4 --write-sub --write-auto-subs --sub-format srt --add-metadata --sub-lang pt-BR --sub-lang en --convert-subs srt -i'
+
+# ==============================================================================
+# 5. DOCKER & CONTAINER
+# ==============================================================================
+alias dc='sudo docker compose'
+alias dcup='sudo docker compose up -d --remove-orphans'
+alias dcdown='sudo docker compose down --remove-orphans'
+alias dcl='sudo docker container list'
+alias dclean-all='sudo docker system prune -af --volumes'
+alias dcrm='sudo docker compose rmi -s -f'
+alias dcstop='sudo docker compose stop'
+alias dcimgup='sudo docker compose pull && sudo docker compose up -d --remove-orphans && sudo docker image prune'
+alias dprune='sudo docker system prune -af'
+alias dprune-volumes='sudo docker system prune --volumes -af'
+alias ds='sudo docker stop'
+alias dex='sudo docker exec -it'
+alias dlogs='sudo docker logs --follow'
+
+# Flatpak
+alias fpr='flatpak run'
+alias fpi='sudo flatpak install -y'
+# CORREÇÃO: Renomeado de 'fpr' para 'fpu' para evitar conflito com 'flatpak run'
+alias fpu='sudo flatpak uninstall -y'
+alias fps='flatpak search'
+alias fpl='flatpak list'
+
+# ==============================================================================
+# 6. RCLONE & CLOUD SYNC
+# ==============================================================================
+# Lista de exclusão padrão
+RC_EXCLUDE="/usr/local/share/scripts/Geral/exclude-list.txt"
+
+# Helpers
+rc_copy() {
+    rclone copy -u -q -P --exclude-from "$RC_EXCLUDE" "$1" "$2"
+}
+
+# GEJA
+alias rc-down-bruno-geja='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy GEJA-Pessoal: /mnt/trabalho/Cloud/Bruno/Escotismo/GEJA'
+alias rc-up-bruno-geja='rclone -u -q -P --drive-allow-import-name-change --drive-import-formats docx,odt,xls,xlsx,ods,ppt,pptx,odp --exclude Diretoria/** --exclude *.mp4 --exclude *.mkv copy /mnt/trabalho/Cloud/Bruno/Escotismo/GEJA/ GEJA-Pessoal:'
+alias rc-up-geja-diretoria='rclone -u -q -P --drive-allow-import-name-change --drive-import-formats docx,odt,xls,xlsx,ods,ppt,pptx,odp --exclude-from '$RC_EXCLUDE' --exclude *.mp4 --exclude *.mkv copy /mnt/trabalho/Cloud/Bruno/Escotismo/GEJA/Diretoria/ GEJA-Diretoria:'
+alias rc-down-geja-diretoria='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy GEJA-Diretoria: /mnt/trabalho/Cloud/Bruno/Escotismo/GEJA/Diretoria/'
+
+# MODAL
+alias rc-up-modal-gdrive='rclone -u -q -P --exclude-from '$RC_EXCLUDE' --exclude Diretoria/** copy /mnt/trabalho/Cloud/Modal Modal:'
+alias rc-up-modal-diretoria-gdrive='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/Modal/Diretoria Modal-Diretoria:'
+alias rc-up-modal-projetos-gdrive='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/Modal/Projetos Modal-Projetos:'
+alias rc-up-modal-onedrive='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/Modal OneDriveModal:/Modal'
+alias rc-up-modals3='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/Modal ModalS3:/modal-backup'
+
+# RIT & OUTROS
+alias rc-up-rit-gdrive='rclone -n -q -P --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/RIT/Diretoria RIT-GDrive:'
+alias rc-down-gphotos='rclone sync -v -u -P --exclude-from /usr/local/share/scripts/config/exclude-photos.txt GooglePhotos:album/FamiliaBPKY /mnt/trabalho/Cloud/Multimidia/Pessoais/FamiliaBPKY ; cd /mnt/trabalho/Cloud/Multimidia/Pessoais/FamiliaBPKY/ ; rm *.mp4 *}.jpg *.gif *.JPG *.jpeg 2>/dev/null'
+alias rc-up-musicas='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/Multimidia/Musicas Dropbox:/Musicas'
+alias rc-up-condominio='rclone -u -q -P --exclude-from '$RC_EXCLUDE' sync /mnt/trabalho/Cloud/Vale\ do\ Cedro Dropbox:/Vale\ do\ Cedro'
+
+# ==============================================================================
+# 7. SSH & CONEXÕES REMOTAS
+# ==============================================================================
+SSH_KEY="/usr/local/share/scripts/config/ssh-keys/id_rsa"
+
+# AWS & Cloudron
+alias aws.cloudron='ssh -i '$SSH_KEY' ubuntu@3.215.113.99'
+alias truenas-modal='ssh -i '$SSH_KEY' modal@131.0.22.165 -p 8222'
+alias cloudron-geja='ssh -i '$SSH_KEY' root@85.31.63.91'
+alias truenas-cloudron-geja='ssh -i '$SSH_KEY' bruno@192.168.0.157'
+alias truenas-v3rtech='ssh -i '$SSH_KEY' 189.50.92.154 -p 9222'
+alias truenas-train='ssh -i '$SSH_KEY' bruno@189.50.92.154 -p 9223'
+alias uplucky='ssh -i '$SSH_KEY' bruno@192.168.0.186'
+alias ijud-dev='ssh -i '$SSH_KEY' ijud@189.50.92.154 -p 8222'
+
+# IoT / Local
+alias DB='sshpass -p admin ssh root@DNS-320B'
+alias DL='sshpass -p br100171 ssh -oHostKeyAlgorithms=+ssh-dss admin@DNS-320L'
+alias pi='ssh -i '$SSH_KEY' pi@189.50.92.154 -p 222'
+
+# VPN SESP
+alias vpn-sesp='sudo openvpn --config /usr/local/share/scripts/config/vpn/SESP-data-ciphers.ovpn --comp-lzo --auth-user-pass /usr/local/share/scripts/config/vpn/sesp-vpn-credentials'
+alias taiga-sesp='ssh -i '$SSH_KEY' ibrowse@10.243.245.12'
+alias hml-app-connectjud='ssh -i '$SSH_KEY' ibrowse@10.243.116.17'
+alias hml-db-connectjud='ssh -i '$SSH_KEY' ibrowse@10.243.116.18'
+alias prod-app-connectjud='ssh -i '$SSH_KEY' ibrowse@10.243.117.31'
+alias prod-db-connectjud='ssh -i '$SSH_KEY' ibrowse@10.243.117.30'
+alias prod-mfa='ssh -i '$SSH_KEY' ibrowse@10.243.117.50'
+alias prod-mfa-weblogic='ssh -i '$SSH_KEY' ibrowse@10.243.117.49'
+
+# ==============================================================================
+# 8. GERENCIAMENTO DE PACOTES (Distro Agnostic)
+# ==============================================================================
+
+# Carrega informações da distro
+if [ -f /etc/os-release ]; then
+    source /etc/os-release
+fi
+
+case "$ID" in
+  arch|endeavouros|manjaro|biglinux|cachyos)
+    # --- ARCH LINUX ---
+    alias i='paru -S --needed --noconfirm'
+    alias yaur='paru -Rns'
+    alias yaur-force='paru -Rcn --noconfirm'
+    alias yaus='paru -Si'
+    alias yauc='paru -Ss'
+    alias m='sudo reflector --country Brazil,Chile,"United States" --protocol https,http --latest 12 --sort rate --verbose'
+    alias ranki='sudo reflector --protocol https,http --latest 20 --sort age --verbose'
+    alias update-grub='sudo grub-mkconfig -o /boot/grub/grub.cfg'
+    alias psk='pacseek'
+    ;;
+
+  ubuntu|elementary|neon|zorin|debian|lingmo|siduction)
+    # --- DEBIAN / UBUNTU ---
+    # Usa apt-smart se disponível (geralmente instalado pelos v3rtech-scripts)
+    if command -v apt-smart >/dev/null; then
+        alias i='apt-smart install -y'
+    else
+        alias i='sudo apt install -y'
+    fi
+    alias yauc='sudo apt search'
+    alias yaus='sudo apt show'
+    alias yaur='sudo apt remove -y'
+    alias update-grub='sudo grub-mkconfig -o /boot/grub/grub.cfg'
+    ;;
+
+  fedora|rhel|nobara)
+    # --- FEDORA ---
+    alias i='sudo dnf install -y --skip-unavailable --nogpgcheck'
+    alias yauc='sudo dnf search'
+    alias yaus='sudo dnf info'
+    alias yaur='sudo dnf -y remove'
+    alias update-grub='sudo grub2-mkconfig -o /etc/grub2.cfg'
+    ;;
+
+  solus)
+    # --- SOLUS ---
+    alias i='sudo eopkg install -y'
+    alias yauc='sudo eopkg search'
+    alias yaus='sudo eopkg info'
+    alias yaur='sudo eopkg remove -y'
+    alias update-grub='sudo clr-boot-manager update'
+    ;;
+esac

@@ -1,101 +1,143 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Projeto: v3rtech-scripts
+# Arquivo: utils/atualiza_scripts.sh
+# Versão: 2.0.0 (New Structure + GitHub Fallback)
+# Descrição: Sincroniza a versão de desenvolvimento para o sistema.
+# ==============================================================================
 
-# === Variáveis ===
-SRC="/mnt/trabalho/Cloud/Compartilhado/Linux"
-DST="/usr/local/share/scripts"
-FONTS_DST="$HOME/.local/share/fonts"
+# === Variáveis de Caminho ===
+# Origem Local (Rede/Cloud)
+LOCAL_SRC="/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts"
+
+# Origem Remota (GitHub)
+REPO_URL="https://github.com/brunocpt/v3rtech-scripts.git"
+
+# Destino no Sistema
+SYSTEM_DST="/usr/local/share/scripts/v3rtech-scripts"
+
+# Variáveis de Usuário
 OWNER="${SUDO_USER:-$USER}"
 GROUP=$(id -gn "$OWNER")
 
-# === Detecta distribuição ===
-source /etc/os-release
-DISTRO="$ID"
-VARIANT="$VARIANT"
+# === Cabeçalho ===
+echo "========================================================"
+echo "   V3RTECH SCRIPTS - ATUALIZADOR DE VERSÃO"
+echo "========================================================"
+echo "Data: $(date)"
+echo "Destino: $SYSTEM_DST"
 
-case "$DISTRO" in
-  arch|rebornos|archcraft|cachyos|endeavouros|manjaro|biglinux) DISTRO="Arch" ;;
-  ubuntu|elementary|neon|zorin) DISTRO="Ubuntu" ;;
-  debian|lingmo|siduction) DISTRO="Debian" ;;
-  fedora|rhel|nobara) DISTRO="Fedora" ;;
-  solus) DISTRO="Solus" ;;
-  *) DISTRO="Geral"; echo "Distro não reconhecida. Usando scripts gerais." ;;
-esac
+# === 1. Verificação da Origem ===
+USE_GIT=false
 
-# === Informações iniciais ===
-echo ""
-echo "--- Atualizando scripts em $DST ---"
-echo "Máquina: ${HOSTNAME:-$(cat /etc/hostname)}"
-echo "Sistema: $ID"
-echo "Scripts específicos: $DISTRO"
-echo "Destino global: $DST"
-echo "Dono padrão: root:root"
-echo "Exceção (chaves): $OWNER:$GROUP"
-
-# === Sincroniza fontes (continua local por usuário) ===
-echo ""
-echo "--- Sincronizando fontes ---"
-echo "Fonte: $SRC/fonts/"
-echo "Destino: $FONTS_DST"
-mkdir -p "$FONTS_DST"
-
-stats=$(rsync -ruhP --delete --out-format='' --stats "$SRC/fonts/" "$FONTS_DST" 2>&1)
-
-if echo "$stats" | grep -Eq 'transferred: [1-9]|created files: [1-9]|deleted files: [1-9]'; then
-  echo "Fontes foram alteradas. Atualizando cache de fontes..."
-  fc-cache -fsv
-  echo "Cache de fontes atualizado."
+if [ -d "$LOCAL_SRC" ]; then
+    echo "[INFO] Origem local detectada: $LOCAL_SRC"
+    SRC_DIR="$LOCAL_SRC"
 else
-  echo "Nenhuma fonte foi alterada."
+    echo "[WARN] Origem local não encontrada (Drive não montado?)"
+    echo "[INFO] Alternando para modo GitHub..."
+    USE_GIT=true
 fi
 
-# === Criação dos diretórios de destino ===
+# === 2. Processo de Atualização ===
+
+# Cria diretório de destino se não existir
+if [ ! -d "$SYSTEM_DST" ]; then
+    echo "[INFO] Criando diretório de destino..."
+    sudo mkdir -p "$SYSTEM_DST"
+    sudo chown "$USER:$USER" "$SYSTEM_DST" # Temporário para git clone funcionar sem sudo
+fi
+
+if [ "$USE_GIT" = true ]; then
+    # --- MODO GITHUB ---
+
+    # Verifica se o destino já é um repositório git
+    if [ -d "$SYSTEM_DST/.git" ]; then
+        echo "[STEP] Atualizando repositório existente (git pull)..."
+        # Força reset para garantir que arquivos locais modificados não travem o pull
+        sudo git -C "$SYSTEM_DST" fetch --all
+        sudo git -C "$SYSTEM_DST" reset --hard origin/main
+        sudo git -C "$SYSTEM_DST" pull origin main
+    else
+        echo "[STEP] Clonando repositório do zero..."
+        # Clona direto para o destino
+        sudo git clone "$REPO_URL" "$SYSTEM_DST"
+    fi
+
+    if [ $? -eq 0 ]; then
+        echo "[SUCCESS] Atualização via GitHub concluída."
+    else
+        echo "[ERROR] Falha ao atualizar via GitHub."
+        exit 1
+    fi
+
+else
+    # --- MODO LOCAL (RSYNC) ---
+
+    echo "[STEP] Sincronizando arquivos locais (Rsync)..."
+
+    # Exclui .git da cópia local para não quebrar versionamento futuro se houver
+    sudo rsync -avhP --delete \
+        --exclude '.git' \
+        --exclude '*.tmp' \
+        "$SRC_DIR/" "$SYSTEM_DST/"
+
+    if [ $? -eq 0 ]; then
+        echo "[SUCCESS] Sincronização local concluída."
+    else
+        echo "[ERROR] Falha no Rsync."
+        exit 1
+    fi
+fi
+
+# === 3. Ajuste de Permissões e Links ===
 echo ""
-echo "--- Criando estrutura de pastas globais em $DST ---"
-sudo mkdir -p "$DST/atalhos"
-sudo mkdir -p "$DST/config"
-sudo mkdir -p "$DST/docker"
-sudo mkdir -p "$DST/Geral"
-sudo mkdir -p "$DST/$DISTRO"
+echo "[STEP] Ajustando permissões e links simbólicos..."
 
-# === Sincronização dos scripts e configs ===
-echo "--- Sincronizando atalhos ---"
-sudo rsync -ruhP --delete "$SRC/atalhos/" "$DST/atalhos"
+# Define root como dono final da pasta de sistema
+sudo chown -R root:root "$SYSTEM_DST"
 
-echo "--- Sincronizando config ---"
-sudo rsync -ruhP --delete "$SRC/config/" "$DST/config"
+# Define permissões: Pastas 755, Arquivos 644
+sudo find "$SYSTEM_DST" -type d -exec chmod 755 {} +
+sudo find "$SYSTEM_DST" -type f -exec chmod 644 {} +
 
-echo "--- Sincronizando docker ---"
-sudo rsync -ruhP --delete "$SRC/docker/" "$DST/docker"
+# Scripts executáveis (.sh) e binários na pasta bin/ ou utils/ devem ser 755
+sudo find "$SYSTEM_DST" -name "*.sh" -exec chmod +x {} +
+if [ -d "$SYSTEM_DST/bin" ]; then
+    sudo chmod +x "$SYSTEM_DST/bin"/*
+fi
+if [ -d "$SYSTEM_DST/utils" ]; then
+    sudo chmod +x "$SYSTEM_DST/utils"/*
+fi
 
-echo "--- Sincronizando scripts gerais ---"
-sudo rsync -ruhP --delete "$SRC/scripts/Geral/" "$DST/Geral"
+# Recria links simbólicos em /usr/local/bin para os utilitários
+echo "[STEP] Atualizando links em /usr/local/bin..."
+if [ -d "$SYSTEM_DST/utils" ]; then
+    for script in "$SYSTEM_DST/utils"/*; do
+        if [ -f "$script" ] && [ -x "$script" ]; then
+            script_name=$(basename "$script")
+            # Remove extensão .sh do link para ficar mais elegante (opcional, mantive com .sh se preferir)
+            # sudo ln -sf "$script" "/usr/local/bin/${script_name%.sh}"
 
-echo "--- Sincronizando scripts específicos para $DISTRO ---"
-sudo rsync -ruhP --delete "$SRC/scripts/$DISTRO/" "$DST/$DISTRO"
+            # Mantém nome original
+            sudo ln -sf "$script" "/usr/local/bin/$script_name"
+            echo " -> Link criado: $script_name"
+        fi
+    done
+fi
 
-# === Ajusta permissões ===
+# === 4. Exceções de Segurança (Chaves SSH/GPG) ===
+# Se existirem chaves sensíveis copiadas, garante que só o dono original ou root leia
+KEYS_DIR="$SYSTEM_DST/configs/ssh-keys"
+if [ -d "$KEYS_DIR" ]; then
+    echo "[SEC] Ajustando permissões de chaves SSH..."
+    # Tenta definir o dono para o usuário real (SUDO_USER) se for para uso pessoal,
+    # ou root se for servidor. Como é /usr/local/share, root 600 é mais seguro.
+    sudo chmod 700 "$KEYS_DIR"
+    sudo find "$KEYS_DIR" -type f -exec chmod 600 {} +
+fi
+
 echo ""
-echo "--- Ajustando permissões e propriedade ---"
-sudo chown -R root:root "$DST"
-sudo find "$DST" -type d -exec chmod 755 {} +
-sudo find "$DST" -type f -exec chmod 744 {} +
-sudo find "$DST/Geral" "$DST/$DISTRO" -type f \( -name "*.sh" -o -not -name "*.*" \) -exec chmod 755 {} + 2>/dev/null || true
-
-# === Exceções para pastas de chaves ===
-echo ""
-echo "--- Aplicando exceções de segurança para pastas de chaves ---"
-for dir in "$DST/config/keys" "$DST/config/ssh-keys"; do
-  if sudo test -d "$dir"; then
-    echo "Protegendo: $dir"
-    sudo chown -R "$OWNER:$GROUP" "$dir"
-    sudo find "$dir" -type f -exec chmod 400 {} +
-    sudo chmod 700 "$dir"
-  fi
-done
-
-# === Final ===
-echo ""
-echo "------------------------------------------------"
-echo "  Atualização concluída com sucesso!"
-echo "------------------------------------------------"
-
+echo "========================================================"
+echo "   ATUALIZAÇÃO FINALIZADA COM SUCESSO"
+echo "========================================================"

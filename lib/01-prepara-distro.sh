@@ -2,135 +2,91 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: lib/01-prepara-distro.sh
-# Versão: 1.0.0
-#
-# Descrição: Prepara o terreno da distribuição.
-# 1. Atualiza o sistema base.
-# 2. Instala dependências de compilação/básicas (git, curl, base-devel).
-# 3. Instala gerenciadores auxiliares (paru, apt-fast).
-# 4. Instala a interface gráfica do instalador (YAD).
-#
-# Autor: V3RTECH Tecnologia, Consultoria e Inovação
-# Website: https://v3rtech.com.br/
+# Descrição: Prepara dependências básicas e aceleradores de pacote.
 # ==============================================================================
 
-log "STEP" "Iniciando preparação do sistema base..."
+log "INFO" "Preparando dependências do sistema..."
 
-# ------------------------------------------------------------------------------
-# 1. Atualização Inicial e Dependências Críticas
-# ------------------------------------------------------------------------------
-log "INFO" "Atualizando cache de repositórios e instalando ferramentas base..."
-
-# Garante ferramentas básicas antes de qualquer coisa
-# Usamos o gerenciador nativo diretamente aqui para evitar loops,
-# pois os aceleradores (paru/apt-fast) ainda não existem.
-
+# 1. Dependências Universais
 case "$DISTRO_FAMILY" in
     debian)
-        $SUDO apt-get update
-        $SUDO apt-get install -y git curl wget software-properties-common build-essential
+        $SUDO apt update
+        $SUDO apt install -y curl git yad aria2 software-properties-common gnupg ca-certificates
         ;;
     arch)
-        # Sincroniza e garante base-devel (necessário para compilar paru)
-        $SUDO pacman -Sy --noconfirm --needed git curl wget base-devel
-
-        # Habilita repositório Multilib (Essencial para Steam/Wine/Gaming)
-        if grep -q "#\[multilib\]" /etc/pacman.conf; then
-            log "INFO" "Habilitando repositório Multilib (Arch)..."
-            $SUDO sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
-            $SUDO pacman -Sy
-        fi
+        $SUDO pacman -Sy --noconfirm curl git yad aria2 base-devel
         ;;
     fedora)
-        $SUDO dnf install -y git curl wget @development-tools
+        $SUDO dnf install -y curl git yad aria2
         ;;
 esac
 
-# ------------------------------------------------------------------------------
-# 2. Instalação de Aceleradores (Paru / Apt-Fast)
-# ------------------------------------------------------------------------------
+# 2. Configuração de Aceleradores (Paru / Apt-Fast)
 
-# --- Lógica para ARCH LINUX (Paru) ---
-if [[ "$DISTRO_FAMILY" == "arch" ]]; then
-    if ! command -v paru &> /dev/null; then
-        log "INFO" "Instalando PARU (AUR Helper)..."
-
-        # Cria diretório temporário
-        mkdir -p /tmp/paru_install
-        cd /tmp/paru_install
-
-        # Clona a versão bin (mais rápida, não precisa compilar rust)
-        if git clone https://aur.archlinux.org/paru-bin.git .; then
-            # makepkg não pode rodar como root, mas nosso script roda como user, então ok.
-            # -s: instala dependencias, -i: instala o pacote
-            makepkg -si --noconfirm
-            log "SUCCESS" "Paru instalado com sucesso."
-        else
-            log "ERROR" "Falha ao clonar Paru. O sistema continuará usando Pacman."
-        fi
-
-        # Limpeza
-        cd "$BASE_DIR"
-        rm -rf /tmp/paru_install
-    else
-        log "INFO" "Paru já está instalado."
+# --- ARCH LINUX (Paru) ---
+if [ "$DISTRO_FAMILY" == "arch" ]; then
+    if ! command -v paru &>/dev/null; then
+        log "INFO" "Instalando Paru (AUR Helper)..."
+        # Cria diretório temporário para build
+        BUILD_DIR=$(mktemp -d)
+        git clone https://aur.archlinux.org/paru.git "$BUILD_DIR/paru"
+        (cd "$BUILD_DIR/paru" && makepkg -si --noconfirm)
+        rm -rf "$BUILD_DIR"
     fi
 fi
 
-# --- Lógica para DEBIAN/UBUNTU (Apt-Fast) ---
-if [[ "$DISTRO_FAMILY" == "debian" ]]; then
-    # Verifica se é Ubuntu ou derivado (Mint, Pop, Zorin, etc)
-    if [[ "$DISTRO_NAME" == "ubuntu" || "$ID_LIKE" =~ "ubuntu" ]]; then
-        if ! command -v apt-fast &> /dev/null; then
-            log "INFO" "Instalando APT-FAST (Acelerador de downloads)..."
+# --- DEBIAN / UBUNTU (Apt-Fast e Apt-Smart) ---
+if [ "$DISTRO_FAMILY" == "debian" ]; then
+    log "INFO" "Configurando apt-fast e apt-smart..."
 
-            # Adiciona PPA
-            $SUDO add-apt-repository -y ppa:apt-fast/stable
-            $SUDO apt-get update
+    # Adiciona PPA do apt-fast (Funciona em Ubuntu e Debian via Launchpad)
+    if ! command -v apt-fast &>/dev/null; then
+        log "INFO" "Adicionando repositório do apt-fast..."
+        # Adiciona chave e repo manualmente para garantir compatibilidade Debian
+        curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xBC5934FD3DEBD4DAEA544F791E2824A7F22B44BD" | $SUDO gpg --dearmor -o /etc/apt/keyrings/apt-fast.gpg
+        
+        # Define codinome base (focal é safe para apt-fast no Debian Stable/Testing)
+        echo "deb [signed-by=/etc/apt/keyrings/apt-fast.gpg] http://ppa.launchpad.net/apt-fast/stable/ubuntu focal main" | $SUDO tee /etc/apt/sources.list.d/apt-fast.list > /dev/null
+        
+        $SUDO apt update
+    fi
 
-            # O apt-fast pede configuração interativa.
-            # Tentamos configurar as variáveis de ambiente para evitar o prompt (non-interactive)
-            echo "apt-fast apt-fast/maxdownloads string 5" | $SUDO debconf-set-selections
-            echo "apt-fast apt-fast/dlflag boolean true" | $SUDO debconf-set-selections
-            echo "apt-fast apt-fast/aptmanager string apt-get" | $SUDO debconf-set-selections
+    # Instala apt-fast (aria2 já foi instalado nas deps universais)
+    $SUDO DEBIAN_FRONTEND=noninteractive apt install -y apt-fast
 
-            # Instalação suprimindo interface
-            DEBIAN_FRONTEND=noninteractive $SUDO apt-get install -y apt-fast aria2
-
-            log "SUCCESS" "Apt-fast configurado."
-        else
-            log "INFO" "Apt-fast já está instalado."
-        fi
+    # Configuração Dinâmica dos Espelhos (Sua lógica solicitada)
+    log "INFO" "Aplicando configuração otimizada do apt-fast..."
+    
+    if [ "$DISTRO_NAME" == "ubuntu" ]; then
+        MIRRORS_LIST="http://archive.ubuntu.com/ubuntu, http://ftp.osuosl.org/pub/ubuntu, http://mirror.leaseweb.com/ubuntu"
     else
-        log "WARN" "Distro Debian Pura detectada. Apt-fast ignorado para evitar instabilidade."
+        # Debian Brasil + Global
+        MIRRORS_LIST="http://ftp.br.debian.org/debian, http://debian.c3sl.ufpr.br/debian, http://deb.debian.org/debian, http://ftp.us.debian.org/debian"
     fi
-fi
 
-# ------------------------------------------------------------------------------
-# 3. Instalação da Interface Gráfica (YAD)
-# ------------------------------------------------------------------------------
-log "INFO" "Verificando dependência de Interface (YAD)..."
+    # Cria arquivo de configuração
+    $SUDO tee /etc/apt-fast.conf > /dev/null <<EOF
+MIRRORS=( '$MIRRORS_LIST' )
+_MAXNUM=5
+_SPLITCON=8
+_MINSPLITSZ=1M
+_DOWNLOADER="aria2c -c -j \${_MAXNUM} -s \${_SPLITCON} -x \${_SPLITCON} -i \${DLLIST} --min-split-size=\${_MINSPLITSZ}"
+DOWNLOADBEFORE=true
+EOF
 
-if ! command -v yad &> /dev/null; then
-    log "INFO" "Instalando YAD..."
-
-    # Agora já podemos usar nossa função 'i' pois os aceleradores (se existirem) já estão lá
-    i yad
-
-    # Verificação pós-instalação
-    if ! command -v yad &> /dev/null; then
-        # Fallback extremo: tenta compilar ou baixar (raro falhar nos repos oficiais hoje em dia)
-        die "Falha crítica: YAD não pôde ser instalado. O script não pode exibir a interface."
-    fi
+    # Cria o Wrapper apt-smart
+    log "INFO" "Criando wrapper apt-smart..."
+    cat <<'EOF' | $SUDO tee /usr/local/bin/apt-smart > /dev/null
+#!/bin/bash
+if command -v apt-fast >/dev/null; then
+  sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@"
 else
-    log "INFO" "YAD já está instalado."
+  sudo DEBIAN_FRONTEND=noninteractive apt "$@"
+fi
+EOF
+    $SUDO chmod +x /usr/local/bin/apt-smart
+    
+    log "SUCCESS" "Apt-fast e Apt-smart configurados."
 fi
 
-# ------------------------------------------------------------------------------
-# 4. Atualização Completa do Sistema
-# ------------------------------------------------------------------------------
-# Agora que temos os aceleradores configurados, fazemos o full-upgrade
-log "INFO" "Realizando atualização completa do sistema (Full Upgrade)..."
-up
-
-log "SUCCESS" "Sistema base preparado com sucesso."
+log "SUCCESS" "Preparação de ambiente concluída."

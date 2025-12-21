@@ -143,8 +143,18 @@ if command -v VBoxManage &>/dev/null || grep -q "^TRUE|.*|VirtualBox|" "$DATA_DI
     load_lib "$LIB_DIR/13-pack-vm.sh"
 fi
 
+# --- 6. LIMPEZA FINAL ---
+# Remove repositórios duplicados criados pelos pacotes instalados
+if [ -f "lib/99-limpeza-final.sh" ]; then
+    source "lib/99-limpeza-final.sh"
+fi
+
 # ------------------------------------------------------------------------------
 # 4. FINALIZAÇÃO
 # ------------------------------------------------------------------------------
 log "SUCCESS" "Execução finalizada com sucesso."
+
+kill $YAD_PID 2>/dev/null
+yad --info --title="Sucesso" --text="Concluído! Verifique o log." --button="OK:0"
+
 exit 0

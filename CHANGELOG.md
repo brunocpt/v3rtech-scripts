@@ -2,6 +2,26 @@
 
 Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 
+## [2.0.0] - 2025-12-20
+### 💥 Mudanças de Arquitetura (Breaking Changes)
+- **Migração de Banco de Dados:** Substituição do arquivo `data/apps.csv` pelo script nativo `lib/apps-data.sh`.
+    - *Motivo:* Eliminar falhas de parsing de texto/quebras de linha, permitir comentários no código e facilitar a manutenção.
+- **Estrutura de Diretórios:** Padronização do diretório de configurações para `configs/` (plural) em todo o projeto.
+- **Lógica de Instalação:** A função `sys_install` foi completamente depreciada em favor do alias `i` e da função `install_app_by_name`.
+
+### ✨ Adicionado
+- **Persistência Global de Ambiente:** O script `03-prepara-configs.sh` agora injeta configurações de `PATH` e carregarmento de `aliases` diretamente em `/etc/bash.bashrc`. Isso garante que o comando `i` e outros utilitários funcionem para todos os usuários e persistam após o reboot.
+- **Script de Limpeza Final (`99-limpeza-final.sh`):** Novo módulo executado ao final da instalação para detectar e remover repositórios duplicados (ex: `.list` vs `.sources`) gerados automaticamente por instaladores de pacotes como Edge, Vivaldi e VS Code.
+- **Suporte a Debian Sid/Forky:** Atualização dos nomes de pacotes no banco de dados para compatibilidade com o ramo instável (ex: `7zip` em vez de `p7zip-full`, `docker-compose-plugin` em vez de `docker-compose`).
+- **Suporte a Wayland:** Implementada exportação de `GDK_BACKEND=x11` e `xhost` para permitir que o script (rodando como root) exiba janelas gráficas (YAD) em sessões Wayland (KDE/GNOME modernos).
+
+### 🛠️ Corrigido
+- **Bug de Interface (YAD):** Corrigido erro onde apenas o primeiro aplicativo da lista era instalado. Implementada sanitização de quebras de linha (`tr '\n' '|'`) no retorno da seleção gráfica.
+- **Expansão de Aliases:** Scripts `logic-apps-reader.sh` e `ui-main.sh` agora forçam `shopt -s expand_aliases` e carregam `configs/aliases.geral` para reconhecer o comando de instalação `i` internamente.
+- **Script de Atualização (`utils/atualiza_scripts.sh`):** Refatorado para suportar a nova estrutura de pastas (`configs`, `utils`) e adicionado fallback automático para GitHub caso a montagem de rede local não esteja disponível.
+
+---
+
 ## [1.6.0] - 2025-10-25
 ### Adicionado
 - **Auto-Instalação (Persistência):** O script mestre agora detecta se está rodando de uma mídia removível (USB) e se copia automaticamente para `/usr/local/share/scripts/v3rtech-scripts` antes de prosseguir.
@@ -19,40 +39,7 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
     - **GNOME:** Configurações do GSettings, Wavebox e Zotero.
     - **KDE Plasma:** Instalação de plugins Dolphin, Ark, Kate e restauração de configs do Falkon.
     - **XFCE:** Configuração via `xfconf-query`, helpers.rc e plugins Thunar.
-    - **Budgie:** Substituição do Nautilus pelo Nemo, configs visuais e serviços.
-    - **Deepin & Mate:** Instalação base e ativação do `lightdm`.
-    - **Cosmic:** Instalação base e configs experimentais.
-- **Detecção Automática de DE:** O script mestre agora identifica o ambiente gráfico atual e carrega o módulo de configuração correspondente automaticamente.
-- **Plymouth:** Adicionada configuração de tema de boot (BGRT/Spinner) no módulo de configurações gerais.
-
-### Corrigido
-- **Ordem de Execução:** O módulo de otimização de Boot (`04-setup-boot.sh`) foi movido para o final do processo para evitar alterações no Kernel caso o usuário cancele a instalação na interface gráfica.
-
----
-
-## [1.4.0] - 2025-10-25
-### Adicionado
-- **Módulo de Configurações Gerais (`03-prepara-configs.sh`):**
-    - Otimizações de `sysctl` (swappiness, cache pressure).
-    - Configuração de `journald` (limite de logs).
-    - Restauração de dotfiles (`.bashrc`, aliases).
-    - Instalação de fontes e scripts utilitários em `/usr/local/bin`.
-    - Restauração de configs de apps (Geany, Cups, Grsync).
-
-### Alterado
-- **Script Mestre:** Integração do módulo `03-prepara-configs.sh` ao fluxo principal.
-
----
-
-## [1.3.0] - 2025-10-24
-### Adicionado
-- **Interface Gráfica (UI):** Implementação do `lib/ui-main.sh` usando YAD.
-    - Checklist interativo para seleção de apps.
-    - Janela de log em tempo real ("Matrix style") durante a instalação.
-- **Hook do Docker:** Script de pós-configuração (`lib/setup-docker.sh`) para ativar serviços systemd, configurar rotação de logs e adicionar usuário ao grupo docker.
-
-### Removido
-- Lógica de loop de instalação interna do script mestre (movida para dentro da UI).
+- **Detecção de Ambiente:** O script `00-detecta-distro.sh` agora identifica `$XDG_CURRENT_DESKTOP` para carregar o módulo de configuração correto.
 
 ---
 
@@ -82,6 +69,4 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 - **Core:** Implementação das bibliotecas base:
     - `logging.sh`: Cores e formatação de logs.
     - `env.sh`: Variáveis globais e detecção de usuário.
-    - `package-mgr.sh`: Abstração de instalação (`i`, `up`, `r`) suportando apt, pacman (paru), dnf, flatpak e pipx.
-- **Detecção de Distro:** Script `00-detecta-distro.sh` para identificar Debian, Ubuntu, Fedora e Arch.
-- **Leitor de CSV:** Script `logic-apps-reader.sh` para processar o banco de dados de aplicativos.
+    - `package-mgr.sh`: Abstração de gerenciadores de pacotes (`apt`, `dnf`, `pacman`).
