@@ -121,7 +121,7 @@ post_install_filebot() {
     
     if [ -f "$LICENSE_FILE" ]; then
         log "INFO" "Aplicando licença do Filebot..."
-        if flatpak run net.filebot.FileBot --license "$LICENSE_FILE" 2>/dev/null; then
+        if cat "$LICENSE_FILE" | flatpak run net.filebot.FileBot --license 2>/dev/null; then
             log "SUCCESS" "✓ Licença aplicada"
         else
             log "WARN" "⚠ Falha ao aplicar licença (pode ser normal se já estiver aplicada)"
