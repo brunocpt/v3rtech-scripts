@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: core/package-mgr.sh
-# Versão: 2.0.0 (Shortcode Edition)
+# Versão: 2.1.0 (Shortcode Edition)
 #
 # Descrição: Abstração dos gerenciadores de pacotes com sintaxe minimalista.
 # Comandos disponíveis:
@@ -167,4 +167,58 @@ install_pipx() {
     fi
     pipx install "$pkg_name"
     pipx ensurepath
+}
+
+# ==============================================================================
+# restore_zip_config: Restaurar configurações de arquivo ZIP
+# ==============================================================================
+# Uso: restore_zip_config "/caminho/arquivo.zip" "/destino"
+# Descrição: Extrai um arquivo ZIP para um diretório de destino com backup automático
+restore_zip_config() {
+    local zip_file="$1"
+    local dest_dir="$2"
+
+    # Validação de argumentos
+    if [ -z "$zip_file" ] || [ -z "$dest_dir" ]; then
+        log "WARN" "restore_zip_config: Argumentos insuficientes (zip_file, dest_dir)"
+        return 1
+    fi
+
+    # Se o arquivo ZIP não existe, apenas loga e retorna (não é erro crítico)
+    if [ ! -f "$zip_file" ]; then
+        log "INFO" "Arquivo de configuração não encontrado: $zip_file (pulando restauração)"
+        return 0
+    fi
+
+    # Cria diretório de destino se não existir
+    if [ ! -d "$dest_dir" ]; then
+        log "INFO" "Criando diretório de destino: $dest_dir"
+        mkdir -p "$dest_dir"
+    fi
+
+    # Cria backup do diretório existente se houver conflito
+    # Extrai o nome da pasta principal do ZIP para detectar conflitos
+    local zip_content_name=$(unzip -l "$zip_file" | head -4 | tail -1 | awk '{print $NF}' | cut -d'/' -f1)
+
+    if [ -n "$zip_content_name" ] && [ -d "$dest_dir/$zip_content_name" ]; then
+        local backup_dir="$dest_dir/${zip_content_name}.backup.$(date +%Y%m%d_%H%M%S)"
+        log "INFO" "Criando backup de configuração existente: $backup_dir"
+        mv "$dest_dir/$zip_content_name" "$backup_dir"
+    fi
+
+    # Extrai o arquivo ZIP
+    log "INFO" "Restaurando configurações de: $(basename "$zip_file")"
+    if unzip -o -q "$zip_file" -d "$dest_dir"; then
+        log "SUCCESS" "Configurações restauradas com sucesso"
+
+        # Ajusta permissões para o usuário real
+        if [ -n "$REAL_USER" ]; then
+            chown -R "$REAL_USER:$REAL_USER" "$dest_dir" 2>/dev/null || true
+        fi
+
+        return 0
+    else
+        log "ERROR" "Falha ao extrair configurações de $zip_file"
+        return 1
+    fi
 }

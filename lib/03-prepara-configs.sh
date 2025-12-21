@@ -2,13 +2,15 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: lib/03-prepara-configs.sh
-# Versão: 5.0.0 (Smart Path & Permissions Fix)
+# Versão: 7.0.0 (PATH Idempotente + Limpeza de Duplicatas - Bug Fix)
 #
 # Descrição: Configurações profundas do sistema.
 # Correções:
-#   1. PATH agora usa lógica anti-duplicação (case statement).
-#   2. Garante chmod +x na pasta utils para que os scripts sejam achados.
-#   3. Caminho 'configs' corrigido.
+#   1. PATH agora usa marcadores de bloco para remoção segura (verdadeiramente idempotente)
+#   2. Função para limpar PATH de entradas repetidas (com array associativo corrigido)
+#   3. Garante chmod +x na pasta utils para que os scripts sejam achados.
+#   4. Aliases com proteção contra duplicação
+#   5. Integração com desktop entries e atalhos de teclado
 # ==============================================================================
 
 log "STEP" "Iniciando Configurações Gerais de Sistema..."
@@ -17,36 +19,97 @@ log "STEP" "Iniciando Configurações Gerais de Sistema..."
 INSTALL_TARGET="/usr/local/share/scripts/v3rtech-scripts"
 UTILS_DIR="$INSTALL_TARGET/utils"
 CONFIG_DIR="$INSTALL_TARGET/configs"
+RESOURCES_DIR="$INSTALL_TARGET/resources"
 SYSTEM_BASHRC="/etc/bash.bashrc"
 
 # ==============================================================================
-# 1. CONFIGURAÇÃO DE PATH GLOBAL INTELIGENTE
+# FUNÇÃO: Limpar PATH de Entradas Repetidas
+# ==============================================================================
+clean_path() {
+    local path_var="$1"
+    local cleaned=""
+    
+    # Declara array associativo para rastrear componentes já vistos
+    declare -A seen
+    
+    # Divide o PATH em componentes e remove duplicatas
+    IFS=':' read -ra components <<< "$path_var"
+    
+    for component in "${components[@]}"; do
+        # Pula entradas vazias
+        if [ -z "$component" ]; then
+            continue
+        fi
+        
+        # Se não foi visto antes, adiciona
+        if [ -z "${seen[$component]:-}" ]; then
+            if [ -z "$cleaned" ]; then
+                cleaned="$component"
+            else
+                cleaned="$cleaned:$component"
+            fi
+            seen[$component]=1
+        fi
+    done
+    
+    echo "$cleaned"
+}
+
+# ==============================================================================
+# 1. LIMPEZA DE PATH DUPLICADO (SE EXISTIR)
+# ==============================================================================
+log "INFO" "Verificando se há entradas duplicadas no PATH..."
+
+# Verifica se há duplicatas no PATH atual
+if [ -n "$PATH" ]; then
+    CLEANED_PATH=$(clean_path "$PATH")
+    
+    if [ "$CLEANED_PATH" != "$PATH" ]; then
+        log "WARN" "PATH contém entradas duplicadas. Limpando..."
+        export PATH="$CLEANED_PATH"
+        
+        # Também limpa no bashrc se houver duplicatas
+        if grep -q "export PATH=" "$SYSTEM_BASHRC" 2>/dev/null; then
+            log "INFO" "Removendo entradas duplicadas do $SYSTEM_BASHRC..."
+            
+            # Extrai o PATH do bashrc, limpa e reescreve
+            BASHRC_PATH=$(grep "^export PATH=" "$SYSTEM_BASHRC" | head -1 | sed 's/export PATH=//' | sed 's/"//g' || true)
+            if [ -n "$BASHRC_PATH" ]; then
+                CLEANED_BASHRC_PATH=$(clean_path "$BASHRC_PATH")
+                $SUDO sed -i 's|^export PATH=.*|export PATH="'"$CLEANED_BASHRC_PATH"'"|' "$SYSTEM_BASHRC"
+                log "SUCCESS" "PATH limpado e atualizado no $SYSTEM_BASHRC"
+            fi
+        fi
+    else
+        log "SUCCESS" "PATH sem duplicatas."
+    fi
+fi
+
+# ==============================================================================
+# 2. CONFIGURAÇÃO DE PATH GLOBAL INTELIGENTE (IDEMPOTENTE)
 # ==============================================================================
 log "INFO" "Configurando PATH global (com proteção anti-duplicação)..."
 
-# Remove configurações antigas/simples do V3RTECH para evitar conflito
-if grep -q "V3RTECH SCRIPTS: Global PATH" "$SYSTEM_BASHRC"; then
+# Remove TODAS as configurações antigas do V3RTECH (usando marcadores de bloco)
+if grep -q "# === V3RTECH SCRIPTS: Global PATH BEGIN ===" "$SYSTEM_BASHRC"; then
     log "INFO" "Removendo configuração de PATH antiga para atualização..."
-    # Sed remove o bloco antigo se ele foi marcado com o comentário específico (simplificado)
-    # Na prática, a limpeza manual que você fez antes resolve, aqui garantimos o futuro.
-    $SUDO sed -i '/V3RTECH SCRIPTS: Global PATH/,+4d' "$SYSTEM_BASHRC"
+    $SUDO sed -i '/# === V3RTECH SCRIPTS: Global PATH BEGIN ===/,/# === V3RTECH SCRIPTS: Global PATH END ===/d' "$SYSTEM_BASHRC"
 fi
 
-# Injeta o código inteligente.
-# A lógica 'case ":$PATH:"' verifica se o caminho já existe na variável atual.
-# Se existir, não faz nada. Se não, adiciona. Isso resolve o problema de duplicação.
-if ! grep -q "$UTILS_DIR" "$SYSTEM_BASHRC"; then
+# Injeta o código inteligente com marcadores de bloco
+if ! grep -q "# === V3RTECH SCRIPTS: Global PATH BEGIN ===" "$SYSTEM_BASHRC"; then
     log "INFO" "Injetando lógica de PATH no $SYSTEM_BASHRC..."
 
     {
         echo ""
-        echo "# --- V3RTECH SCRIPTS: Global PATH (Smart Append) ---"
+        echo "# === V3RTECH SCRIPTS: Global PATH BEGIN ==="
         echo "if [ -d \"$UTILS_DIR\" ]; then"
         echo "    case \":\$PATH:\" in"
         echo "        *:\"$UTILS_DIR\":*) ;;"
         echo "        *) export PATH=\"\$PATH:$UTILS_DIR\" ;;"
         echo "    esac"
         echo "fi"
+        echo "# === V3RTECH SCRIPTS: Global PATH END ==="
     } | $SUDO tee -a "$SYSTEM_BASHRC" > /dev/null
 
     log "SUCCESS" "PATH configurado. Reinicie o terminal para testar."
@@ -55,7 +118,7 @@ else
 fi
 
 # ==============================================================================
-# 2. PERMISSÕES DE EXECUÇÃO (CRÍTICO)
+# 3. PERMISSÕES DE EXECUÇÃO (CRÍTICO)
 # ==============================================================================
 log "INFO" "Ajustando permissões de execução dos utilitários..."
 
@@ -64,7 +127,6 @@ if [ -d "$UTILS_DIR" ]; then
     $SUDO chmod 755 "$UTILS_DIR"
 
     # Garante que TODOS os scripts dentro dela sejam executáveis
-    # Isso resolve o problema de 'comando não encontrado'
     $SUDO chmod +x "$UTILS_DIR"/*
 
     log "SUCCESS" "Permissões +x aplicadas em $UTILS_DIR"
@@ -73,36 +135,35 @@ else
 fi
 
 # ==============================================================================
-# 3. CONFIGURAÇÃO DE ALIASES GLOBAIS
+# 4. CONFIGURAÇÃO DE ALIASES GLOBAIS (IDEMPOTENTE)
 # ==============================================================================
 log "INFO" "Configurando carregamento automático de aliases..."
 
 GLOBAL_ALIAS_FILE="$CONFIG_DIR/aliases.geral"
 
-# Limpa entrada antiga se existir (para evitar duplicação do bloco source)
-if grep -q "source.*aliases.geral" "$SYSTEM_BASHRC"; then
-    # Verifica se aponta para o caminho errado 'config' (sem s)
-    if grep -q "/config/" "$SYSTEM_BASHRC"; then
-        log "WARN" "Corrigindo caminho de aliases antigo no bashrc..."
-        $SUDO sed -i '/aliases.geral/d' "$SYSTEM_BASHRC"
-        $SUDO sed -i '/V3RTECH.*Global Aliases/d' "$SYSTEM_BASHRC"
-    fi
+# Remove TODAS as configurações antigas de aliases (usando marcadores de bloco)
+if grep -q "# === V3RTECH SCRIPTS: Global Aliases BEGIN ===" "$SYSTEM_BASHRC"; then
+    log "INFO" "Removendo configuração de aliases antiga para atualização..."
+    $SUDO sed -i '/# === V3RTECH SCRIPTS: Global Aliases BEGIN ===/,/# === V3RTECH SCRIPTS: Global Aliases END ===/d' "$SYSTEM_BASHRC"
 fi
 
-if ! grep -q "$GLOBAL_ALIAS_FILE" "$SYSTEM_BASHRC"; then
+if ! grep -q "# === V3RTECH SCRIPTS: Global Aliases BEGIN ===" "$SYSTEM_BASHRC"; then
     log "INFO" "Injetando carregamento de aliases..."
     {
         echo ""
-        echo "# --- V3RTECH SCRIPTS: Global Aliases ---"
+        echo "# === V3RTECH SCRIPTS: Global Aliases BEGIN ==="
         echo "if [ -f \"$GLOBAL_ALIAS_FILE\" ]; then"
         echo "    source \"$GLOBAL_ALIAS_FILE\""
         echo "fi"
+        echo "# === V3RTECH SCRIPTS: Global Aliases END ==="
     } | $SUDO tee -a "$SYSTEM_BASHRC" > /dev/null
     log "SUCCESS" "Aliases configurados."
+else
+    log "INFO" "Aliases já configurados."
 fi
 
 # ==============================================================================
-# 4. OTIMIZAÇÕES DE KERNEL E LOGS
+# 5. OTIMIZAÇÕES DE KERNEL E LOGS
 # ==============================================================================
 log "INFO" "Aplicando otimizações de Kernel e Journald..."
 
@@ -125,13 +186,12 @@ if [ -f "$JOURNAL_CONF" ]; then
 fi
 
 # ==============================================================================
-# 5. RESTAURAÇÃO DE CONFIGURAÇÕES DE USUÁRIO
+# 6. RESTAURAÇÃO DE CONFIGURAÇÕES DE USUÁRIO
 # ==============================================================================
 log "INFO" "Padronizando diretórios pessoais e restaurando configs..."
 
 $SUDO xdg-user-dirs-update &>/dev/null
 
-RESOURCES_DIR="$(dirname "$0")/../resources"
 CONFIG_SRC_DIR="$RESOURCES_DIR/configs"
 CUSTOM_BASHRC="$RESOURCES_DIR/user.bashrc"
 
@@ -155,7 +215,7 @@ if [ -d "$CONFIG_SRC_DIR" ]; then
 fi
 
 # ==============================================================================
-# 6. INSTALAÇÃO DE SCRIPTS UTILITÁRIOS (LINKS)
+# 7. INSTALAÇÃO DE SCRIPTS UTILITÁRIOS (LINKS)
 # ==============================================================================
 log "INFO" "Criando links simbólicos..."
 
@@ -177,7 +237,7 @@ if [ -d "$RESOURCES_DIR/fonts" ]; then
 fi
 
 # ==============================================================================
-# 7. CONFIGURAÇÃO VISUAL DE BOOT (PLYMOUTH)
+# 8. CONFIGURAÇÃO VISUAL DE BOOT (PLYMOUTH)
 # ==============================================================================
 log "INFO" "Verificando tema de boot..."
 

@@ -11,15 +11,39 @@ log "INFO" "Preparando dependências do sistema..."
 case "$DISTRO_FAMILY" in
     debian)
         $SUDO apt update
-        $SUDO apt install -y curl git yad aria2 software-properties-common gnupg ca-certificates
+        $SUDO apt install -y curl git yad aria2 gnupg ca-certificates rsync pipx zip unzip
         ;;
     arch)
-        $SUDO pacman -Sy --noconfirm curl git yad aria2 base-devel
+        $SUDO pacman -Sy --noconfirm curl git yad aria2 base-devel rsync python-pipx zip unzip
         ;;
     fedora)
-        $SUDO dnf install -y curl git yad aria2
+        $SUDO dnf install -y curl git yad aria2 rsync pipx zip unzip
         ;;
 esac
+
+# Verificação crítica: YAD deve estar disponível
+if ! command -v yad &>/dev/null; then
+    log "ERROR" "YAD não foi instalado com sucesso. Tentando instalação alternativa..."
+    case "$DISTRO_FAMILY" in
+        debian)
+            $SUDO apt install -y --no-install-recommends yad || die "Falha ao instalar YAD em Debian/Ubuntu"
+            ;;
+        arch)
+            $SUDO pacman -S --noconfirm --needed yad || die "Falha ao instalar YAD em Arch Linux"
+            ;;
+        fedora)
+            $SUDO dnf install -y yad || die "Falha ao instalar YAD em Fedora"
+            ;;
+    esac
+
+    # Verifica novamente
+    if ! command -v yad &>/dev/null; then
+        die "YAD não pôde ser instalado. Não é possível continuar sem a interface gráfica."
+    fi
+    log "SUCCESS" "YAD instalado com sucesso na tentativa alternativa."
+else
+    log "SUCCESS" "YAD verificado e disponível."
+fi
 
 # 2. Configuração de Aceleradores (Paru / Apt-Fast)
 
@@ -44,10 +68,10 @@ if [ "$DISTRO_FAMILY" == "debian" ]; then
         log "INFO" "Adicionando repositório do apt-fast..."
         # Adiciona chave e repo manualmente para garantir compatibilidade Debian
         curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xBC5934FD3DEBD4DAEA544F791E2824A7F22B44BD" | $SUDO gpg --dearmor -o /etc/apt/keyrings/apt-fast.gpg
-        
+
         # Define codinome base (focal é safe para apt-fast no Debian Stable/Testing)
         echo "deb [signed-by=/etc/apt/keyrings/apt-fast.gpg] http://ppa.launchpad.net/apt-fast/stable/ubuntu focal main" | $SUDO tee /etc/apt/sources.list.d/apt-fast.list > /dev/null
-        
+
         $SUDO apt update
     fi
 
@@ -56,7 +80,7 @@ if [ "$DISTRO_FAMILY" == "debian" ]; then
 
     # Configuração Dinâmica dos Espelhos (Sua lógica solicitada)
     log "INFO" "Aplicando configuração otimizada do apt-fast..."
-    
+
     if [ "$DISTRO_NAME" == "ubuntu" ]; then
         MIRRORS_LIST="http://archive.ubuntu.com/ubuntu, http://ftp.osuosl.org/pub/ubuntu, http://mirror.leaseweb.com/ubuntu"
     else
@@ -85,7 +109,7 @@ else
 fi
 EOF
     $SUDO chmod +x /usr/local/bin/apt-smart
-    
+
     log "SUCCESS" "Apt-fast e Apt-smart configurados."
 fi
 

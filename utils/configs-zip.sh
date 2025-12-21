@@ -1,22 +1,24 @@
 #!/bin/bash
 # ============================================================================
 #
-#        ARQUIVO: configs-zip (Versão Completa e Corrigida)
+#        ARQUIVO: configs-zip (Versão Corrigida - v2.0)
 #
 #        UTILIZAÇÃO: ./configs-zip
 #
 #        DESCRIÇÃO: Realiza backup de configurações com uma interface YAD.
-#                   Esta versão é a final, com a lógica de processos
-#                   corrigida e com os blocos de backup implementados
-#                   para todos os aplicativos da lista.
+#                   Versão corrigida com tratamento de erros e killall
+#                   para todos os aplicativos.
 #
-#        AUTOR: Gemini
-#        REVISÃO: 8.0 - Adicionados todos os blocos 'case' em falta.
-#                       O script está agora completo e funcional.
+#        AUTOR: Gemini (Revisão: v3rtech-scripts)
+#        REVISÃO: 2.0 - Bugs corrigidos:
+#                       - Adicionado killall para todos os apps
+#                       - Verificação de erro após zip
+#                       - Mensagens corretas no log
+#                       - Variáveis escapadas
 #
 # ============================================================================
 
-DEST_DIR="/mnt/trabalho/Cloud/Compartilhado/Linux/config"
+DEST_DIR="/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/backups"
 TMP_DIR="/tmp/backup_script_$$"
 LOG_FILE="$HOME/configs-zip.log"
 USERNAME="$USER"
@@ -27,6 +29,47 @@ declare -a APP_LIST=(
     "WAVEBOX" "RAMBOX" "FERDIUM" "NEXTCLOUD" "FILEZILLA" "TRANSMISSION" "OBSIDIAN" "ZOTERO" "TINTERO"
     "MASTER_PDF" "PICARD" "VSCODE" "ANTIGRAVITY" "PYCHARM" "DBEAVER" "POSTMAN" "REMMINA" "SYSTEM_SETTINGS"
 )
+
+# --- FUNÇÕES AUXILIARES ---
+
+log_msg() {
+    local msg="$1"
+    echo "[$(date +'%H:%M:%S')] $msg" | tee -a "$LOG_FILE"
+}
+
+log_success() {
+    local msg="$1"
+    echo "[$(date +'%H:%M:%S')] ✅ $msg" | tee -a "$LOG_FILE"
+}
+
+log_error() {
+    local msg="$1"
+    echo "[$(date +'%H:%M:%S')] ❌ ERRO: $msg" | tee -a "$LOG_FILE"
+}
+
+# Função para fazer backup com verificação de erro
+backup_zip() {
+    local app_name="$1"
+    local zip_file="$2"
+    shift 2
+    local dirs=("$@")
+
+    log_msg "  Criando ZIP: $(basename "$zip_file")"
+
+    if zip -qr "$zip_file" "${dirs[@]}" 2>/dev/null; then
+        if [ -f "$zip_file" ]; then
+            mv "$zip_file" "$DEST_DIR/"
+            log_success "$app_name: Backup realizado com sucesso"
+            return 0
+        else
+            log_error "$app_name: Arquivo ZIP não foi criado"
+            return 1
+        fi
+    else
+        log_error "$app_name: Erro ao criar ZIP"
+        return 1
+    fi
+}
 
 # --- INÍCIO DA EXECUÇÃO ---
 trap 'rm -rf "$TMP_DIR"' EXIT
@@ -64,15 +107,14 @@ if [ ${#selected_apps[@]} -eq 0 ]; then
 fi
 
 # --- PROCESSO DE BACKUP ---
-echo "[$(date +'%H:%M:%S')] INICIANDO PROCESSO DE BACKUP..." >> "$LOG_FILE"
-echo "[$(date +'%H:%M:%S')] Itens selecionados: ${selected_apps[*]}" >> "$LOG_FILE"
-echo "============================================================" >> "$LOG_FILE"
+log_msg "=== INICIANDO PROCESSO DE BACKUP ==="
+log_msg "Itens selecionados: ${selected_apps[*]}"
+log_msg "============================================================"
 
-cd "$HOME" || { echo "[$(date +'%H:%M:%S')] ERRO CRÍTICO: Não foi possível acessar o diretório $HOME." >> "$LOG_FILE"; exit 1; }
+cd "$HOME" || { log_error "Não foi possível acessar o diretório $HOME"; exit 1; }
 
 for app in "${selected_apps[@]}"; do
-    echo "------------------------------------------------------------" >> "$LOG_FILE"
-    echo "[$(date +'%H:%M:%S')] INICIANDO BACKUP PARA: $app" >> "$LOG_FILE"
+    log_msg "--- Processando: $app ---"
 
     # Inicia a janela de progresso genérica
     yad --progress --pulsate --title="Backup de $app" --text="<big>Compactando arquivos de $app...</big>" --width=400 --auto-close --no-buttons >/dev/null 2>&1 &
@@ -81,267 +123,219 @@ for app in "${selected_apps[@]}"; do
     case "$app" in
         "BRAVE")
             killall brave-browser brave-browser-beta &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'com.brave.Browser'; then
-                zip -qr "$TMP_DIR/brave-flatpak-${USERNAME}.zip" ".var/app/com.brave.Browser" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
-                mv "$TMP_DIR/brave-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'com.brave.Browser'; then
+                backup_zip "BRAVE (Flatpak)" "$TMP_DIR/brave-flatpak-${USERNAME}.zip" ".var/app/com.brave.Browser" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
             else
-                zip -qr "$TMP_DIR/brave-${USERNAME}.zip" ".config/BraveSoftware" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
-                mv "$TMP_DIR/brave-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "BRAVE (Nativo)" "$TMP_DIR/brave-${USERNAME}.zip" ".config/BraveSoftware" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
             fi
             ;;
         "CHROME")
             killall google-chrome google-chrome-beta &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'com.google.Chrome'; then
-                zip -qr "$TMP_DIR/chrome-flatpak-${USERNAME}.zip" ".var/app/com.google.Chrome" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Service Worker/*" "*/Crashpad/*"
-                mv "$TMP_DIR/chrome-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'com.google.Chrome'; then
+                backup_zip "CHROME (Flatpak)" "$TMP_DIR/chrome-flatpak-${USERNAME}.zip" ".var/app/com.google.Chrome" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Service Worker/*" "*/Crashpad/*"
             else
-                zip -qr "$TMP_DIR/google-chrome-${USERNAME}.zip" ".config/google-chrome" ".config/google-chrome-beta" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Service Worker/*" "*/Crashpad/*" "*/Crash Reports/*" "*/Storage/*"
-                mv "$TMP_DIR/google-chrome-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "CHROME (Nativo)" "$TMP_DIR/google-chrome-${USERNAME}.zip" ".config/google-chrome" ".config/google-chrome-beta" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Service Worker/*" "*/Crashpad/*" "*/Crash Reports/*" "*/Storage/*"
             fi
             ;;
         "EDGE")
             killall msedge msedge-beta &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'com.microsoft.Edge'; then
-                zip -qr "$TMP_DIR/edge-flatpak-${USERNAME}.zip" ".var/app/com.microsoft.Edge" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
-                mv "$TMP_DIR/edge-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'com.microsoft.Edge'; then
+                backup_zip "EDGE (Flatpak)" "$TMP_DIR/edge-flatpak-${USERNAME}.zip" ".var/app/com.microsoft.Edge" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
             else
-                zip -qr "$TMP_DIR/edge-${USERNAME}.zip" ".config/microsoft-edge" ".config/microsoft-edge-beta" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
-                mv "$TMP_DIR/edge-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "EDGE (Nativo)" "$TMP_DIR/edge-${USERNAME}.zip" ".config/microsoft-edge" ".config/microsoft-edge-beta" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
             fi
             ;;
         "FALKON")
             killall falkon &>/dev/null; sleep 1
-            zip -qr "$TMP_DIR/falkon-${USERNAME}.zip" ".config/falkon"
-            mv "$TMP_DIR/falkon-${USERNAME}.zip" "$DEST_DIR/"
+            backup_zip "FALKON" "$TMP_DIR/falkon-${USERNAME}.zip" ".config/falkon"
             ;;
         "FIREFOX")
             killall firefox &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'org.mozilla.firefox'; then
-                zip -qr "$TMP_DIR/firefox-flatpak-${USERNAME}.zip" ".var/app/org.mozilla.firefox" -x "*/cache2/*" "*/storage/*" "*.db-wal" "*.db-shm" "*/Crash Reports/*"
-                mv "$TMP_DIR/firefox-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'org.mozilla.firefox'; then
+                backup_zip "FIREFOX (Flatpak)" "$TMP_DIR/firefox-flatpak-${USERNAME}.zip" ".var/app/org.mozilla.firefox" -x "*/cache2/*" "*/storage/*" "*.db-wal" "*.db-shm" "*/Crash Reports/*"
             else
-                zip -qr "$TMP_DIR/firefox-${USERNAME}.zip" ".mozilla" -x ".mozilla/firefox/*/cache2/*" ".mozilla/firefox/*/storage/*" "*.db-wal" "*.db-shm" "*/Crash Reports/*"
-                mv "$TMP_DIR/firefox-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "FIREFOX (Nativo)" "$TMP_DIR/firefox-${USERNAME}.zip" ".mozilla" -x ".mozilla/firefox/*/cache2/*" ".mozilla/firefox/*/storage/*" "*.db-wal" "*.db-shm" "*/Crash Reports/*"
             fi
             ;;
         "FLOORP")
             killall floorp &>/dev/null; sleep 1
-            zip -qr "$TMP_DIR/floorp-${USERNAME}.zip" ".floorp" -x ".floorp/*/.cache2/*" ".floorp/*/.storage/*" "*.db-wal" "*.db-shm" "*/.Crash Reports/*"
-            mv "$TMP_DIR/floorp-${USERNAME}.zip" "$DEST_DIR/"
+            backup_zip "FLOORP" "$TMP_DIR/floorp-${USERNAME}.zip" ".floorp" -x ".floorp/*/.cache2/*" ".floorp/*/.storage/*" "*.db-wal" "*.db-shm" "*/.Crash Reports/*"
             ;;
         "VIVALDI")
             killall vivaldi-stable &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'com.vivaldi.Vivaldi'; then
-                zip -qr "$TMP_DIR/vivaldi-flatpak-${USERNAME}.zip" ".var/app/com.vivaldi.Vivaldi" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
-                mv "$TMP_DIR/vivaldi-flatpak-${USERNAME}.zip" "$DEST_DIR/"
-                echo "[$(date +'%H:%M:%S')] Backup Flatpak do Vivaldi realizado com sucesso." >> "$LOG_FILE"
+            if flatpak list --app 2>/dev/null | grep -q 'com.vivaldi.Vivaldi'; then
+                backup_zip "VIVALDI (Flatpak)" "$TMP_DIR/vivaldi-flatpak-${USERNAME}.zip" ".var/app/com.vivaldi.Vivaldi" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
             else
-                zip -qr "$TMP_DIR/vivaldi-${USERNAME}.zip" ".config/vivaldi" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
-                mv "$TMP_DIR/vivaldi-${USERNAME}.zip" "$DEST_DIR/"
-                echo "[$(date +'%H:%M:%S')] Backup nativo do Vivaldi realizado com sucesso." >> "$LOG_FILE"
+                backup_zip "VIVALDI (Nativo)" "$TMP_DIR/vivaldi-${USERNAME}.zip" ".config/vivaldi" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
             fi
             ;;
         "OPERA")
             killall opera-stable &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'com.opera.Opera'; then
-                zip -qr "$TMP_DIR/opera-flatpak-${USERNAME}.zip" ".var/app/com.opera.Opera" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
-                mv "$TMP_DIR/opera-flatpak-${USERNAME}.zip" "$DEST_DIR/"
-                echo "[$(date +'%H:%M:%S')] Backup Flatpak do Opera realizado com sucesso." >> "$LOG_FILE"
+            if flatpak list --app 2>/dev/null | grep -q 'com.opera.Opera'; then
+                backup_zip "OPERA (Flatpak)" "$TMP_DIR/opera-flatpak-${USERNAME}.zip" ".var/app/com.opera.Opera" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
             else
-                zip -qr "$TMP_DIR/opera-${USERNAME}.zip" ".config/opera" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
-                mv "$TMP_DIR/opera-${USERNAME}.zip" "$DEST_DIR/"
-                echo "[$(date +'%H:%M:%S')] Backup nativo do Vivaldi realizado com sucesso." >> "$LOG_FILE"
+                backup_zip "OPERA (Nativo)" "$TMP_DIR/opera-${USERNAME}.zip" ".config/opera" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
             fi
             ;;
         "ZEN BROWSER")
             killall zen-browser &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'app.zen_browser.zen'; then
-                zip -qr "$TMP_DIR/zen-flatpak-${USERNAME}.zip" ".var/app/app.zen_browser.zen" -x "*/cache2/*" "*/storage/*" "*.db-wal" "*.db-shm" "*/Crash Reports/*"
-                mv "$TMP_DIR/zen-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'app.zen_browser.zen'; then
+                backup_zip "ZEN BROWSER (Flatpak)" "$TMP_DIR/zen-flatpak-${USERNAME}.zip" ".var/app/app.zen_browser.zen" -x "*/cache2/*" "*/storage/*" "*.db-wal" "*.db-shm" "*/Crash Reports/*"
             else
-                zip -qr "$TMP_DIR/zen-${USERNAME}.zip" ".zen" -x "*.db-wal" "*.db-shm" "*/Crash Reports/*"
-                mv "$TMP_DIR/zen-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "ZEN BROWSER (Nativo)" "$TMP_DIR/zen-${USERNAME}.zip" ".zen" -x "*.db-wal" "*.db-shm" "*/Crash Reports/*"
             fi
             ;;
         "CALIBRE")
             killall calibre &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'com.calibre_ebook.calibre'; then
-                zip -qr "$TMP_DIR/calibre-flatpak-${USERNAME}.zip" ".var/app/com.calibre_ebook.calibre" -x "*/caches/*"
-                mv "$TMP_DIR/calibre-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'com.calibre_ebook.calibre'; then
+                backup_zip "CALIBRE (Flatpak)" "$TMP_DIR/calibre-flatpak-${USERNAME}.zip" ".var/app/com.calibre_ebook.calibre" -x "*/caches/*"
             else
-                zip -qr "$TMP_DIR/calibre-${USERNAME}.zip" ".config/calibre" -x "calibre/caches/*"
-                mv "$TMP_DIR/calibre-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "CALIBRE (Nativo)" "$TMP_DIR/calibre-${USERNAME}.zip" ".config/calibre" -x "calibre/caches/*"
             fi
             ;;
         "WAVEBOX")
             killall wavebox &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'io.wavebox.Wavebox'; then
-                zip -qr "$TMP_DIR/wavebox-flatpak-${USERNAME}.zip" ".var/app/io.wavebox.Wavebox" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*" "*/Crash Reports/*" "*/Storage/*"
-                mv "$TMP_DIR/wavebox-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'io.wavebox.Wavebox'; then
+                backup_zip "WAVEBOX (Flatpak)" "$TMP_DIR/wavebox-flatpak-${USERNAME}.zip" ".var/app/io.wavebox.Wavebox" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*" "*/Crash Reports/*" "*/Storage/*"
             else
-                zip -qr "$TMP_DIR/wavebox-${USERNAME}.zip" ".config/wavebox" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*" "*/Crash Reports/*" "*/Storage/*"
-                mv "$TMP_DIR/wavebox-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "WAVEBOX (Nativo)" "$TMP_DIR/wavebox-${USERNAME}.zip" ".config/wavebox" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*" "*/Crash Reports/*" "*/Storage/*"
             fi
             ;;
         "RAMBOX")
             killall rambox &>/dev/null; sleep 1
-            zip -qr "$TMP_DIR/rambox-${USERNAME}.zip" ".config/rambox" -x "*Cache*" "*cache*"
-            mv "$TMP_DIR/rambox-${USERNAME}.zip" "$DEST_DIR/"
+            backup_zip "RAMBOX" "$TMP_DIR/rambox-${USERNAME}.zip" ".config/rambox" -x "*Cache*" "*cache*"
             ;;
         "FERDIUM")
-            if flatpak list --app | grep -q 'org.ferdium.Ferdium'; then
-                zip -qr "$TMP_DIR/ferdium-flatpak-${USERNAME}.zip" ".var/app/org.ferdium.Ferdium" -x "*Cache*" "*cache*"
-                mv "$TMP_DIR/ferdium-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            killall ferdium &>/dev/null; sleep 1
+            if flatpak list --app 2>/dev/null | grep -q 'org.ferdium.Ferdium'; then
+                backup_zip "FERDIUM (Flatpak)" "$TMP_DIR/ferdium-flatpak-${USERNAME}.zip" ".var/app/org.ferdium.Ferdium" -x "*Cache*" "*cache*"
             else
-                zip -qr "$TMP_DIR/ferdium-${USERNAME}.zip" ".config/Ferdium" -x "*Cache*" "*cache*"
-                mv "$TMP_DIR/ferdium-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "FERDIUM (Nativo)" "$TMP_DIR/ferdium-${USERNAME}.zip" ".config/Ferdium" -x "*Cache*" "*cache*"
             fi
             ;;
         "NEXTCLOUD")
             killall nextcloud &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'com.nextcloud.desktopclient.nextcloud'; then
-                zip -qr "$TMP_DIR/nextcloud-flatpak-${USERNAME}.zip" ".var/app/com.nextcloud.desktopclient.nextcloud" -x "*/logs/*"
-                mv "$TMP_DIR/nextcloud-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'com.nextcloud.desktopclient.nextcloud'; then
+                backup_zip "NEXTCLOUD (Flatpak)" "$TMP_DIR/nextcloud-flatpak-${USERNAME}.zip" ".var/app/com.nextcloud.desktopclient.nextcloud" -x "*/logs/*"
             else
-                zip -qr "$TMP_DIR/nextcloud-${USERNAME}.zip" ".config/Nextcloud" -x "Nextcloud/logs/*"
-                mv "$TMP_DIR/nextcloud-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "NEXTCLOUD (Nativo)" "$TMP_DIR/nextcloud-${USERNAME}.zip" ".config/Nextcloud" -x "Nextcloud/logs/*"
             fi
             ;;
         "FILEZILLA")
             killall filezilla &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'org.filezillaproject.Filezilla'; then
-                zip -qr "$TMP_DIR/filezilla-flatpak-${USERNAME}.zip" ".var/app/org.filezillaproject.Filezilla"
-                mv "$TMP_DIR/filezilla-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'org.filezillaproject.Filezilla'; then
+                backup_zip "FILEZILLA (Flatpak)" "$TMP_DIR/filezilla-flatpak-${USERNAME}.zip" ".var/app/org.filezillaproject.Filezilla"
             else
-                zip -qr "$TMP_DIR/filezilla-${USERNAME}.zip" ".config/filezilla"
-                mv "$TMP_DIR/filezilla-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "FILEZILLA (Nativo)" "$TMP_DIR/filezilla-${USERNAME}.zip" ".config/filezilla"
             fi
             ;;
         "TRANSMISSION")
             killall transmission &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'com.transmissionbt.Transmission'; then
-                zip -qr "$TMP_DIR/transmission-flatpak-${USERNAME}.zip" ".var/app/com.transmissionbt.Transmission"
-                mv "$TMP_DIR/transmission-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'com.transmissionbt.Transmission'; then
+                backup_zip "TRANSMISSION (Flatpak)" "$TMP_DIR/transmission-flatpak-${USERNAME}.zip" ".var/app/com.transmissionbt.Transmission"
             else
-                zip -qr "$TMP_DIR/transmission-${USERNAME}.zip" ".config/transmission-daemon"
-                mv "$TMP_DIR/transmission-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "TRANSMISSION (Nativo)" "$TMP_DIR/transmission-${USERNAME}.zip" ".config/transmission-daemon"
             fi
             ;;
         "OBSIDIAN")
-            if flatpak list --app | grep -q 'md.obsidian.Obsidian'; then
-                zip -qr "$TMP_DIR/obsidian-flatpak-${USERNAME}.zip" ".var/app/md.obsidian.Obsidian"
-                mv "$TMP_DIR/obsidian-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            killall obsidian &>/dev/null; sleep 1
+            if flatpak list --app 2>/dev/null | grep -q 'md.obsidian.Obsidian'; then
+                backup_zip "OBSIDIAN (Flatpak)" "$TMP_DIR/obsidian-flatpak-${USERNAME}.zip" ".var/app/md.obsidian.Obsidian"
             else
-                zip -qr "$TMP_DIR/obsidian-${USERNAME}.zip" ".config/obsidian"
-                mv "$TMP_DIR/obsidian-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "OBSIDIAN (Nativo)" "$TMP_DIR/obsidian-${USERNAME}.zip" ".config/obsidian"
             fi
             ;;
         "ZOTERO")
             killall zotero &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'org.zotero.Zotero'; then
-                zip -qr "$TMP_DIR/zotero-flatpak-${USERNAME}.zip" ".var/app/org.zotero.Zotero" "Zotero"
-                mv "$TMP_DIR/zotero-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'org.zotero.Zotero'; then
+                backup_zip "ZOTERO (Flatpak)" "$TMP_DIR/zotero-flatpak-${USERNAME}.zip" ".var/app/org.zotero.Zotero" "Zotero"
             else
-                zip -qr "$TMP_DIR/zotero-${USERNAME}.zip" ".zotero" "Zotero"
-                mv "$TMP_DIR/zotero-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "ZOTERO (Nativo)" "$TMP_DIR/zotero-${USERNAME}.zip" ".zotero" "Zotero"
             fi
             ;;
         "TINTERO")
             killall tintero &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'app.tintero.Tintero'; then
-                zip -qr "$TMP_DIR/tintero-flatpak-${USERNAME}.zip" ".var/app/app.tintero.Tintero" "tintero"
-                mv "$TMP_DIR/tintero-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'app.tintero.Tintero'; then
+                backup_zip "TINTERO (Flatpak)" "$TMP_DIR/tintero-flatpak-${USERNAME}.zip" ".var/app/app.tintero.Tintero" "tintero"
+            else
+                backup_zip "TINTERO (Nativo)" "$TMP_DIR/tintero-${USERNAME}.zip" ".config/tintero" "tintero"
             fi
             ;;
         "MASTER_PDF")
             killall masterpdfeditor5 &>/dev/null; sleep 1
-            zip -qr "$TMP_DIR/master_pdf-${USERNAME}.zip" ".masterpdfeditor" ".config/Code Industry"
-            mv "$TMP_DIR/master_pdf-${USERNAME}.zip" "$DEST_DIR/"
+            backup_zip "MASTER_PDF" "$TMP_DIR/master_pdf-${USERNAME}.zip" ".masterpdfeditor" ".config/Code Industry"
             ;;
         "PICARD")
             killall picard &>/dev/null; sleep 1
-            if flatpak list --app | grep -q 'org.musicbrainz.Picard'; then
-                zip -qr "$TMP_DIR/picard-flatpak-${USERNAME}.zip" ".var/app/org.musicbrainz.Picard"
-                mv "$TMP_DIR/picard-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            if flatpak list --app 2>/dev/null | grep -q 'org.musicbrainz.Picard'; then
+                backup_zip "PICARD (Flatpak)" "$TMP_DIR/picard-flatpak-${USERNAME}.zip" ".var/app/org.musicbrainz.Picard"
             else
-                zip -qr "$TMP_DIR/picard-${USERNAME}.zip" ".picard" "picard"
-                mv "$TMP_DIR/picard-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "PICARD (Nativo)" "$TMP_DIR/picard-${USERNAME}.zip" ".picard" "picard"
             fi
             ;;
         "VSCODE")
-            if flatpak list --app | grep -q 'com.visualstudio.code'; then
-                zip -qr "$TMP_DIR/vscode-flatpak-${USERNAME}.zip" ".var/app/com.visualstudio.code" -x "*/CachedData/*" "*/CachedExtensionVSIXs/*"
-                mv "$TMP_DIR/vscode-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            killall code code-oss &>/dev/null; sleep 1
+            if flatpak list --app 2>/dev/null | grep -q 'com.visualstudio.code'; then
+                backup_zip "VSCODE (Flatpak)" "$TMP_DIR/vscode-flatpak-${USERNAME}.zip" ".var/app/com.visualstudio.code" -x "*/CachedData/*" "*/CachedExtensionVSIXs/*"
             else
-                zip -qr "$TMP_DIR/vscode-${USERNAME}.zip" ".vscode" ".config/Code" -x ".config/Code/CachedData/*" ".config/Code/CachedExtensionVSIXs/*"
-                mv "$TMP_DIR/vscode-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "VSCODE (Nativo)" "$TMP_DIR/vscode-${USERNAME}.zip" ".vscode" ".config/Code" -x ".config/Code/CachedData/*" ".config/Code/CachedExtensionVSIXs/*"
             fi
             ;;
         "ANTIGRAVITY")
-            zip -qr "$TMP_DIR/antigravity-${USERNAME}.zip" ".antigravity" ".config/Antigravity" -x ".config/Antigravity/CachedData/*" ".config/Antigravity/CachedExtensionVSIXs/*"
-            mv "$TMP_DIR/antigravity-${USERNAME}.zip" "$DEST_DIR/"
+            killall antigravity &>/dev/null; sleep 1
+            backup_zip "ANTIGRAVITY" "$TMP_DIR/antigravity-${USERNAME}.zip" ".antigravity" ".config/Antigravity" -x ".config/Antigravity/CachedData/*" ".config/Antigravity/CachedExtensionVSIXs/*"
             ;;
         "PYCHARM")
-            if flatpak list --app | grep -q 'com.jetbrains.PyCharm-Professional'; then
-                zip -qr "$TMP_DIR/pycharm-flatpak-${USERNAME}.zip" ".var/app/com.jetbrains.PyCharm-Professional"
-                mv "$TMP_DIR/pycharm-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            killall pycharm.sh pycharm &>/dev/null; sleep 1
+            if flatpak list --app 2>/dev/null | grep -q 'com.jetbrains.PyCharm-Professional'; then
+                backup_zip "PYCHARM (Flatpak)" "$TMP_DIR/pycharm-flatpak-${USERNAME}.zip" ".var/app/com.jetbrains.PyCharm-Professional"
             else
-                zip -qr "$TMP_DIR/pycharm-${USERNAME}.zip" ".pycharm" ".config/pycharm"
-                mv "$TMP_DIR/pycharm-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "PYCHARM (Nativo)" "$TMP_DIR/pycharm-${USERNAME}.zip" ".pycharm" ".config/pycharm"
             fi
             ;;
         "DBEAVER")
-            if flatpak list --app | grep -q 'io.dbeaver.DBeaverCommunity'; then
-                zip -qr "$TMP_DIR/dbeaver-flatpak-${USERNAME}.zip" ".var/app/io.dbeaver.DBeaverCommunity"
-                mv "$TMP_DIR/dbeaver-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            killall dbeaver &>/dev/null; sleep 1
+            if flatpak list --app 2>/dev/null | grep -q 'io.dbeaver.DBeaverCommunity'; then
+                backup_zip "DBEAVER (Flatpak)" "$TMP_DIR/dbeaver-flatpak-${USERNAME}.zip" ".var/app/io.dbeaver.DBeaverCommunity"
             else
-                zip -qr "$TMP_DIR/dbeaver-${USERNAME}.zip" ".dbeaver" ".config/dbeaver"
-                mv "$TMP_DIR/dbeaver-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "DBEAVER (Nativo)" "$TMP_DIR/dbeaver-${USERNAME}.zip" ".dbeaver" ".config/dbeaver"
             fi
             ;;
         "REMMINA")
-            if flatpak list --app | grep -q 'org.remmina.Remmina'; then
-                zip -qr "$TMP_DIR/remmina-flatpak-${USERNAME}.zip" ".var/app/org.remmina.Remmina"
-                mv "$TMP_DIR/remmina-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            killall remmina &>/dev/null; sleep 1
+            if flatpak list --app 2>/dev/null | grep -q 'org.remmina.Remmina'; then
+                backup_zip "REMMINA (Flatpak)" "$TMP_DIR/remmina-flatpak-${USERNAME}.zip" ".var/app/org.remmina.Remmina"
             else
-                zip -qr "$TMP_DIR/remmina-${USERNAME}.zip" ".remmina" ".config/remmina"
-                mv "$TMP_DIR/remmina-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "REMMINA (Nativo)" "$TMP_DIR/remmina-${USERNAME}.zip" ".remmina" ".config/remmina"
             fi
             ;;
         "POSTMAN")
-            if flatpak list --app | grep -q 'com.getpostman.Postman'; then
-                zip -qr "$TMP_DIR/postman-flatpak-${USERNAME}.zip" ".var/app/com.getpostman.Postman"
-                mv "$TMP_DIR/postman-flatpak-${USERNAME}.zip" "$DEST_DIR/"
+            killall postman &>/dev/null; sleep 1
+            if flatpak list --app 2>/dev/null | grep -q 'com.getpostman.Postman'; then
+                backup_zip "POSTMAN (Flatpak)" "$TMP_DIR/postman-flatpak-${USERNAME}.zip" ".var/app/com.getpostman.Postman"
             else
-                zip -qr "$TMP_DIR/postman-${USERNAME}.zip" ".postman" ".config/postman"
-                mv "$TMP_DIR/postman-${USERNAME}.zip" "$DEST_DIR/"
+                backup_zip "POSTMAN (Nativo)" "$TMP_DIR/postman-${USERNAME}.zip" ".postman" ".config/postman"
             fi
             ;;
-        #"KWALLET")
-            #killall kwalletd5 &>/dev/null; sleep 1
-            #zip -qr "$TMP_DIR/kwallet-${USERNAME}.zip" ".config/kwalletrc" ".local/share/kwalletd/kdewallet.kwl"
-            #mv "$TMP_DIR/kwallet-${USERNAME}.zip" "$DEST_DIR/"
-            #;;
         "SYSTEM_SETTINGS")
             if command -v dconf &>/dev/null; then dconf dump / > "$TMP_DIR/dconf-settings.dump"; fi
-            zip -qr "$TMP_DIR/system-settings-${USERNAME}.zip" ".config" ".local/share" ".themes" ".icons" -x "*/Cache/*" "*/cache/*" ".config/google-chrome/*" ".config/BraveSoftware/*" ".mozilla/*"
+            backup_zip "SYSTEM_SETTINGS" "$TMP_DIR/system-settings-${USERNAME}.zip" ".config" ".local/share" ".themes" ".icons" -x "*/Cache/*" "*/cache/*" ".config/google-chrome/*" ".config/BraveSoftware/*" ".mozilla/*"
             if [ -f "$TMP_DIR/dconf-settings.dump" ]; then
-                zip -qju "$TMP_DIR/system-settings-${USERNAME}.zip" "$TMP_DIR/dconf-settings.dump"
+                zip -qju "$DEST_DIR/system-settings-${USERNAME}.zip" "$TMP_DIR/dconf-settings.dump"
             fi
-            mv "$TMP_DIR/system-settings-${USERNAME}.zip" "$DEST_DIR/"
             ;;
         *)
-            echo "[$(date +'%H:%M:%S')] AVISO: A lógica para '$app' não foi implementada. Pulando." >> "$LOG_FILE"
+            log_error "Lógica para '$app' não foi implementada. Pulando."
             ;;
     esac
 
-    # Fecha a janela de progresso e regista no log
-    kill $YAD_PID 2>/dev/null
-    echo "[$(date +'%H:%M:%S')] Backup para $app concluído." >> "$LOG_FILE"
+    # Fecha a janela de progresso
+    kill "$YAD_PID" 2>/dev/null || true
+    wait "$YAD_PID" 2>/dev/null || true
 done
 
-echo "============================================================" >> "$LOG_FILE"
-echo "[$(date +'%H:%M:%S')] PROCESSO DE BACKUP CONCLUÍDO." >> "$LOG_FILE"
+log_msg "============================================================"
+log_msg "=== PROCESSO DE BACKUP CONCLUÍDO ==="
 
 # Exibe a notificação final para o usuário.
 yad --info --title="Backup Concluído" \
@@ -349,4 +343,3 @@ yad --info --title="Backup Concluído" \
     --width=450 --height=150 --timeout=10
 
 exit 0
-

@@ -43,7 +43,7 @@ add_app "TRUE" "Escritório" "Obsidian" "Knowledge Base" "" "obsidian" "obsidian
 add_app "TRUE" "Escritório" "Calibre" "E-books" "calibre" "calibre" "calibre" "com.calibre_ebook.calibre" "native"
 add_app "TRUE" "Escritório" "Zotero" "Gestão Bibliográfica" "" "zotero-bin" "zotero" "org.zotero.Zotero" "flatpak"
 add_app "TRUE" "Escritório" "XMind" "Mapas Mentais" "" "xmind" "xmind" "net.xmind.XMind8" "flatpak"
-add_app "TRUE" "Escritório" "Camunda Modeler" "Modelagem BPMN" "" "camunda-modeler-bin" "camunda-modeler" "com.camunda.CamundaModeler" "flatpak"
+add_app "TRUE" "Escritório" "Camunda Modeler" "Modelagem BPMN" "" "camunda-modeler" "camunda-modeler" "" "native"
 add_app "TRUE" "Escritório" "Draw.io" "Diagramas" "drawio" "drawio-desktop" "drawio" "com.jgraph.drawio.desktop" "native"
 # FIX: Garante 'aspell-pt-br' pois 'aspell-pt' pode falhar
 add_app "TRUE" "Escritório" "Corretores PT-BR" "Dicionários" "aspell-pt-br hunspell-pt-br mythes-pt-br hyphen-pt-br wportuguese" "aspell-pt hunspell-pt mythes-pt hyphen-pt" "aspell-pt hunspell-pt mythes-pt hyphen-pt" "" "native"
@@ -102,7 +102,7 @@ add_app "TRUE" "Impressão" "Gutenprint" "Drivers Genéricos" "printer-driver-gu
 # --- IA E CLI ---
 add_app "TRUE" "IA" "OpenAI Whisper" "Reconhecimento de Fala" "" "" "" "openai-whisper" "pipx"
 add_app "TRUE" "IA" "Subliminal" "Baixador de Legendas" "" "" "" "subliminal" "pipx"
-add_app "FALSE" "IA" "YT-DLP" "Downloader de Vídeos" "" "" "" "yt-dlp" "pipx"
+add_app "FALSE" "IA" "YT-DLP" "Downloader de Vídeos" "yt-dlp" "yt-dlp" "yt-dlp" "yt-dlp" "native"
 
 # --- CUSTOM SCRIPTS ---
 add_app "FALSE" "Utils" "Ventoy" "Criador USB Bootável" "" "" "" "ventoy" "custom"

@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: v3rtech-install.sh (Script Mestre Consolidado)
-# Versão: 1.6.0
+# Versão: 1.6.1
 #
 # Descrição: Orquestrador principal da automação de pós-instalação.
 # Novidades: Auto-instalação no disco, Confirmação de Distro e VM Hook.
@@ -80,27 +80,34 @@ trap 'echo ""; log "WARN" "Interrompido."; exit 1' INT
 # 3. FLUXO DE EXECUÇÃO
 # ------------------------------------------------------------------------------
 
-# --- 00: DETECÇÃO ---
+# --- 00: DETECCAO ---
 log "STEP" "1. Identificando o sistema..."
 load_lib "$LIB_DIR/00-detecta-distro.sh"
 
-# --- UI: CONFIRMAÇÃO DA DETECÇÃO ---
-# Requisito: Usuário deve confirmar se a detecção está certa
+# --- 01: PREPARACAO ---
+log "STEP" "2. Preparando base..."
+load_lib "$LIB_DIR/01-prepara-distro.sh"
+load_lib "$LIB_DIR/05-setup-sudoers.sh"
+load_lib "$LIB_DIR/06-setup-shell-env.sh"
+load_lib "$LIB_DIR/07-setup-user-dirs.sh"
+load_lib "$LIB_DIR/08-setup-maintenance.sh"
+load_lib "$LIB_DIR/09-setup-fstab-mounts.sh"
+load_lib "$LIB_DIR/10-setup-keyboard-shortcuts.sh"
+
+# --- UI: CONFIRMACAO DA DETECCAO ---
+# Requisito: Usuario deve confirmar se a deteccao esta certa
+# NOTA: YAD agora esta garantidamente instalado apos 01-prepara-distro.sh
 yad --image="computer" \
-    --title="Confirmação de Sistema" \
-    --text="O sistema detectou o seguinte ambiente:\n\n<b>Distro:</b> ${DISTRO_NAME^} (${DISTRO_FAMILY})\n<b>Ambiente:</b> ${DESKTOP_ENV^}\n<b>GPU:</b> ${GPU_VENDOR^}\n\nAs otimizações serão aplicadas com base nisso.\nEstá correto?" \
-    --button="Não (Sair):1" \
+    --title="Confirmacao de Sistema" \
+    --text="O sistema detectou o seguinte ambiente:\n\n<b>Distro:</b> ${DISTRO_NAME^} (${DISTRO_FAMILY})\n<b>Ambiente:</b> ${DESKTOP_ENV^}\n<b>GPU:</b> ${GPU_VENDOR^}\n\nAs otimizacoes serao aplicadas com base nisso.\nEsta correto?" \
+    --button="Nao (Sair):1" \
     --button="Sim (Continuar):0" \
     --center --width=400
 
 if [ $? -ne 0 ]; then
-    log "WARN" "Usuário abortou após detecção de sistema."
+    log "WARN" "Usuario abortou apos deteccao de sistema."
     exit 0
 fi
-
-# --- 01: PREPARAÇÃO ---
-log "STEP" "2. Preparando base..."
-load_lib "$LIB_DIR/01-prepara-distro.sh"
 
 # --- DADOS E REPOSITÓRIOS ---
 log "STEP" "3. Carregando dados..."

@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: lib/logic-apps-reader.sh
-# Versão: 11.0.0 (Path Corrected)
+# Versão: 11.1.0 (Multi-Package Fix)
 # Descrição: Define lógica de instalação e integra alias 'i'.
 # ==============================================================================
 
@@ -102,7 +102,9 @@ install_app_by_name() {
                 # Verifica se 'i' é um alias ou função válida
                 if type i &>/dev/null; then
                     log "INFO" "Usando comando 'i' para instalar: $pkg_native"
-                    if i "$pkg_native"; then installed=true; fi
+                    # CORREÇÃO: Usar expansão sem aspas para que múltiplos pacotes sejam tratados corretamente
+                    # Exemplo: "geany geany-plugins" é expandido para dois argumentos separados
+                    if i $pkg_native; then installed=true; fi
 
                 # Fallbacks manuais (caso o alias falhe ou não exista)
                 elif command -v apt &>/dev/null; then sudo apt install -y $pkg_native && installed=true;
