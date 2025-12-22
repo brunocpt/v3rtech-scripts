@@ -43,8 +43,8 @@ if [ -d "$APT_SOURCES_DIR" ]; then
 
     # Atualiza o cache para confirmar que os erros sumiram
     log "INFO" "Atualizando cache do APT para validar limpeza..."
-    if command -v apt-get &>/dev/null; then
-        $SUDO apt-get update -qq 2>/dev/null && log "SUCCESS" "Repositórios limpos e atualizados." || log "WARN" "Ainda pode haver avisos no apt update."
+    if command -v apt &>/dev/null; then
+        $SUDO apt update -qq 2>/dev/null && log "SUCCESS" "Repositórios limpos e atualizados." || log "WARN" "Ainda pode haver avisos no apt update."
     fi
 else
     log "INFO" "Diretório de fontes não encontrado ou não é Debian/Ubuntu. Pulei."
@@ -54,8 +54,8 @@ fi
 log "INFO" "Limpando cache de pacotes desnecessários..."
 case "$DISTRO_FAMILY" in
     debian|ubuntu)
-        $SUDO apt-get autoremove -y &>/dev/null
-        $SUDO apt-get clean &>/dev/null
+        $SUDO apt autoremove -y &>/dev/null
+        $SUDO apt clean &>/dev/null
         ;;
     fedora)
         $SUDO dnf autoremove -y &>/dev/null

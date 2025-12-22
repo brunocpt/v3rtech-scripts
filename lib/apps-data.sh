@@ -8,17 +8,16 @@
 # ==============================================================================
 
 # --- NAVEGADORES ---
-add_app "TRUE" "Internet" "Wavebox" "Navegador focado em trabalho" "wavebox" "wavebox" "wavebox" "io.wavebox.Wavebox" "native"
+add_app "TRUE" "Internet" "Wavebox" "Navegador focado em trabalho" "wavebox" "wavebox" "wavebox" "" "native"
 add_app "TRUE" "Internet" "Google Chrome" "Navegador do Google" "google-chrome-stable" "google-chrome" "google-chrome-stable" "com.google.Chrome" "native"
 add_app "TRUE" "Internet" "Firefox" "Navegador Mozilla" "firefox" "firefox" "firefox" "org.mozilla.firefox" "native"
 add_app "TRUE" "Internet" "Brave" "Navegador Privacidade" "brave-browser" "brave-bin" "brave-browser" "com.brave.Browser" "native"
 add_app "TRUE" "Internet" "Vivaldi" "Navegador Power User" "vivaldi-stable" "vivaldi" "vivaldi" "com.vivaldi.Vivaldi" "native"
-add_app "TRUE" "Internet" "Opera" "Navegador com VPN" "opera-stable" "opera" "opera-stable" "com.opera.Opera" "native"
+add_app "TRUE" "Internet" "Opera" "Navegador com VPN" "" "opera" "" "com.opera.Opera" "native"
 add_app "TRUE" "Internet" "Microsoft Edge" "Navegador Microsoft" "microsoft-edge-stable" "microsoft-edge-stable-bin" "microsoft-edge-stable" "com.microsoft.Edge" "native"
 
 # --- NUVEM E TRANSFERÊNCIA ---
 add_app "TRUE" "Nuvem" "Nextcloud" "Sync Nextcloud" "nextcloud-desktop" "nextcloud-client" "nextcloud-client" "com.nextcloud.desktopclient.nextcloud" "native"
-add_app "TRUE" "Nuvem" "RClone" "Cloud CLI" "rclone" "rclone" "rclone" "" "native"
 add_app "FALSE" "Nuvem" "Filezilla" "Cliente FTP" "filezilla" "filezilla" "filezilla" "org.filezilla.FileZilla" "native"
 
 # --- COMUNICAÇÃO ---
@@ -28,7 +27,7 @@ add_app "FALSE" "Comunicação" "MailViewer" "Visualizador EML/MSG" "" "" "" "io
 # --- DESENVOLVIMENTO & TERMINAL ---
 add_app "FALSE" "Dev" "VS Code" "Editor Microsoft" "code" "visual-studio-code-bin" "code" "com.visualstudio.code" "native"
 add_app "TRUE" "Dev" "Antigravity" "Ambiente Google (VSCode)" "antigravity" "antigravity" "antigravity" "" "native"
-add_app "TRUE" "Dev" "Docker" "Containers" "docker.io docker-compose-plugin" "docker docker-compose" "docker docker-compose-plugin" "" "native"
+add_app "TRUE" "Dev" "Docker" "Containers" "docker.io docker-compose" "docker docker-compose" "docker docker-compose-plugin" "" "native"
 add_app "FALSE" "Dev" "DBeaver" "Cliente SQL" "dbeaver-ce" "dbeaver" "dbeaver" "io.dbeaver.DBeaverCommunity" "native"
 add_app "FALSE" "Dev" "Postman" "Plataforma API" "postman" "postman-bin" "postman" "com.getpostman.Postman" "native"
 add_app "FALSE" "Dev" "Terminator" "Terminal Avançado" "terminator" "terminator" "terminator" "" "native"

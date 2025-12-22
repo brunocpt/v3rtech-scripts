@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: core/package-mgr.sh
-# Versão: 2.1.0 (Shortcode Edition)
+# Versão: 2.0.0 (Shortcode Edition)
 #
 # Descrição: Abstração dos gerenciadores de pacotes com sintaxe minimalista.
 # Comandos disponíveis:
@@ -39,7 +39,7 @@ i() {
             if _check_cmd apt-fast; then
                 $SUDO apt-fast install -y "${packages[@]}"
             else
-                $SUDO apt-get install -y "${packages[@]}"
+                $SUDO apt install -y "${packages[@]}"
             fi
             ;;
 
@@ -77,7 +77,7 @@ r() {
 
     case "$DISTRO_FAMILY" in
         debian)
-            $SUDO apt-get remove -y "${packages[@]}"
+            $SUDO apt remove -y "${packages[@]}"
             ;;
         arch)
             # -Rs remove o pacote e dependências não usadas (limpeza)
@@ -100,9 +100,9 @@ up() {
             if _check_cmd apt-fast; then
                 $SUDO apt-fast update && $SUDO apt-fast full-upgrade -y
             else
-                $SUDO apt-get update && $SUDO apt-get full-upgrade -y
+                $SUDO apt update && $SUDO apt full-upgrade -y
             fi
-            $SUDO apt-get autoremove -y
+            $SUDO apt autoremove -y
             ;;
         arch)
             if _check_cmd paru; then
@@ -148,13 +148,17 @@ install_flatpak() {
     local app_id="$1"
 
     if ! _check_cmd flatpak; then
-        log "WARN" "Flatpak ausente. Instalando..."
-        i flatpak
-        flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+        log "ERROR" "Comando 'flatpak' não encontrado. A etapa de configuração do Flatpak deveria ter sido executada antes."
+        return 1
     fi
 
-    # --or-update: Atualiza se já existir
-    flatpak install -y --or-update flathub "$app_id"
+    log "INFO" "Instalando Flatpak: $app_id"
+    if ! flatpak install -y --or-update flathub "$app_id"; then
+        log "ERROR" "Falha ao instalar Flatpak: $app_id"
+        # Não retorna 1 para não parar o script inteiro, apenas loga o erro.
+    else
+        log "SUCCESS" "Instalado com sucesso via Flatpak: $app_id"
+    fi
 }
 
 # Wrapper para Pipx
@@ -167,58 +171,4 @@ install_pipx() {
     fi
     pipx install "$pkg_name"
     pipx ensurepath
-}
-
-# ==============================================================================
-# restore_zip_config: Restaurar configurações de arquivo ZIP
-# ==============================================================================
-# Uso: restore_zip_config "/caminho/arquivo.zip" "/destino"
-# Descrição: Extrai um arquivo ZIP para um diretório de destino com backup automático
-restore_zip_config() {
-    local zip_file="$1"
-    local dest_dir="$2"
-
-    # Validação de argumentos
-    if [ -z "$zip_file" ] || [ -z "$dest_dir" ]; then
-        log "WARN" "restore_zip_config: Argumentos insuficientes (zip_file, dest_dir)"
-        return 1
-    fi
-
-    # Se o arquivo ZIP não existe, apenas loga e retorna (não é erro crítico)
-    if [ ! -f "$zip_file" ]; then
-        log "INFO" "Arquivo de configuração não encontrado: $zip_file (pulando restauração)"
-        return 0
-    fi
-
-    # Cria diretório de destino se não existir
-    if [ ! -d "$dest_dir" ]; then
-        log "INFO" "Criando diretório de destino: $dest_dir"
-        mkdir -p "$dest_dir"
-    fi
-
-    # Cria backup do diretório existente se houver conflito
-    # Extrai o nome da pasta principal do ZIP para detectar conflitos
-    local zip_content_name=$(unzip -l "$zip_file" | head -4 | tail -1 | awk '{print $NF}' | cut -d'/' -f1)
-
-    if [ -n "$zip_content_name" ] && [ -d "$dest_dir/$zip_content_name" ]; then
-        local backup_dir="$dest_dir/${zip_content_name}.backup.$(date +%Y%m%d_%H%M%S)"
-        log "INFO" "Criando backup de configuração existente: $backup_dir"
-        mv "$dest_dir/$zip_content_name" "$backup_dir"
-    fi
-
-    # Extrai o arquivo ZIP
-    log "INFO" "Restaurando configurações de: $(basename "$zip_file")"
-    if unzip -o -q "$zip_file" -d "$dest_dir"; then
-        log "SUCCESS" "Configurações restauradas com sucesso"
-
-        # Ajusta permissões para o usuário real
-        if [ -n "$REAL_USER" ]; then
-            chown -R "$REAL_USER:$REAL_USER" "$dest_dir" 2>/dev/null || true
-        fi
-
-        return 0
-    else
-        log "ERROR" "Falha ao extrair configurações de $zip_file"
-        return 1
-    fi
 }

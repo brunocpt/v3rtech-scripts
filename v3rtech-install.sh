@@ -2,11 +2,10 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: v3rtech-install.sh (Script Mestre Consolidado)
-# Versão: 1.6.3 (Final - Rsync Mirror com Verificação)
+# Versão: 1.6.3
 #
 # Descrição: Orquestrador principal da automação de pós-instalação.
 # Novidades: Auto-instalação no disco, Confirmação de Distro e VM Hook.
-# Correção: Usa rsync com mirror para cópia completa e confiável
 #
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -161,13 +160,14 @@ load_lib "$LIB_DIR/00-detecta-distro.sh"
 # --- 01: PREPARACAO ---
 log "STEP" "2. Preparando base..."
 load_lib "$LIB_DIR/01-prepara-distro.sh"
+load_lib "$LIB_DIR/02-setup-repos.sh"
+load_lib "$LIB_DIR/03-setup-flatpak.sh"
 load_lib "$LIB_DIR/05-setup-sudoers.sh"
 load_lib "$LIB_DIR/06-setup-shell-env.sh"
 load_lib "$LIB_DIR/07-setup-user-dirs.sh"
 load_lib "$LIB_DIR/08-setup-maintenance.sh"
 load_lib "$LIB_DIR/09-setup-fstab-mounts.sh"
 load_lib "$LIB_DIR/10-setup-keyboard-shortcuts.sh"
-load_lib "$LIB_DIR/12-pack-certificates.sh"
 
 # --- UI: CONFIRMACAO DA DETECCAO ---
 # Requisito: Usuario deve confirmar se a deteccao esta certa
@@ -184,23 +184,23 @@ if [ $? -ne 0 ]; then
     exit 0
 fi
 
-# --- DADOS E REPOSITÓRIOS ---
-log "STEP" "3. Carregando dados..."
-load_lib "$LIB_DIR/logic-apps-reader.sh"
-load_apps_csv
-
-log "STEP" "4. Configurando repositórios..."
-load_lib "$LIB_DIR/02-setup-repos.sh"
-
-# --- UI: SELEÇÃO E INSTALAÇÃO ---
-log "STEP" "5. Interface de Seleção..."
-load_lib "$LIB_DIR/ui-main.sh"
-
 # --- AMBIENTE DESKTOP ---
 if [ -f "$LIB_DIR/04-pack-${DESKTOP_ENV}.sh" ]; then
     log "STEP" "6. Configurando Desktop: ${DESKTOP_ENV^}..."
     load_lib "$LIB_DIR/04-pack-${DESKTOP_ENV}.sh"
 fi
+
+# --- DADOS E REPOSITÓRIOS ---
+log "STEP" "3. Carregando dados..."
+load_lib "$LIB_DIR/logic-apps-reader.sh"
+#load_apps_csv
+
+# --- UI: SELEÇÃO E INSTALAÇÃO ---
+log "STEP" "5. Interface de Seleção..."
+load_lib "$LIB_DIR/ui-main.sh"
+
+# --- CERTIFICADOS ---
+load_lib "$LIB_DIR/12-pack-certificates.sh"
 
 # --- 03: CONFIGS GERAIS (INCLUI PLYMOUTH AGORA) ---
 log "STEP" "7. Otimizações de sistema e visuais..."
@@ -213,14 +213,14 @@ load_lib "$LIB_DIR/04-setup-boot.sh"
 # --- HOOKS ESPECÍFICOS ---
 
 # Docker
-if grep -q "^TRUE|.*|Docker|" "$DATA_DIR/apps.csv"; then
+if grep -q "^TRUE|.*|Docker|" "$LIB_DIR/apps-data.sh"; then
     log "STEP" "9. Configurando Docker..."
     load_lib "$LIB_DIR/setup-docker.sh"
 fi
 
 # VirtualBox (Novo Hook)
-# Verifica se VirtualBox foi instalado OU se está no CSV
-if command -v VBoxManage &>/dev/null || grep -q "^TRUE|.*|VirtualBox|" "$DATA_DIR/apps.csv"; then
+# Verifica se VirtualBox foi instalado OU se está no lib/apps-data.sh
+if command -v VBoxManage &>/dev/null || grep -q "^TRUE|.*|VirtualBox|" "$LIB_DIR/apps-data.sh"; then
     log "STEP" "10. Configurando VirtualBox (Extension Pack & Users)..."
     load_lib "$LIB_DIR/13-pack-vm.sh"
 fi

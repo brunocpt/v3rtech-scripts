@@ -12,12 +12,15 @@ case "$DISTRO_FAMILY" in
     debian)
         $SUDO apt update
         $SUDO apt install -y curl git yad aria2 gnupg ca-certificates rsync pipx zip unzip bc bash-completion
+        # --- INSTALAÇÃO DO RCLONE ---
+        curl -Lo /tmp/rclone.deb https://downloads.rclone.org/rclone-current-linux-amd64.deb
+        $SUDO apt install -y /tmp/rclone.deb
         ;;
     arch)
-        $SUDO pacman -Sy --noconfirm --needed curl git yad aria2 base-devel rsync python-pipx zip unzip bc bash-completion
+        $SUDO pacman -Sy --noconfirm --needed curl git yad aria2 base-devel rsync python-pipx zip unzip bc bash-completion rclone
         ;;
     fedora)
-        $SUDO dnf install -y curl git yad aria2 rsync pipx zip unzip bc bash-completion
+        $SUDO dnf install -y curl git yad aria2 rsync pipx zip unzip bc bash-completion rclone
         ;;
 esac
 

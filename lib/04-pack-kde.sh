@@ -26,6 +26,7 @@ PKGS_KDE_BASE=(
     "konsole"                  # Emulador de terminal
     "gwenview"                 # Visualizador de imagens
     "spectacle"                # Ferramenta de screenshot moderna
+    "kde-spectacle"            # No Debian o pacote é esse
     "okular"                   # Visualizador de documentos (PDF, etc)
     "kcalc"                    # Calculadora
     "kdeconnect"               # Integração com smartphones

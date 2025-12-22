@@ -4,6 +4,30 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 
 ---
 
+## [3.6.0] - 2025-12-22
+### 🐛 Corrigido
+- **Falhas de Instalação em Debian:** Corrigido problema crítico onde aplicativos via repositórios de terceiros não eram encontrados e instalações via Flatpak falhavam em cascata.
+  - *Causa:* Repositórios não eram adicionados antes da tentativa de instalação, e o Flatpak não estava configurado (faltava Flathub e overrides).
+  - *Solução:* Reordenamento da sequência de execução e criação de novos scripts dedicados.
+
+### ✨ Adicionado
+- **Script `lib/03-setup-flatpak.sh`:** Novo módulo dedicado à configuração completa do Flatpak.
+  - Verifica se o Flatpak está instalado (e instala se necessário).
+  - Adiciona o repositório Flathub.
+  - Aplica overrides globais para acesso ao sistema de arquivos.
+  - Executa ANTES de qualquer tentativa de instalação de apps Flatpak.
+- **Suporte a Repositório Mozilla Firefox:** Adicionado repositório oficial do Mozilla ao script lib/02-setup-repos.sh.
+
+### 🔧 Alterado
+- **Sequência de Instalação Principal (v3rtech-install.sh):**
+  - Repositórios de terceiros agora são adicionados ANTES do carregamento do banco de dados de apps.
+  - Configuração do Flatpak agora é executada IMEDIATAMENTE APÓS os repositórios.
+  - Banco de dados de apps é carregado APÓS todas as fontes estarem configuradas.
+- **Função `install_flatpak()` em `core/package-mgr.sh`:**
+  - Removida lógica de instalação de Flatpak e configuração de Flathub.
+  - Simplificada para apenas instalar o app especificado.
+
+  
 ## [3.5.0] - 2025-12-21 (Sessão 5 - Boot Options Multi-Distro)
 
 ### ✨ Adicionado

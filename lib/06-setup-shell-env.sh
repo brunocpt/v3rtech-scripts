@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: lib/06-setup-shell-env.sh
-# Versão: 1.1.0 (Corrigido - Verdadeiramente Idempotente)
+# Versão: 1.1.0
 # Descrição: Configura ambiente de shell (bash/zsh) com aliases e variáveis
 # Compatível com: Arch, Debian/Ubuntu, Fedora
 # ==============================================================================
@@ -192,8 +192,17 @@ hush() {
 # v3rtech-scripts: Fim de Aliases
 # ==============================================================================
 EOF
-
-chown "$REAL_USER:$REAL_USER" "$BASHRC_FILE"
 log "SUCCESS" "Aliases adicionados ao $BASHRC_FILE"
+
+# Configura bookmarks e user-dirs
+log "INFO" "Configurando bookmarks e user-dirs..."
+if [ -f "$CONFIGS_DIR/$REAL_USER-bookmarks" ]; then
+    cat $CONFIGS_DIR/$REAL_USER-bookmarks | tee $REAL_HOME/.config/gtk-3.0/bookmarks
+fi
+if [ -f "$CONFIGS_DIR/$REAL_USER-user-dirs" ]; then
+    cat $CONFIGS_DIR/$REAL_USER-user-dirs | tee $REAL_HOME/.config/gtk-3.0/user-dirs
+fi
+chown "$REAL_USER:$REAL_USER" "$BASHRC_FILE"
+log "SUCCESS" "Configuração de bookmarks e user-dirs concluída."
 
 log "SUCCESS" "Configuração de shell concluída."

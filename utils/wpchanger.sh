@@ -297,8 +297,8 @@ install_dependencies() {
         gui_tool="zenity"
     else
         log_message "Tentando instalar YAD..."
-        if command -v apt-get &> /dev/null; then
-            sudo apt-get update && sudo apt-get install -y yad
+        if command -v apt &> /dev/null; then
+            sudo apt update && sudo apt install -y yad
         elif command -v pacman &> /dev/null; then
             sudo pacman -S --noconfirm yad
         elif command -v dnf &> /dev/null; then
