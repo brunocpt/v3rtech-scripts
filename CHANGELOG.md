@@ -2,6 +2,24 @@
 
 Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 
+## [3.3.0] - 2025-12-21 (Sessão 4 - Certificados Digitais)
+
+### ✨ Adicionado
+
+#### Certificados Digitais e ICP-Brasil
+- **Script `12-pack-certificates.sh`** (NOVO): Instalação de certificados digitais e ferramentas ICP-Brasil com:
+  - Instalação de certificados (suporta .crt, .pem, .cer)
+  - Ferramentas de token/smartcard (pcsc-lite, opensc)
+  - Assinador SERPRO (Debian/Ubuntu e Arch)
+  - PyHanko para assinatura de PDFs (opcional)
+  - Pós-instalação (pcscd)
+  - Suporte multi-distro (Arch, Debian, Fedora)
+- **Script `test-pack-certificates-STANDALONE.sh`** (NOVO): Versão standalone para testes independentes com:
+  - Menu interativo
+  - Modo linha de comando
+  - Diagnóstico automático
+  - Sem dependências externas
+
 ## [3.2.0] - 2025-12-21 (Sessão 3 - Whisper e Filebot Finalizados)
 
 ### ✨ Adicionado
@@ -162,10 +180,10 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ### 📊 Estatísticas
 
 - **Bugs Corrigidos:** 8 (sessão 1) + 8 (sessão 2) + 2 (sessão 3) = **18 total**
-- **Novos Scripts:** 10 (sessão 1) + 0 (sessão 2) + 1 (sessão 3) = **11 total**
+- **Novos Scripts:** 10 (sessão 1) + 0 (sessão 2) + 1 (sessão 3) + 2 (sessão 4) = **13 total**
 - **Scripts Melhorados:** 5 (sessão 1) + 3 (sessão 2) + 1 (sessão 3) = **9 total**
-- **Novas Funcionalidades:** 8 (sessão 1) + 6 (sessão 2) + 2 (sessão 3) = **16 total**
-- **Documentos Atualizados:** 3 (sessão 1) + 6 (sessão 2) + 2 (sessão 3) = **11 total**
+- **Novas Funcionalidades:** 8 (sessão 1) + 6 (sessão 2) + 2 (sessão 3) + 4 (sessão 4) = **20 total**
+- **Documentos Atualizados:** 3 (sessão 1) + 6 (sessão 2) + 2 (sessão 3) + 2 (sessão 4) = **13 total**
 
 ### 🔄 Fluxo de Execução Completo
 
@@ -263,6 +281,6 @@ v3rtech-install.sh
 
 ---
 
-**Versão Atual:** 3.2.0
+**Versão Atual:** 3.3.0
 **Status:** ✅ Estável
 **Última Atualização:** 2025-12-21

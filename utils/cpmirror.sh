@@ -39,8 +39,7 @@ dest_dir="$mount_point"
   echo "#Espelhando de $src_dir → $dest_dir"
   log_message "Iniciando rsync de $src_dir para $dest_dir"
 
-  rsync -rt --copy-links --update --delete \
-  --no-perms --no-owner --no-group \
+  rsync -razv --update --delete \
   --info=progress2,name1 \
   --exclude-from=/usr/local/share/scripts/v3rtech-scripts/configs/exclude-list.txt "$src_dir" "$dest_dir" | \
   while IFS= read -r line; do
@@ -97,4 +96,3 @@ log_message "Sync concluído."
 # Conclusão
 log_message "Operação CPMIRROR concluída com sucesso"
 exit 0
-

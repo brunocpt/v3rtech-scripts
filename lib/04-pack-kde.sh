@@ -30,6 +30,8 @@ PKGS_KDE_BASE=(
     "kcalc"                    # Calculadora
     "kdeconnect"               # Integração com smartphones
     "kaccounts-providers"      # Provedores de contas online
+    "kwalletmanager"           # Wallet management tool
+    "kleopatra"                # Certificate Manager and Unified Crypto GUI
 )
 
 # Tenta instalar pacotes base
@@ -46,7 +48,9 @@ PKGS_KDE_OPTIONAL=(
     "kfind"                    # Ferramenta de busca de arquivos
     "krename"                  # Renomeador em lote
     "skanpage"                 # Scanner de documentos
+    "korganizer"               # Calendar and scheduling Program
     "falkon"                   # Navegador web do KDE (leve)
+    "partitionmanager"         # Gerenciador de partições
 )
 
 # Tenta instalar pacotes opcionais (não críticos se falharem)
@@ -65,7 +69,6 @@ log "INFO" "Removendo aplicações indesejadas (se existirem)..."
 APPS_TO_REMOVE=(
     "kmix"                     # Mixer de áudio antigo (substituído por plasma-pa)
     "ktorrent"                 # Cliente BitTorrent
-    "elisa"                    # Player de música padrão (às vezes indesejado)
     "calligra"                 # Calligra Suite (pesado)
 )
 
@@ -109,6 +112,6 @@ fi
 
 # Opcional: Desabilitar Baloo (indexador de arquivos) se desejar melhor performance
 # Descomente a linha abaixo se quiser desabilitar
-# balooctl disable 2>/dev/null && log "INFO" "Baloo desabilitado"
+balooctl disable 2>/dev/null && log "INFO" "Baloo desabilitado"
 
 log "SUCCESS" "Configuração do KDE Plasma concluída."

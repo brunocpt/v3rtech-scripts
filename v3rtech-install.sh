@@ -56,12 +56,12 @@ if [[ "$SCRIPT_DIR" != "$TARGET_DIR" ]]; then
     # ==============================================================================
     # VERIFICAÇÃO E INSTALAÇÃO DO RSYNC
     # ==============================================================================
-    
+
     log "INFO" "Verificando disponibilidade do rsync..."
-    
+
     if ! command -v rsync &>/dev/null; then
         log "WARN" "rsync não encontrado. Instalando..."
-        
+
         case "$DISTRO_FAMILY" in
             debian)
                 log "INFO" "Instalando rsync via apt..."
@@ -80,7 +80,7 @@ if [[ "$SCRIPT_DIR" != "$TARGET_DIR" ]]; then
                 die "Distro não suportada ou rsync não disponível"
                 ;;
         esac
-        
+
         # Verifica novamente
         if ! command -v rsync &>/dev/null; then
             die "rsync não pôde ser instalado. Não é possível continuar."
@@ -93,12 +93,12 @@ if [[ "$SCRIPT_DIR" != "$TARGET_DIR" ]]; then
     # ==============================================================================
     # CÓPIA COM RSYNC (MIRROR)
     # ==============================================================================
-    
+
     log "INFO" "Copiando arquivos para $TARGET_DIR usando rsync..."
-    
+
     # Cria diretório destino
     sudo mkdir -p "$TARGET_DIR"
-    
+
     # Usa rsync com opções de mirror:
     # -a: archive mode (preserva permissões, timestamps, etc)
     # -v: verbose
@@ -113,7 +113,7 @@ if [[ "$SCRIPT_DIR" != "$TARGET_DIR" ]]; then
         --exclude='.vscode' \
         --checksum \
         "$SCRIPT_DIR/" "$TARGET_DIR/"; then
-        
+
         log "SUCCESS" "Arquivos copiados com sucesso via rsync."
     else
         die "Falha ao copiar arquivos com rsync."
@@ -123,7 +123,7 @@ if [[ "$SCRIPT_DIR" != "$TARGET_DIR" ]]; then
     log "INFO" "Ajustando permissões..."
     sudo chown -R root:root "$TARGET_DIR"
     sudo chmod -R 755 "$TARGET_DIR"
-    
+
     # Garante que scripts em utils/ são executáveis
     sudo chmod +x "$TARGET_DIR/utils"/* 2>/dev/null || true
 
@@ -134,7 +134,7 @@ if [[ "$SCRIPT_DIR" != "$TARGET_DIR" ]]; then
 
     log "SUCCESS" "Instalação concluída em $TARGET_DIR."
     log "INFO" "Continuando execução a partir da mídia atual..."
-    
+
     # Atualiza BASE_DIR, LIB_DIR, etc para apontar para o novo local
     BASE_DIR="$TARGET_DIR"
     LIB_DIR="$TARGET_DIR/lib"
@@ -167,6 +167,7 @@ load_lib "$LIB_DIR/07-setup-user-dirs.sh"
 load_lib "$LIB_DIR/08-setup-maintenance.sh"
 load_lib "$LIB_DIR/09-setup-fstab-mounts.sh"
 load_lib "$LIB_DIR/10-setup-keyboard-shortcuts.sh"
+load_lib "$LIB_DIR/12-pack-certificates.sh"
 
 # --- UI: CONFIRMACAO DA DETECCAO ---
 # Requisito: Usuario deve confirmar se a deteccao esta certa

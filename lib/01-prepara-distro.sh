@@ -11,13 +11,13 @@ log "INFO" "Preparando dependências do sistema..."
 case "$DISTRO_FAMILY" in
     debian)
         $SUDO apt update
-        $SUDO apt install -y curl git yad aria2 gnupg ca-certificates rsync pipx zip unzip bc
+        $SUDO apt install -y curl git yad aria2 gnupg ca-certificates rsync pipx zip unzip bc bash-completion
         ;;
     arch)
-        $SUDO pacman -Sy --noconfirm --needed curl git yad aria2 base-devel rsync python-pipx zip unzip bc
+        $SUDO pacman -Sy --noconfirm --needed curl git yad aria2 base-devel rsync python-pipx zip unzip bc bash-completion
         ;;
     fedora)
-        $SUDO dnf install -y curl git yad aria2 rsync pipx zip unzip bc
+        $SUDO dnf install -y curl git yad aria2 rsync pipx zip unzip bc bash-completion
         ;;
 esac
 
