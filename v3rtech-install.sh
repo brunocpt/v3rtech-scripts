@@ -168,6 +168,7 @@ load_lib "$LIB_DIR/07-setup-user-dirs.sh"
 load_lib "$LIB_DIR/08-setup-maintenance.sh"
 load_lib "$LIB_DIR/09-setup-fstab-mounts.sh"
 load_lib "$LIB_DIR/10-setup-keyboard-shortcuts.sh"
+load_lib "$LIB_DIR/14-pack-essential-apps.sh"
 
 # --- UI: CONFIRMACAO DA DETECCAO ---
 # Requisito: Usuario deve confirmar se a deteccao esta certa
