@@ -37,7 +37,7 @@ add_app "TRUE" "Dev" "Git Tools" "Git e GitHub CLI" "git gh" "git github-cli" "g
 add_app "TRUE" "Dev" "Dev Utils" "JQ, CCache, Duf, Eza" "jq ccache duf eza" "jq ccache duf eza" "jq ccache duf eza" "" "native"
 
 # --- ESCRITÓRIO E PRODUTIVIDADE ---
-add_app "TRUE" "Escritório" "LibreOffice" "Suíte Office" "libreoffice" "libreoffice-fresh" "libreoffice" "org.libreoffice.LibreOffice" "native"
+add_app "TRUE" "Escritório" "LibreOffice" "Suíte Office" "libreoffice libreoffice-l10n-pt-br" "libreoffice-fresh libreoffice-fresh-pt-br" "libreoffice libreoffice-langpack-pt-BR" "org.libreoffice.LibreOffice" "native"
 add_app "TRUE" "Escritório" "Obsidian" "Knowledge Base" "" "obsidian" "obsidian" "md.obsidian.Obsidian" "flatpak"
 add_app "TRUE" "Escritório" "Calibre" "E-books" "calibre" "calibre" "calibre" "com.calibre_ebook.calibre" "native"
 add_app "TRUE" "Escritório" "Zotero" "Gestão Bibliográfica" "" "zotero-bin" "zotero" "org.zotero.Zotero" "flatpak"
