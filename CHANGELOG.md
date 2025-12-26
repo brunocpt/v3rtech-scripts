@@ -4,6 +4,14 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 
 ---
 
+## [3.7.0] - 2025-12-26
+### ✨ Adicionado
+- **Geany como App Essencial:** O editor Geany e seus plugins agora são instalados como parte do pacote de aplicativos essenciais em `lib/14-pack-essential-apps.sh` (Debian e Arch).
+
+### 🔧 Alterado
+- **Caminho de Chave SSH:** Atualizado o caminho da chave SSH em `configs/aliases.geral` para o novo padrão de diretórios.
+- **Segurança no Script de Atualização:** `utils/atualiza_scripts.sh` agora aplica permissões mais restritivas (chmod 400/700) e garante ownership correto para o diretório de chaves copiadas.
+
 ## [3.6.0] - 2025-12-22
 ### 🐛 Corrigido
 - **Falhas de Instalação em Debian:** Corrigido problema crítico onde aplicativos via repositórios de terceiros não eram encontrados e instalações via Flatpak falhavam em cascata.
@@ -401,7 +409,7 @@ Análise completa do projeto v3rtech-scripts para identificação de bugs e opor
 
 ---
 
-**Versão Atual:** 3.5.0  
+**Versão Atual:** 3.7.0  
 **Status:** ✅ Estável  
-**Última Atualização:** 2025-12-21  
+**Última Atualização:** 2025-12-26  
 **Desenvolvedor:** Bruno (v3rtech)

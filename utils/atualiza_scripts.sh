@@ -9,6 +9,7 @@
 # === Variáveis de Caminho ===
 # Origem Local (Rede/Cloud)
 LOCAL_SRC="/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts"
+KEYS_DIR="/mnt/trabalho/Cloud/Compartilhado/Linux/config/ssh-keys"
 
 # Origem Remota (GitHub)
 REPO_URL="https://github.com/brunocpt/v3rtech-scripts.git"
@@ -128,13 +129,17 @@ fi
 
 # === 4. Exceções de Segurança (Chaves SSH/GPG) ===
 # Se existirem chaves sensíveis copiadas, garante que só o dono original ou root leia
-KEYS_DIR="$SYSTEM_DST/configs/ssh-keys"
 if [ -d "$KEYS_DIR" ]; then
     echo "[SEC] Ajustando permissões de chaves SSH..."
     # Tenta definir o dono para o usuário real (SUDO_USER) se for para uso pessoal,
     # ou root se for servidor. Como é /usr/local/share, root 600 é mais seguro.
+    #sudo chmod 700 "$KEYS_DIR"
+    #sudo find "$KEYS_DIR" -type f -exec chmod 600 {} +
+
+    echo "Protegendo: $KEYS_DIR"
+    sudo chown -R "$OWNER:$GROUP" "$KEYS_DIR"
+    sudo find "$KEYS_DIR" -type f -exec chmod 400 {} +
     sudo chmod 700 "$KEYS_DIR"
-    sudo find "$KEYS_DIR" -type f -exec chmod 600 {} +
 fi
 
 echo ""

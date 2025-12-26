@@ -185,7 +185,7 @@ alias rc-up-condominio='rclone -u -q -P --exclude-from '$RC_EXCLUDE' sync /mnt/t
 # ==============================================================================
 # 7. SSH & CONEXÕES REMOTAS
 # ==============================================================================
-SSH_KEY="/usr/local/share/scripts/config/ssh-keys/id_rsa"
+SSH_KEY="/mnt/trabalho/Cloud/Compartilhado/Linux/config/ssh-keys/id_rsa"
 
 # AWS & Cloudron
 alias aws.cloudron='ssh -i '$SSH_KEY' ubuntu@3.215.113.99'

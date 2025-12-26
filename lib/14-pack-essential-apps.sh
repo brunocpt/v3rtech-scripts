@@ -32,6 +32,7 @@ case "$DISTRO_FAMILY" in
           guake \
           duf \
           eza \
+          geany geany-plugins \
           zram-tools \
           imagemagick \
           cups \
@@ -76,6 +77,7 @@ case "$DISTRO_FAMILY" in
           lsb-release \
           bchunk \
           guake \
+          geany geany-plugins \
           jq \
           gutenprint \
           foomatic-db-engine \
