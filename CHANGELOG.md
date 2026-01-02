@@ -4,8 +4,14 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 
 ---
 
+
 ## [3.8.0] - 2026-01-02
 ### ✨ Adicionado
+- **Suporte ICP-Brasil:** Novo script `utils/pack-icp-brasil.sh` para instalação universal da cadeia de certificados ICP-Brasil.
+  - Compatível com Arch, Debian, Ubuntu e Fedora.
+  - Instalação automática do Assinador SERPRO e Lacuna WebPKI.
+  - Importação automática de certificados para keystores Java.
+  - Suporte a diretórios de certificados pessoais personalizados.
 - **Suporte NVIDIA Wayland Universal:** Novo script `utils/pack-nvidia-wayland.sh` para instalação robusta de drivers NVIDIA com foco em Wayland.
   - Compatível com Arch, Debian, Ubuntu, Fedora e openSUSE.
   - Detecção automática de GPU, Distro e Bootloader (GRUB, systemd-boot).
@@ -22,6 +28,10 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 - **Correções de Caminhos:** Atualizado caminho `RC_EXCLUDE` em `configs/aliases.geral`.
 - **Licenciamento Filebot:** Simplificação da lógica de aplicação de licença.
 - **Limpeza GNOME:** Removida lógica legada de restauração de configs do Wavebox e Zotero.
+
+
+### 🐛 Corrigido
+- **Permissões de Execução:** Scripts na pasta `utils/` (`clean-path.sh`, `video-converter-gui.sh`, etc) agora têm permissão de execução (+x) por padrão.
 
 ---
 
