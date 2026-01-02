@@ -63,7 +63,7 @@ add_app "FALSE" "Design" "WebP Converter" "Conversor WebP" "" "" "" "io.itstermi
 add_app "TRUE" "Design" "ImageMagick" "Manipulação CLI" "imagemagick" "imagemagick" "imagemagick" "" "native"
 
 # --- MULTIMÍDIA ---
-add_app "TRUE" "Multimídia" "VLC" "Player" "vlc" "vlc" "vlc" "org.videolan.VLC" "native"
+add_app "TRUE" "Multimídia" "VLC" "Player" "vlc" "vlc vlc-plugins-all" "vlc" "org.videolan.VLC" "native"
 add_app "TRUE" "Multimídia" "OBS Studio" "Streaming" "obs-studio" "obs-studio" "obs-studio" "com.obsproject.Studio" "native"
 add_app "FALSE" "Multimídia" "Spotify" "Música" "spotify-client" "spotify" "spotify-client" "com.spotify.Client" "flatpak"
 add_app "TRUE" "Multimídia" "Filebot" "Organizador" "" "" "" "net.filebot.FileBot" "flatpak"

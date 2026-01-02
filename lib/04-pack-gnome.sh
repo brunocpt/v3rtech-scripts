@@ -45,6 +45,7 @@ PKGS_GNOME_OPTIONAL=(
     "gnome-maps"               # Aplicativo de mapas
     "gnome-music"              # Player de música
     "gnome-weather"            # Aplicativo de clima
+    "variety"                  # Alternador de pano de fundo
 )
 
 # Tenta instalar pacotes opcionais (não críticos se falharem)
@@ -54,8 +55,37 @@ for pkg in "${PKGS_GNOME_OPTIONAL[@]}"; do
     fi
 done
 
+# Variety
+  if [ -f "/usr/local/share/scripts/v3rtech-scripts/configs/variety.conf" ]; then
+    mkdir -p $HOME/.config/variety/
+    rm $HOME/.config/variety/variety.conf
+    cp /usr/local/share/scripts/v3rtech-scripts/configs/variety.conf $HOME/.config/variety/
+  fi
+
 # ==============================================================================
-# 3. REMOÇÃO DE BLOATWARE (Se existirem)
+# 3. INSTALAÇÃO DE EXTENSÕES PARA O GNOME SHELL (Melhorias)
+# ==============================================================================
+
+log "INFO" "Instalando extensões do GNOME SHELL..."
+
+PKGS_GNOME_EXTENSIONS=(
+    "gnome-shell-extension-dash-to-panel"
+    "gnome-shell-extension-desktop-icons-ng"
+    "gnome-shell-extension-dash-to-dock"
+    "gnome-shell-extension-tray-icons-reloaded"
+    "gnome-shell-extension-appindicator"
+)
+
+# Tenta instalar pacotes opcionais (não críticos se falharem)
+for pkg in "${PKGS_GNOME_EXTENSIONS[@]}"; do
+    if ! i "$pkg" 2>/dev/null; then
+        log "WARN" "Não foi possível instalar $pkg (opcional)"
+    fi
+done
+
+
+# ==============================================================================
+# 4. REMOÇÃO DE BLOATWARE (Se existirem)
 # ==============================================================================
 
 log "INFO" "Removendo aplicações indesejadas (se existirem)..."
@@ -100,24 +130,6 @@ gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true 2>/dev/n
 # Screenshot (Salvar em Downloads)
 if [ -d "$REAL_HOME/Downloads" ]; then
     gsettings set org.gnome.gnome-screenshot auto-save-directory "file://$REAL_HOME/Downloads" 2>/dev/null || true
-fi
-
-# ==============================================================================
-# 5. RESTAURAÇÃO DE CONFIGURAÇÕES PERSONALIZADAS
-# ==============================================================================
-
-log "INFO" "Verificando configurações personalizadas..."
-
-# Wavebox
-if command -v wavebox &>/dev/null; then
-    log "INFO" "Wavebox detectado. Verificando backup de config..."
-    restore_zip_config "$CONFIGS_DIR/wavebox-$REAL_USER.zip" "$REAL_HOME/.config"
-fi
-
-# Zotero
-if command -v zotero &>/dev/null; then
-    log "INFO" "Zotero detectado. Verificando backup de config..."
-    restore_zip_config "$CONFIGS_DIR/zotero-$REAL_USER.zip" "$REAL_HOME"
 fi
 
 log "SUCCESS" "Configuração do GNOME concluída."

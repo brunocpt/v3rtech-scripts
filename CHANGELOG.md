@@ -4,6 +4,27 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 
 ---
 
+## [3.8.0] - 2026-01-02
+### ✨ Adicionado
+- **Suporte NVIDIA Wayland Universal:** Novo script `utils/pack-nvidia-wayland.sh` para instalação robusta de drivers NVIDIA com foco em Wayland.
+  - Compatível com Arch, Debian, Ubuntu, Fedora e openSUSE.
+  - Detecção automática de GPU, Distro e Bootloader (GRUB, systemd-boot).
+  - Configuração automática de parâmetros do Kernel (`nvidia-drm.modeset=1`) e variáveis de ambiente.
+  - Configuração de `mkinitcpio` e hooks do Pacman (Arch).
+- **Integração Variety Wallpaper:**
+  - Instalação automática do Variety no script GNOME.
+  - Configuração otimizada `configs/variety.conf` distribuída automaticamente.
+- **Extensões GNOME:** Instalação automática de extensões essenciais em `lib/04-pack-gnome.sh`:
+  - `dash-to-panel`, `desktop-icons-ng`, `dash-to-dock`, `tray-icons-reloaded`, `appindicator`.
+
+### 🔧 Alterado
+- **VLC no Arch Linux:** Instalação agora inclui `vlc-plugins-all` para suporte completo a codecs.
+- **Correções de Caminhos:** Atualizado caminho `RC_EXCLUDE` em `configs/aliases.geral`.
+- **Licenciamento Filebot:** Simplificação da lógica de aplicação de licença.
+- **Limpeza GNOME:** Removida lógica legada de restauração de configs do Wavebox e Zotero.
+
+---
+
 ## [3.7.0] - 2025-12-26
 ### ✨ Adicionado
 - **Geany como App Essencial:** O editor Geany e seus plugins agora são instalados como parte do pacote de aplicativos essenciais em `lib/14-pack-essential-apps.sh` (Debian e Arch).
@@ -400,16 +421,16 @@ Análise completa do projeto v3rtech-scripts para identificação de bugs e opor
 
 | Métrica | Total |
 |---------|-------|
-| Bugs Corrigidos | **20** |
-| Novos Scripts | **13** |
-| Scripts Melhorados | **10** |
-| Novas Funcionalidades | **22** |
+| Bugs Corrigidos | **21** |
+| Novos Scripts | **14** |
+| Scripts Melhorados | **14** |
+| Novas Funcionalidades | **25** |
 | Documentos Criados | **14** |
-| Versões Lançadas | **6** |
+| Versões Lançadas | **7** |
 
 ---
 
-**Versão Atual:** 3.7.0  
+**Versão Atual:** 3.8.0  
 **Status:** ✅ Estável  
-**Última Atualização:** 2025-12-26  
+**Última Atualização:** 2026-01-02  
 **Desenvolvedor:** Bruno (v3rtech)

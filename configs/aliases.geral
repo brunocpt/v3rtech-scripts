@@ -147,7 +147,6 @@ alias dlogs='sudo docker logs --follow'
 # Flatpak
 alias fpr='flatpak run'
 alias fpi='sudo flatpak install -y'
-# CORREÇÃO: Renomeado de 'fpr' para 'fpu' para evitar conflito com 'flatpak run'
 alias fpu='sudo flatpak uninstall -y'
 alias fps='flatpak search'
 alias fpl='flatpak list'
@@ -156,7 +155,7 @@ alias fpl='flatpak list'
 # 6. RCLONE & CLOUD SYNC
 # ==============================================================================
 # Lista de exclusão padrão
-RC_EXCLUDE="/usr/local/share/scripts/Geral/exclude-list.txt"
+RC_EXCLUDE="/usr/local/share/scripts/v3rtech-scripts/configs/exclude-list.txt"
 
 # Helpers
 rc_copy() {
