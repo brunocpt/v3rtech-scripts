@@ -87,19 +87,19 @@ fi
 # Verifica se o bloco de aliases já existe
 if grep -qF "$ALIAS_MARKER" "$BASHRC_FILE"; then
     log "INFO" "Aliases já configurados em $BASHRC_FILE. Removendo versão antiga..."
-    
+
     # Remove o bloco antigo (entre MARKER e MARKER_END)
     # Usa sed para remover linhas entre os marcadores
     local TMPFILE
     TMPFILE=$(mktemp)
-    
+
     # Copia o arquivo removendo o bloco antigo
     sed "/$ALIAS_MARKER/,/$ALIAS_MARKER_END/d" "$BASHRC_FILE" > "$TMPFILE"
-    
+
     # Copia de volta
     cp "$TMPFILE" "$BASHRC_FILE"
     rm -f "$TMPFILE"
-    
+
     log "INFO" "Versão antiga removida. Adicionando versão atualizada..."
 else
     log "INFO" "Aliases não encontrados. Adicionando..."
@@ -204,5 +204,48 @@ if [ -f "$CONFIGS_DIR/$REAL_USER-user-dirs" ]; then
 fi
 chown "$REAL_USER:$REAL_USER" "$BASHRC_FILE"
 log "SUCCESS" "Configuração de bookmarks e user-dirs concluída."
+
+# --- RESTAURAÇÃO DE ATALHOS DE TECLADO
+echo "Restaurando atalhos de teclado personalizados..."
+BACKUP_DIR="/usr/local/share/scripts/v3rtech-scripts/backups"
+DE=$(echo "$XDG_CURRENT_DESKTOP" | tr '[:upper:]' '[:lower:]')
+
+case "$DE" in
+  *plasma*|*kde*)
+    ZIP="$BACKUP_DIR/$USER-atalhos-kde.zip"
+    if [ -f $ZIP ]; then
+      unzip -o $ZIP -d ~/.config/
+      chown $USER:$USER ~/.config/k*shortcut* 2>/dev/null
+      echo "Atalhos restaurados para KDE/Plasma."
+    else
+      echo "Backup de atalhos KDE não encontrado."
+    fi
+    ;;
+  *gnome*|*budgie*)
+    ZIP="$BACKUP_DIR/$USER-atalhos-gnome.zip"
+    if [ -f $ZIP ]; then
+      unzip -p $ZIP custom-keybindings.dconf | dconf load /org/gnome/settings-daemon/plugins/media-keys/
+      echo "Atalhos restaurados para GNOME/Budgie."
+    else
+      echo "Backup de atalhos GNOME/Budgie não encontrado."
+    fi
+    ;;
+  *xfce*)
+    ZIP="$BACKUP_DIR/$USER-atalhos-xfce.zip"
+    if [ -f $ZIP ]; then
+      unzip -o $ZIP -d ~/.config/xfce4/xfconf/xfce-perchannel-xml/
+      chown $USER:$USER ~/.config/xfce4/xfconf/xfce-perchannel-xml/*.xml 2>/dev/null
+      xfce4-panel -r &
+      echo "Atalhos restaurados para XFCE."
+    else
+      echo "Backup de atalhos XFCE não encontrado."
+    fi
+    ;;
+  *)
+    echo "Ambiente de desktop não suportado para restauração de atalhos: $DE"
+    ;;
+esac
+
+
 
 log "SUCCESS" "Configuração de shell concluída."

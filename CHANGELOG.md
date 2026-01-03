@@ -5,6 +5,13 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.8.1] - 2026-01-03
+### 🔧 Corrigido
+- **Permissões de Execução:** Correção massiva de permissões (+x) para scripts utilitários em `utils/` e `resources/` para garantir funcionamento correto em ambientes compartilhados.
+- **Estabilização:** Validação final dos scripts `pack-icp-brasil.sh` e `pack-nvidia-wayland.sh`.
+
+---
+
 ## [3.8.0] - 2026-01-02
 ### ✨ Adicionado
 - **Suporte ICP-Brasil:** Novo script `utils/pack-icp-brasil.sh` para instalação universal da cadeia de certificados ICP-Brasil.
@@ -431,16 +438,16 @@ Análise completa do projeto v3rtech-scripts para identificação de bugs e opor
 
 | Métrica | Total |
 |---------|-------|
-| Bugs Corrigidos | **21** |
+| Bugs Corrigidos | **22** |
 | Novos Scripts | **14** |
-| Scripts Melhorados | **14** |
+| Scripts Melhorados | **15** |
 | Novas Funcionalidades | **25** |
 | Documentos Criados | **14** |
-| Versões Lançadas | **7** |
+| Versões Lançadas | **8** |
 
 ---
 
-**Versão Atual:** 3.8.0  
+**Versão Atual:** 3.8.1  
 **Status:** ✅ Estável  
-**Última Atualização:** 2026-01-02  
+**Última Atualização:** 2026-01-03  
 **Desenvolvedor:** Bruno (v3rtech)

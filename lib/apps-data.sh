@@ -19,6 +19,7 @@ add_app "TRUE" "Internet" "Microsoft Edge" "Navegador Microsoft" "microsoft-edge
 # --- NUVEM E TRANSFERÊNCIA ---
 add_app "TRUE" "Nuvem" "Nextcloud" "Sync Nextcloud" "nextcloud-desktop" "nextcloud-client" "nextcloud-client" "com.nextcloud.desktopclient.nextcloud" "native"
 add_app "FALSE" "Nuvem" "Filezilla" "Cliente FTP" "filezilla" "filezilla" "filezilla" "org.filezilla.FileZilla" "native"
+add_app "TRUE" "Nuvem" "Packet" "Simple, fast file sharing between Linux and Android" "" "" "" "io.github.nozwock.Packet" "flatpak"
 
 # --- COMUNICAÇÃO ---
 add_app "FALSE" "Comunicação" "Discord" "Chat e Voz" "discord" "discord" "discord" "com.discordapp.Discord" "flatpak"
@@ -32,19 +33,19 @@ add_app "FALSE" "Dev" "DBeaver" "Cliente SQL" "dbeaver-ce" "dbeaver" "dbeaver" "
 add_app "FALSE" "Dev" "Postman" "Plataforma API" "postman" "postman-bin" "postman" "com.getpostman.Postman" "native"
 add_app "FALSE" "Dev" "Terminator" "Terminal Avançado" "terminator" "terminator" "terminator" "" "native"
 add_app "TRUE" "Dev" "Guake" "Terminal Drop-down" "guake" "guake" "guake" "" "native"
-#add_app "TRUE" "Dev" "Geany" "Editor Leve" "geany geany-plugins" "geany geany-plugins" "geany geany-plugins" "" "native"
+add_app "TRUE" "Dev" "Geany" "Editor Leve" "geany geany-plugins" "geany geany-plugins" "geany geany-plugins" "" "native"
 add_app "TRUE" "Dev" "Git Tools" "Git e GitHub CLI" "git gh" "git github-cli" "git gh" "" "native"
 add_app "TRUE" "Dev" "Dev Utils" "JQ, CCache, Duf, Eza" "jq ccache duf eza" "jq ccache duf eza" "jq ccache duf eza" "" "native"
 
 # --- ESCRITÓRIO E PRODUTIVIDADE ---
 add_app "TRUE" "Escritório" "LibreOffice" "Suíte Office" "libreoffice libreoffice-l10n-pt-br" "libreoffice-fresh libreoffice-fresh-pt-br" "libreoffice libreoffice-langpack-pt-BR" "org.libreoffice.LibreOffice" "native"
 add_app "TRUE" "Escritório" "Obsidian" "Knowledge Base" "" "obsidian" "obsidian" "md.obsidian.Obsidian" "flatpak"
-add_app "TRUE" "Escritório" "Calibre" "E-books" "calibre" "calibre" "calibre" "com.calibre_ebook.calibre" "native"
+add_app "TRUE" "Escritório" "Calibre" "E-books" "calibre" "calibre" "calibre" "com.calibre_ebook.calibre" "flatpak"
 add_app "TRUE" "Escritório" "Zotero" "Gestão Bibliográfica" "" "zotero-bin" "zotero" "org.zotero.Zotero" "flatpak"
 add_app "TRUE" "Escritório" "XMind" "Mapas Mentais" "" "xmind" "xmind" "net.xmind.XMind8" "flatpak"
 add_app "TRUE" "Escritório" "Camunda Modeler" "Modelagem BPMN" "" "camunda-modeler" "camunda-modeler" "" "native"
 add_app "TRUE" "Escritório" "Draw.io" "Diagramas" "drawio" "drawio-desktop" "drawio" "com.jgraph.drawio.desktop" "native"
-# FIX: Garante 'aspell-pt-br' pois 'aspell-pt' pode falhar
+add_app "TRUE" "Escritório" "PDF Adobe Reader" "Leitor de PDF Adobe Reader" "" "" "" "com.adobe.Reader" "flatpak"
 add_app "TRUE" "Escritório" "Corretores PT-BR" "Dicionários" "aspell-pt-br hunspell-pt-br mythes-pt-br hyphen-pt-br wportuguese" "aspell-pt hunspell-pt mythes-pt hyphen-pt" "aspell-pt hunspell-pt mythes-pt hyphen-pt" "" "native"
 
 # --- PDF E OCR ---

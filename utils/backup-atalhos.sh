@@ -3,7 +3,7 @@
 
 USER=$(logname)
 HOME_DIR=$(eval echo "~$USER")
-DEST="/mnt/trabalho/Cloud/Compartilhado/Linux/config"
+DEST="/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/backups"
 DE=$(echo "$XDG_CURRENT_DESKTOP" | tr '[:upper:]' '[:lower:]')
 
 TMP="$DEST/tmp-$USER"
