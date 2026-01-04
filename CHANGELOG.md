@@ -5,6 +5,13 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.8.2] - 2026-01-04
+### 🐛 Corrigido
+- **Auto-instalação (Rsync):** Corrigido bug onde a instalação falhava em sistemas limpos (como Arch Linux minimal) devido à falta do `rsync` e da variável `DISTRO_FAMILY` não inicializada no momento da verificação. Adicionada detecção de fallback para garantir a instalação correta do rsync.
+
+### 🔧 Alterado
+- **Apps Data:** Alterado método de instalação do "Sejda PDF" de Flatpak para Native/AUR em `lib/apps-data.sh`.
+
 ## [3.8.1] - 2026-01-03
 ### 🔧 Corrigido
 - **Permissões de Execução:** Correção massiva de permissões (+x) para scripts utilitários em `utils/` e `resources/` para garantir funcionamento correto em ambientes compartilhados.
@@ -447,7 +454,7 @@ Análise completa do projeto v3rtech-scripts para identificação de bugs e opor
 
 ---
 
-**Versão Atual:** 3.8.1  
+**Versão Atual:** 3.8.2  
 **Status:** ✅ Estável  
-**Última Atualização:** 2026-01-03  
+**Última Atualização:** 2026-01-04  
 **Desenvolvedor:** Bruno (v3rtech)

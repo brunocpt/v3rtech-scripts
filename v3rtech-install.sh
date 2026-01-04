@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: v3rtech-install.sh (Script Mestre Consolidado)
-# Versão: 1.6.3
+# Versão: 3.8.2
 #
 # Descrição: Orquestrador principal da automação de pós-instalação.
 # Novidades: Auto-instalação no disco, Confirmação de Distro e VM Hook.
@@ -60,6 +60,21 @@ if [[ "$SCRIPT_DIR" != "$TARGET_DIR" ]]; then
 
     if ! command -v rsync &>/dev/null; then
         log "WARN" "rsync não encontrado. Instalando..."
+
+        # [HOTFIX] Se DISTRO_FAMILY não estiver definido (estágio inicial), detecta agora.
+        if [ -z "$DISTRO_FAMILY" ] && [ -f /etc/os-release ]; then
+            source /etc/os-release
+            local_id="${ID,,}"
+            local_id_like="${ID_LIKE,,}"
+            
+            if [[ "$local_id" == "arch" || "$local_id_like" =~ "arch" ]]; then
+                DISTRO_FAMILY="arch"
+            elif [[ "$local_id" == "debian" || "$local_id_like" =~ "debian" || "$local_id" == "ubuntu" || "$local_id_like" =~ "ubuntu" ]]; then
+                DISTRO_FAMILY="debian"
+            elif [[ "$local_id" == "fedora" || "$local_id_like" =~ "fedora" ]]; then
+                DISTRO_FAMILY="fedora"
+            fi
+        fi
 
         case "$DISTRO_FAMILY" in
             debian)

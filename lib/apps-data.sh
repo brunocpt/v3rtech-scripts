@@ -49,7 +49,7 @@ add_app "TRUE" "Escritório" "PDF Adobe Reader" "Leitor de PDF Adobe Reader" "" 
 add_app "TRUE" "Escritório" "Corretores PT-BR" "Dicionários" "aspell-pt-br hunspell-pt-br mythes-pt-br hyphen-pt-br wportuguese" "aspell-pt hunspell-pt mythes-pt hyphen-pt" "aspell-pt hunspell-pt mythes-pt hyphen-pt" "" "native"
 
 # --- PDF E OCR ---
-add_app "TRUE" "Escritório" "Sejda PDF" "Editor PDF Desktop" "" "sejda-desktop" "sejda-desktop" "com.sejda.Sejda" "flatpak"
+add_app "TRUE" "Escritório" "Sejda PDF" "Editor PDF Desktop" "" "sejda-desktop" "sejda-desktop" "com.sejda.Sejda" "native"
 add_app "TRUE" "Escritório" "OCRmyPDF" "OCR em PDFs" "ocrmypdf ghostscript jbig2dec" "ocrmypdf ghostscript jbig2dec" "ocrmypdf ghostscript jbig2dec" "" "native"
 add_app "TRUE" "Escritório" "Tesseract OCR" "Motor OCR" "tesseract-ocr tesseract-ocr-por tesseract-ocr-eng" "tesseract tesseract-data-por tesseract-data-eng" "tesseract tesseract-langpack-por" "" "native"
 
