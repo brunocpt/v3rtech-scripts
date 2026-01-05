@@ -5,6 +5,18 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.9.0] - 2026-01-05
+### ✨ Adicionado
+- **Otimização de Armazenamento:** Novo script inteligente `utils/optimize-fstab.sh` integrado ao sistema de manutenção.
+  - **Btrfs:** Aplica automaticamente `compress=zstd:3`, `space_cache=v2`, `noatime` e `ssd` (se detectado disco sólido).
+  - **Ext4:** Aplica `noatime`, `lazytime` e `commit=60`.
+  - **Segurança:** Backup automático (`fstab.bak`) e preservação de UUIDs/Labels.
+  - **Auto-elevação:** O script detecta se não é root e solicita `sudo` automaticamente.
+- **Trim Automático:** Habilitação do `fstrim.timer` no módulo de manutenção para performance de SSDs.
+
+### 🔧 Alterado
+- **Script de Manutenção (`lib/08-setup-maintenance.sh`):** Agora executa o otimizador de fstab e recarrega o systemd automaticamente.
+
 ## [3.8.3] - 2026-01-05
 ### ✨ Adicionado
 - **Suporte exFAT:** Adicionado pacote `exfatprogs` ao `lib/14-pack-essential-apps.sh` para suporte nativo a sistema de arquivos exFAT no GNOME Disks e outros utilitários.
@@ -461,7 +473,7 @@ Análise completa do projeto v3rtech-scripts para identificação de bugs e opor
 
 ---
 
-**Versão Atual:** 3.8.2  
+**Versão Atual:** 3.9.0  
 **Status:** ✅ Estável  
 **Última Atualização:** 2026-01-04  
 **Desenvolvedor:** Bruno (v3rtech)

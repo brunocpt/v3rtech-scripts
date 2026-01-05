@@ -280,4 +280,39 @@ $SUDO sysctl --system > /dev/null 2>&1 || true
 
 log "SUCCESS" "Otimizações de sistema aplicadas"
 
+# ==============================================================================
+# 6. OTIMIZAÇÕES DE ARMAZENAMENTO (FSTAB & FSTRIM)
+# ==============================================================================
+
+log "INFO" "Otimizando fstab e armazenamento..."
+
+# Executa otimização de fstab
+OPTIMIZE_SCRIPT="$UTILS_DIR/optimize-fstab.sh"
+
+if [ -f "$OPTIMIZE_SCRIPT" ]; then
+    log "INFO" "Executando otimizador de fstab..."
+    if $SUDO "$OPTIMIZE_SCRIPT"; then
+        log "SUCCESS" "✓ Fstab otimizado"
+        # Recarrega systemd daemon para processar mudanças no fstab (se necessário mount -a faria o remount)
+        $SUDO systemctl daemon-reload
+        # Opcional: Remount para aplicar sem reiniciar? 
+        # mount -o remount / 2>/dev/null || true
+        # Mas fstab é majoritariamente para o próximo boot, exceto lazytime/commit que podem ser remount.
+        # Vamos manter simples.
+    else
+        log "WARN" "⚠ Falha ao executar otimizador de fstab"
+    fi
+else
+    log "WARN" "Script de otimização não encontrado: $OPTIMIZE_SCRIPT"
+fi
+
+# Habilita fstrim.timer
+log "INFO" "Habilitando fstrim.timer..."
+if $SUDO systemctl enable --now fstrim.timer; then
+    log "SUCCESS" "✓ fstrim.timer habilitado"
+else
+    log "WARN" "⚠ Falha ao habilitar fstrim.timer"
+fi
+
 log "SUCCESS" "Configuração de manutenção concluída."
+
