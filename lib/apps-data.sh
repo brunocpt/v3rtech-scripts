@@ -69,7 +69,7 @@ add_app "TRUE" "Multimídia" "OBS Studio" "Streaming" "obs-studio" "obs-studio" 
 add_app "FALSE" "Multimídia" "Spotify" "Música" "spotify-client" "spotify" "spotify-client" "com.spotify.Client" "flatpak"
 add_app "TRUE" "Multimídia" "Filebot" "Organizador" "" "" "" "net.filebot.FileBot" "flatpak"
 add_app "FALSE" "Multimídia" "MuseAmp" "Player estilo Winamp" "" "" "" "io.github.tapscodes.MuseAmp" "flatpak"
-add_app "TRUE" "Multimídia" "MusicBrainz Picard" "Tagger de Música" "picard" "picard" "picard" "org.musicbrainz.Picard" "native"
+add_app "TRUE" "Multimídia" "MusicBrainz Picard" "Tagger de Música" "picard libchromaprint-tools mp3gain ffmpeg" "picard chromaprint ffmpeg mp3gain puddletag" "picard chromaprint-tools mp3gain ffmpeg" "org.musicbrainz.Picard" "native"
 add_app "TRUE" "Multimídia" "Avidemux" "Editor de Vídeo" "avidemux" "avidemux-qt" "avidemux" "org.avidemux.Avidemux" "native"
 add_app "TRUE" "Multimídia" "MKVToolNix" "Ferramentas MKV" "mkvtoolnix" "mkvtoolnix-cli mkvtoolnix-gui" "mkvtoolnix" "org.bunkus.mkvtoolnix-gui" "native"
 

@@ -5,6 +5,13 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.8.3] - 2026-01-05
+### ✨ Adicionado
+- **Suporte exFAT:** Adicionado pacote `exfatprogs` ao `lib/14-pack-essential-apps.sh` para suporte nativo a sistema de arquivos exFAT no GNOME Disks e outros utilitários.
+
+### 🔧 Alterado
+- **MusicBrainz Picard:** Dependências aprimoradas no `lib/apps-data.sh` incluindo `chromaprint` (fingerprinting), `ffmpeg` e `mp3gain` para funcionalidade completa de tagging e análise de áudio.
+
 ## [3.8.2] - 2026-01-04
 ### 🐛 Corrigido
 - **Auto-instalação (Rsync):** Corrigido bug onde a instalação falhava em sistemas limpos (como Arch Linux minimal) devido à falta do `rsync` e da variável `DISTRO_FAMILY` não inicializada no momento da verificação. Adicionada detecção de fallback para garantir a instalação correta do rsync.

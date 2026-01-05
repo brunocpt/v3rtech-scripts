@@ -54,6 +54,7 @@ case "$DISTRO_FAMILY" in
           printer-driver-ptouch \
           printer-driver-m2300w \
           printer-driver-all \
+          exfatprogs \
           ; do
           i "$pkg"  || echo "Falha ao instalar $pkg"
         done
@@ -91,6 +92,7 @@ case "$DISTRO_FAMILY" in
           scangearmp2 \
           cnrdrvcups-lb \
           cups-bjnp \
+          exfatprogs \
           ; do
           i "$pkg"  || echo "Falha ao instalar $pkg"
         done
@@ -109,6 +111,7 @@ case "$DISTRO_FAMILY" in
           hyphen-en \
           bat thefuck \
           duf eza exa \
+          exfatprogs \
           ; do
           i "$pkg"  || echo "Falha ao instalar $pkg"
         done
