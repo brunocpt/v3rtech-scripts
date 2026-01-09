@@ -5,6 +5,15 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.9.1] - 2026-01-09
+### ✨ Adicionado
+- **BrowserOS:** Adicionado "BrowserOS" (The Open source agentic browser) à lista de aplicativos de Internet em `lib/apps-data.sh`.
+- **Backup/Restore:** Suporte a BrowserOS (Nativo e Flatpak) adicionado aos scripts de backup (`utils/configs-zip.sh`) e restauração (`utils/restaura-config.sh`).
+
+### 🔧 Alterado
+- **Padrões de Navegador:** Desabilitada a instalação padrão para Vivaldi, Opera e Microsoft Edge em `lib/apps-data.sh` (flag alterada para "FALSE").
+- **Permissões de Arquivo:** Padronização de permissões (remoção de bit executável desnecessário) em diversos scripts nas pastas `lib/` e `utils/`.
+
 ## [3.9.0] - 2026-01-05
 ### ✨ Adicionado
 - **Otimização de Armazenamento:** Novo script inteligente `utils/optimize-fstab.sh` integrado ao sistema de manutenção.

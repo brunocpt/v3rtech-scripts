@@ -12,9 +12,10 @@ add_app "TRUE" "Internet" "Wavebox" "Navegador focado em trabalho" "wavebox" "wa
 add_app "TRUE" "Internet" "Google Chrome" "Navegador do Google" "google-chrome-stable" "google-chrome" "google-chrome-stable" "com.google.Chrome" "native"
 add_app "TRUE" "Internet" "Firefox" "Navegador Mozilla" "firefox" "firefox" "firefox" "org.mozilla.firefox" "native"
 add_app "TRUE" "Internet" "Brave" "Navegador Privacidade" "brave-browser" "brave-bin" "brave-browser" "com.brave.Browser" "native"
-add_app "TRUE" "Internet" "Vivaldi" "Navegador Power User" "vivaldi-stable" "vivaldi" "vivaldi" "com.vivaldi.Vivaldi" "native"
-add_app "TRUE" "Internet" "Opera" "Navegador com VPN" "" "opera" "" "com.opera.Opera" "native"
-add_app "TRUE" "Internet" "Microsoft Edge" "Navegador Microsoft" "microsoft-edge-stable" "microsoft-edge-stable-bin" "microsoft-edge-stable" "com.microsoft.Edge" "native"
+add_app "FALSE" "Internet" "Vivaldi" "Navegador Power User" "vivaldi-stable" "vivaldi" "vivaldi" "com.vivaldi.Vivaldi" "native"
+add_app "FALSE" "Internet" "Opera" "Navegador com VPN" "" "opera" "" "com.opera.Opera" "native"
+add_app "FALSE" "Internet" "Microsoft Edge" "Navegador Microsoft" "microsoft-edge-stable" "microsoft-edge-stable-bin" "microsoft-edge-stable" "com.microsoft.Edge" "native"
+add_app "TRUE" "Internet" "BrowserOS" "The Open source agentic browser" "" "browseros-bin" "" "" "native"
 
 # --- NUVEM E TRANSFERÊNCIA ---
 add_app "TRUE" "Nuvem" "Nextcloud" "Sync Nextcloud" "nextcloud-desktop" "nextcloud-client" "nextcloud-client" "com.nextcloud.desktopclient.nextcloud" "native"

@@ -102,7 +102,7 @@ SELECTION=$(yad --title="Restauração de Configurações" \
     --list --checklist --width=500 --height=600 \
     --column="Restaurar" --column="Aplicativo" \
     FALSE "BRAVE" FALSE "CHROME" FALSE "EDGE" FALSE "FALKON" \
-    FALSE "FIREFOX" FALSE "FLOORP" FALSE "VIVALDI" FALSE "OPERA" FALSE "CALIBRE" \
+    FALSE "FIREFOX" FALSE "FLOORP" FALSE "VIVALDI" FALSE "OPERA" FALSE "BROWSEROS" FALSE "CALIBRE" \
     FALSE "WAVEBOX" FALSE "RAMBOX" FALSE "FERDIUM" FALSE "NEXTCLOUD" \
     FALSE "FILEZILLA" FALSE "TRANSMISSION" FALSE "OBSIDIAN" FALSE "ZOTERO" \
     FALSE "MASTER_PDF" FALSE "PICARD" FALSE "VSCODE" FALSE "SYSTEM_SETTINGS" FALSE "KWALLET" \
@@ -227,6 +227,10 @@ for app in "${selected_apps[@]}"; do
         "OPERA")
             restore_app "OPERA (Flatpak)" "$DEST_DIR/opera-flatpak-$USERNAME.zip" && ((SUCCESS++)) || true
             restore_app "OPERA (Nativo)" "$DEST_DIR/opera-$USERNAME.zip" && ((SUCCESS++)) || true
+            ;;
+        "BROWSEROS")
+            restore_app "BROWSEROS (Flatpak)" "$DEST_DIR/browser-os-flatpak-$USERNAME.zip" && ((SUCCESS++)) || true
+            restore_app "BROWSEROS (Nativo)" "$DEST_DIR/browser-os-$USERNAME.zip" && ((SUCCESS++)) || true
             ;;
         "CALIBRE")
             restore_app "CALIBRE (Flatpak)" "$DEST_DIR/calibre-flatpak-$USERNAME.zip" && ((SUCCESS++)) || true

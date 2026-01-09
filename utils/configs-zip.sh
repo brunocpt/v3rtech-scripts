@@ -25,7 +25,7 @@ USERNAME="$USER"
 
 # --- LISTA DE APLICATIVOS PARA O YAD ---
 declare -a APP_LIST=(
-    "BRAVE" "CHROME" "EDGE" "FALKON" "FIREFOX" "FLOORP" "VIVALDI" "OPERA" "ZEN BROWSER" "CALIBRE"
+    "BRAVE" "CHROME" "EDGE" "FALKON" "FIREFOX" "FLOORP" "VIVALDI" "OPERA" "ZEN BROWSER" "BROWSEROS" "CALIBRE"
     "WAVEBOX" "RAMBOX" "FERDIUM" "NEXTCLOUD" "FILEZILLA" "TRANSMISSION" "OBSIDIAN" "ZOTERO" "TINTERO"
     "MASTER_PDF" "PICARD" "VSCODE" "ANTIGRAVITY" "GEANY" "PYCHARM" "DBEAVER" "POSTMAN" "REMMINA" "SYSTEM_SETTINGS"
 )
@@ -167,6 +167,14 @@ for app in "${selected_apps[@]}"; do
                 backup_zip "VIVALDI (Flatpak)" "$TMP_DIR/vivaldi-flatpak-${USERNAME}.zip" ".var/app/com.vivaldi.Vivaldi" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
             else
                 backup_zip "VIVALDI (Nativo)" "$TMP_DIR/vivaldi-${USERNAME}.zip" ".config/vivaldi" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
+            fi
+            ;;
+        "BROWSEROS")
+            killall browseros &>/dev/null; sleep 1
+            if flatpak list --app 2>/dev/null | grep -q 'com.browseros.BrowserOS'; then
+                backup_zip "BROWSEROS (Flatpak)" "$TMP_DIR/browser-os-flatpak-${USERNAME}.zip" ".var/app/com.browseros.BrowserOS" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
+            else
+                backup_zip "BROWSEROS (Nativo)" "$TMP_DIR/browser-os-${USERNAME}.zip" ".config/browser-os" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Crashpad/*"
             fi
             ;;
         "OPERA")
