@@ -5,6 +5,12 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.9.2] - 2026-01-11
+### ✨ Adicionado
+- **Correção Automática Pipx:** Novo script `utils/fix_pipx.sh` para detectar e corrigir ambientes virtuais quebrados (comum após atualizações do Python do sistema).
+  - Detecta links simbólicos quebrados para o interpretador Python.
+  - Executa `pipx reinstall-all` automaticamente se necessário.
+
 ## [3.9.1] - 2026-01-09
 ### ✨ Adicionado
 - **BrowserOS:** Adicionado "BrowserOS" (The Open source agentic browser) à lista de aplicativos de Internet em `lib/apps-data.sh`.
@@ -474,15 +480,15 @@ Análise completa do projeto v3rtech-scripts para identificação de bugs e opor
 | Métrica | Total |
 |---------|-------|
 | Bugs Corrigidos | **22** |
-| Novos Scripts | **14** |
+| Novos Scripts | **15** |
 | Scripts Melhorados | **15** |
-| Novas Funcionalidades | **25** |
+| Novas Funcionalidades | **26** |
 | Documentos Criados | **14** |
-| Versões Lançadas | **8** |
+| Versões Lançadas | **9** |
 
 ---
 
-**Versão Atual:** 3.9.0  
+**Versão Atual:** 3.9.2  
 **Status:** ✅ Estável  
-**Última Atualização:** 2026-01-04  
+**Última Atualização:** 2026-01-11  
 **Desenvolvedor:** Bruno (v3rtech)
