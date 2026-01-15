@@ -30,3 +30,6 @@
 /tmp/
 /build/
 configs/filebot-osdb.conf
+
+# Arquivos específicos
+configs/Cloudflare_APITokens.txt

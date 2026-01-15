@@ -8,35 +8,36 @@
 # ==============================================================================
 
 # --- NAVEGADORES ---
-add_app "TRUE" "Internet" "Wavebox" "Navegador focado em trabalho" "wavebox" "wavebox" "wavebox" "" "native"
 add_app "TRUE" "Internet" "Google Chrome" "Navegador do Google" "google-chrome-stable" "google-chrome" "google-chrome-stable" "com.google.Chrome" "native"
 add_app "TRUE" "Internet" "Firefox" "Navegador Mozilla" "firefox" "firefox" "firefox" "org.mozilla.firefox" "native"
 add_app "TRUE" "Internet" "Brave" "Navegador Privacidade" "brave-browser" "brave-bin" "brave-browser" "com.brave.Browser" "native"
+add_app "TRUE" "Internet" "Wavebox" "Navegador focado em trabalho" "wavebox" "wavebox" "wavebox" "" "native"
 add_app "FALSE" "Internet" "Vivaldi" "Navegador Power User" "vivaldi-stable" "vivaldi" "vivaldi" "com.vivaldi.Vivaldi" "native"
 add_app "FALSE" "Internet" "Opera" "Navegador com VPN" "" "opera" "" "com.opera.Opera" "native"
 add_app "FALSE" "Internet" "Microsoft Edge" "Navegador Microsoft" "microsoft-edge-stable" "microsoft-edge-stable-bin" "microsoft-edge-stable" "com.microsoft.Edge" "native"
-add_app "TRUE" "Internet" "BrowserOS" "The Open source agentic browser" "" "browseros-bin" "" "" "native"
+add_app "FALSE" "Internet" "BrowserOS" "The Open source agentic browser" "" "browseros-bin" "" "" "native"
 
 # --- NUVEM E TRANSFERÊNCIA ---
 add_app "TRUE" "Nuvem" "Nextcloud" "Sync Nextcloud" "nextcloud-desktop" "nextcloud-client" "nextcloud-client" "com.nextcloud.desktopclient.nextcloud" "native"
-add_app "FALSE" "Nuvem" "Filezilla" "Cliente FTP" "filezilla" "filezilla" "filezilla" "org.filezilla.FileZilla" "native"
 add_app "TRUE" "Nuvem" "Packet" "Simple, fast file sharing between Linux and Android" "" "" "" "io.github.nozwock.Packet" "flatpak"
+add_app "FALSE" "Nuvem" "SendWorm" "Ferramenta segura e fácil de usar para transferir arquivos rapidamente" "" "" "" "to.bnt.sendworm" "flatpak"
+add_app "FALSE" "Nuvem" "Filezilla" "Cliente FTP" "filezilla" "filezilla" "filezilla" "org.filezilla.FileZilla" "native"
 
 # --- COMUNICAÇÃO ---
 add_app "FALSE" "Comunicação" "Discord" "Chat e Voz" "discord" "discord" "discord" "com.discordapp.Discord" "flatpak"
 add_app "FALSE" "Comunicação" "MailViewer" "Visualizador EML/MSG" "" "" "" "io.github.alescdb.mailviewer" "flatpak"
 
 # --- DESENVOLVIMENTO & TERMINAL ---
-add_app "FALSE" "Dev" "VS Code" "Editor Microsoft" "code" "visual-studio-code-bin" "code" "com.visualstudio.code" "native"
 add_app "TRUE" "Dev" "Antigravity" "Ambiente Google (VSCode)" "antigravity" "antigravity" "antigravity" "" "native"
 add_app "TRUE" "Dev" "Docker" "Containers" "docker.io docker-compose" "docker docker-compose" "docker docker-compose-plugin" "" "native"
-add_app "FALSE" "Dev" "DBeaver" "Cliente SQL" "dbeaver-ce" "dbeaver" "dbeaver" "io.dbeaver.DBeaverCommunity" "native"
-add_app "FALSE" "Dev" "Postman" "Plataforma API" "postman" "postman-bin" "postman" "com.getpostman.Postman" "native"
-add_app "FALSE" "Dev" "Terminator" "Terminal Avançado" "terminator" "terminator" "terminator" "" "native"
 add_app "TRUE" "Dev" "Guake" "Terminal Drop-down" "guake" "guake" "guake" "" "native"
 add_app "TRUE" "Dev" "Geany" "Editor Leve" "geany geany-plugins" "geany geany-plugins" "geany geany-plugins" "" "native"
 add_app "TRUE" "Dev" "Git Tools" "Git e GitHub CLI" "git gh" "git github-cli" "git gh" "" "native"
 add_app "TRUE" "Dev" "Dev Utils" "JQ, CCache, Duf, Eza" "jq ccache duf eza" "jq ccache duf eza" "jq ccache duf eza" "" "native"
+add_app "FALSE" "Dev" "DBeaver" "Cliente SQL" "dbeaver-ce" "dbeaver" "dbeaver" "io.dbeaver.DBeaverCommunity" "native"
+add_app "FALSE" "Dev" "Postman" "Plataforma API" "postman" "postman-bin" "postman" "com.getpostman.Postman" "native"
+add_app "FALSE" "Dev" "Terminator" "Terminal Avançado" "terminator" "terminator" "terminator" "" "native"
+add_app "FALSE" "Dev" "VS Code" "Editor Microsoft" "code" "visual-studio-code-bin" "code" "com.visualstudio.code" "native"
 
 # --- ESCRITÓRIO E PRODUTIVIDADE ---
 add_app "TRUE" "Escritório" "LibreOffice" "Suíte Office" "libreoffice libreoffice-l10n-pt-br" "libreoffice-fresh libreoffice-fresh-pt-br" "libreoffice libreoffice-langpack-pt-BR" "org.libreoffice.LibreOffice" "native"
@@ -46,8 +47,8 @@ add_app "TRUE" "Escritório" "Zotero" "Gestão Bibliográfica" "" "zotero-bin" "
 add_app "TRUE" "Escritório" "XMind" "Mapas Mentais" "" "xmind" "xmind" "net.xmind.XMind8" "flatpak"
 add_app "TRUE" "Escritório" "Camunda Modeler" "Modelagem BPMN" "" "camunda-modeler" "camunda-modeler" "" "native"
 add_app "TRUE" "Escritório" "Draw.io" "Diagramas" "drawio" "drawio-desktop" "drawio" "com.jgraph.drawio.desktop" "native"
-add_app "TRUE" "Escritório" "PDF Adobe Reader" "Leitor de PDF Adobe Reader" "" "" "" "com.adobe.Reader" "flatpak"
-add_app "TRUE" "Escritório" "Corretores PT-BR" "Dicionários" "aspell-pt-br hunspell-pt-br mythes-pt-br hyphen-pt-br wportuguese" "aspell-pt hunspell-pt mythes-pt hyphen-pt" "aspell-pt hunspell-pt mythes-pt hyphen-pt" "" "native"
+add_app "TRUE" "Escritório" "Corretores PT-BR" "Dicionários" "aspell-pt-br hunspell-pt-br mythes-pt-br hyphen-pt-br wportuguese" "aspell-pt hunspell-pt-br hyphen-pt_pt" "aspell-pt hunspell-pt mythes-pt hyphen-pt" "" "native"
+add_app "FALSE" "Escritório" "PDF Adobe Reader" "Leitor de PDF Adobe Reader" "" "" "" "com.adobe.Reader" "flatpak"
 
 # --- PDF E OCR ---
 add_app "TRUE" "Escritório" "Sejda PDF" "Editor PDF Desktop" "" "sejda-desktop" "sejda-desktop" "com.sejda.Sejda" "native"

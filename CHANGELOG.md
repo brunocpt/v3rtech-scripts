@@ -5,6 +5,16 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.9.3] - 2026-01-15
+### ✨ Adicionado
+- **SendWorm:** Adicionado "SendWorm" (ferramenta de transferência de arquivos) à categoria Nuvem em `lib/apps-data.sh` (flag "FALSE" padrão).
+- **Git Ignore:** Adicionado arquivo de tokens Cloudflare ao `.gitignore` para segurança.
+
+### 🔧 Alterado
+- **Dicionários Arch Linux:** Correção nos nomes dos pacotes de dicionários (hunspell, aspell, hyphen) para compatibilidade com Arch Linux em `lib/apps-data.sh`.
+- **Reorganização de Apps:** Ajuste na ordem de exibição e categorias de navegadores e ferramentas de desenvolvimento.
+- **BrowserOS:** Alterado para "FALSE" (desabilitado) por padrão na lista de instalação.
+
 ## [3.9.2] - 2026-01-11
 ### ✨ Adicionado
 - **Correção Automática Pipx:** Novo script `utils/fix_pipx.sh` para detectar e corrigir ambientes virtuais quebrados (comum após atualizações do Python do sistema).

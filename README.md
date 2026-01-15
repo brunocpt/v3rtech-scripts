@@ -1,6 +1,6 @@
 # V3RTECH Scripts - Automação de Pós-Instalação Linux
 
-> **Versão:** 3.9.2
+> **Versão:** 3.9.3
 > **Autor:** V3RTECH Tecnologia, Consultoria e Inovação
 > **Website:** [v3rtech.com.br](https://v3rtech.com.br/)
 
@@ -10,7 +10,7 @@ O **V3RTECH Scripts** é uma suíte de automação modular projetada para config
 
 **Compatibilidade e Detecção**
 - **Multi-Distro:** Compatível com Debian 12/Sid, Ubuntu/Mint/Pop!_OS, Fedora e Arch Linux
-- **Multi-Ambiente:** Suporte para KDE/Plasma, GNOME/Budgie, XFCE, LXQT e Tiling Window Managers (i3, sway, etc)
+- **Multi-Ambiente:** Suporte para KDE/Plasma, GNOME/Budgie, XFCE, Mate, Deepin, Cosmic, LXQT e Tiling Window Managers (i3, sway, etc)
 - **Detecção Automática:** Identifica distro, ambiente de desktop e GPU para aplicar configurações específicas
 
 **Instalação e Configuração**
@@ -36,6 +36,9 @@ O **V3RTECH Scripts** é uma suíte de automação modular projetada para config
 - **Sudo Sem Senha:** Configuração segura com detecção de grupo por distro
 - **FUSE:** Configuração automática para montagem de sistemas de arquivos
 - **Docker:** Instalação e configuração com suporte a docker-compose
+- **ICP-Brasil:** Instalação automática de certificados, drivers de token e assinadores digitais
+- **NVIDIA:** Instalação robusta de drivers proprietários com foco em Wayland
+- **IA Local:** Instalação facilitada do OpenAI Whisper com aceleração de GPU
 
 ## 📋 Como Usar
 
@@ -161,6 +164,16 @@ O sistema instala scripts úteis em `/usr/local/share/scripts/v3rtech-scripts/ut
 **OCR e Processamento**
 - **`ocrbr`:** Ferramenta de OCR para PDFs em português
 - **`ocrauto`:** OCR com detecção automática de idioma
+- **`video-converter-gui.sh`:** Interface gráfica para conversão de vídeo (FFmpeg)
+- **`extrai-legendas.sh`:** Extração automática de legendas de vídeos
+
+**Certificados e Drivers**
+- **`pack-icp-brasil.sh`:** Instalador universal de certificados ICP-Brasil e Assinador SERPRO
+- **`pack-nvidia-wayland.sh`:** Instalador de drivers NVIDIA com otimização Wayland
+
+**Reparos e Otimização**
+- **`fix_pipx.sh`:** Repara ambientes virtuais Python quebrados
+- **`optimize-fstab.sh`:** Otimização para SSDs e Btrfs/Ext4 (compressão, noatime)
 
 ## 📁 Estrutura de Diretórios
 
@@ -274,6 +287,9 @@ grep "atalhos" ~/.local/share/v3rtech-scripts.log
 | XFCE | ✅ Completo | Sim |
 | LXQT | ✅ Completo | Sim |
 | Tiling WM (i3, sway) | ✅ Completo | Sim |
+| Mate | ✅ Completo | Sim |
+| Deepin | ✅ Completo | Sim |
+| Cosmic | ✅ Completo | Sim |
 
 ## ⚠️ Aviso Legal
 
@@ -293,4 +309,4 @@ Para dúvidas ou problemas, acesse [v3rtech.com.br](https://v3rtech.com.br/) ou 
 
 ---
 
-**Versão:** 3.0.0 | **Última atualização:** 2025-12-21
+**Versão:** 3.9.3 | **Última atualização:** 2026-01-15

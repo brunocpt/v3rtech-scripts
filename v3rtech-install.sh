@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: v3rtech-install.sh (Script Mestre Consolidado)
-# Versão: 3.9.0
+# Versão: 3.9.3
 #
 # Descrição: Orquestrador principal da automação de pós-instalação.
 # Novidades: Auto-instalação no disco, Confirmação de Distro e VM Hook.
