@@ -5,6 +5,24 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.9.4] - 2026-01-20
+### ✨ Adicionado
+- **Tradutor de Legendas:** Novo utilitário `utils/ts.sh` que traduz legendas SRT para Português Brasileiro usando Google Translate API (sem necessidade de chave de API).
+  - Suporta cache de traduções para evitar requisições repetidas.
+  - Mantém formatação e timestamps do arquivo original.
+  - Interface gráfica simplificada via YAD.
+
+### 🔧 Alterado
+- **Whisper Transcriber (`utils/wtt.sh`):**
+  - Adicionado suporte a múltiplos formatos de saída (TXT, SRT ou Ambos).
+  - Melhorada validação de arquivos de entrada.
+  - Logs mais detalhados e interface de progresso aprimorada.
+- **Mirror Sync (`utils/cpmirror.sh`):**
+  - Mensagens de sincronização mais claras para o usuário ("Gravando dados...").
+  - Aumento do timeout para leitura visual.
+- **Organizador de Vídeos (`utils/cpv.sh`):**
+  - Adicionada regra para ignorar a categoria "Cursos" na organização automática.
+
 ## [3.9.3] - 2026-01-15
 ### ✨ Adicionado
 - **SendWorm:** Adicionado "SendWorm" (ferramenta de transferência de arquivos) à categoria Nuvem em `lib/apps-data.sh` (flag "FALSE" padrão).
@@ -498,7 +516,7 @@ Análise completa do projeto v3rtech-scripts para identificação de bugs e opor
 
 ---
 
-**Versão Atual:** 3.9.2  
+**Versão Atual:** 3.9.4  
 **Status:** ✅ Estável  
-**Última Atualização:** 2026-01-11  
+**Última Atualização:** 2026-01-20  
 **Desenvolvedor:** Bruno (v3rtech)

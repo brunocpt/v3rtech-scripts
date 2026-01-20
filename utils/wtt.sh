@@ -35,6 +35,7 @@ check_gpu() {
 run_whisper() {
   local input_file="$1"
   local lang_param="$2"
+  local output_type="$3"
   local output_dir
   output_dir="$(dirname "$input_file")"
 
@@ -44,33 +45,39 @@ run_whisper() {
 
   log "Iniciando processamento de: $file_name"
 
+  # Validação do arquivo
+  if [ ! -f "$input_file" ]; then
+    log "ERRO: Arquivo não encontrado: $input_file"
+    return 1
+  fi
+
   if [ "$GPU_TYPE" = "nvidia" ]; then
     log "Limpando cache CUDA antes da execução..."
     python3 -c "import torch; torch.cuda.empty_cache()" 2>/dev/null
   fi
 
-  # Parâmetros comuns para todos os comandos do whisper
-  # CORREÇÃO: Trocado --download_root por --model_dir para compatibilidade
-  local common_params="--model $MODEL --output_dir \"$output_dir\" --model_dir \"$MODEL_DOWNLOAD_ROOT\""
+  # Construir o comando do whisper de forma segura
+  local whisper_command
 
   if [[ "$output_type" == "Legendas" ]]; then
-    whisper_command="whisper \"$input_file\" $lang_param $common_params --task transcribe --output_format srt"
+    whisper_command="whisper \"$input_file\" $lang_param --model $MODEL --output_dir \"$output_dir\" --model_dir \"$MODEL_DOWNLOAD_ROOT\" --task transcribe --output_format srt"
   elif [[ "$output_type" == "Transcrição" ]]; then
-    whisper_command="whisper \"$input_file\" $lang_param $common_params --task transcribe --output_format txt"
+    whisper_command="whisper \"$input_file\" $lang_param --model $MODEL --output_dir \"$output_dir\" --model_dir \"$MODEL_DOWNLOAD_ROOT\" --task transcribe --output_format txt"
   else
-    whisper_command="whisper \"$input_file\" $lang_param $common_params --task transcribe --output_format txt && whisper \"$input_file\" $lang_param $common_params --task transcribe --output_format srt"
+    # Ambos: gera tanto TXT quanto SRT
+    whisper_command="whisper \"$input_file\" $lang_param --model $MODEL --output_dir \"$output_dir\" --model_dir \"$MODEL_DOWNLOAD_ROOT\" --task transcribe --output_format txt && whisper \"$input_file\" $lang_param --model $MODEL --output_dir \"$output_dir\" --model_dir \"$MODEL_DOWNLOAD_ROOT\" --task transcribe --output_format srt"
   fi
 
-  log "Executando comando: $whisper_command"
+  log "Executando comando para: $file_name"
 
   # Executa o comando e aguarda sua conclusão
   bash -c "$whisper_command"
 
   local exit_status=$?
   if [ $exit_status -eq 0 ]; then
-      log "Finalizado com sucesso: $file_name"
+      log "✓ Finalizado com sucesso: $file_name"
   else
-      log "Erro ou cancelamento durante o processamento de: $file_name (código: $exit_status)"
+      log "✗ Erro ou cancelamento durante o processamento de: $file_name (código: $exit_status)"
   fi
 }
 
@@ -83,16 +90,28 @@ process_all_files() {
     log " INÍCIO DO PROCESSAMENTO - $(date)"
     log "============================================================"
 
-    IFS='|' read -ra FILE_ARRAY <<< "$input_files"
-    for file in "${FILE_ARRAY[@]}"; do
+    # CORREÇÃO FINAL: Usar printf para converter ! em quebras de linha reais
+    # O YAD retorna múltiplos arquivos separados por ! (exclamação)
+    # Usamos printf com %b para interpretar \n corretamente
+    local files_with_newlines
+    files_with_newlines=$(printf '%s' "$input_files" | sed 's/!/\n/g')
+    
+    local file_count=0
+    while IFS= read -r file; do
+        # Ignora linhas vazias
+        [ -z "$file" ] && continue
+        
+        ((file_count++))
         echo ""
         log "------------------------------------------------------------"
-        run_whisper "$file" "$lang_param"
-    done
+        log "Processando arquivo $file_count"
+        run_whisper "$file" "$lang_param" "$output_type"
+    done <<< "$files_with_newlines"
 
     echo ""
     log "============================================================"
     log " TODOS OS ARQUIVOS FORAM PROCESSADOS - $(date)"
+    log " Total de arquivos: $file_count"
     log "============================================================"
 }
 
@@ -147,26 +166,51 @@ else
 fi
 
 log "Configurações selecionadas:"
-log " - Arquivos: $input_files"
 log " - Tipo de Saída: $output_type"
 log " - Idioma: ${language:-Detecção Automática}"
 log " - Modelo: $MODEL"
 log " - Local dos Modelos: $MODEL_DOWNLOAD_ROOT"
+
+# Melhor logging dos arquivos selecionados
+log " - Arquivos selecionados:"
+local files_with_newlines
+files_with_newlines=$(printf '%s' "$input_files" | sed 's/!/\n/g')
+
+local file_index=0
+while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    ((file_index++))
+    log "   $file_index. $(basename "$file")"
+done <<< "$files_with_newlines"
 
 # Executa a função de processamento e envia a saída para a janela de log do YAD
 process_all_files | yad --text-info --tail --title="Processamento em Andamento" \
     --width=800 --height=600 --button="Fechar:1"
 
 # Exibe a tela final com o resumo
-IFS='|' read -ra FILE_ARRAY <<< "$input_files"
-FINAL_MESSAGE="Processamento finalizado com sucesso!
+FINAL_MESSAGE="Processamento finalizado!
 
-Arquivos processados:
-$(for file in "${FILE_ARRAY[@]}"; do echo "- $(basename "$file")"; done)
+Arquivos processados:"
+
+local files_with_newlines_final
+files_with_newlines_final=$(printf '%s' "$input_files" | sed 's/!/\n/g')
+
+local final_count=0
+while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    ((final_count++))
+    FINAL_MESSAGE="$FINAL_MESSAGE
+$final_count. $(basename "$file")"
+done <<< "$files_with_newlines_final"
+
+FINAL_MESSAGE="$FINAL_MESSAGE
+
+Total: $final_count arquivo(s)
 
 Log salvo em:
 $LOGFILE"
 
+yad --info --title="Conclusão" --text="$FINAL_MESSAGE" --width=600
+
 log "Script finalizado."
 exit 0
-

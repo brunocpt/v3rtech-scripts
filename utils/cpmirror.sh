@@ -9,56 +9,80 @@ log_message() {
   echo "$(date '+%Y-%m-%d %H:%M:%S') - $message" >> "$log_file"
 }
 
-# Função para encontrar o ponto de montagem do disco Mirror
-find_mount_point() {
-  mount_point=$(lsblk -o LABEL,MOUNTPOINT | grep -w 'Mirror' | awk '{print $2}')
-  if [[ -z "$mount_point" ]]; then
-    yad --error \
-        --title="Disco Mirror não encontrado" \
-        --text="O disco <b>Mirror</b> não está montado.\n\nVerifique a conexão e tente novamente." \
-        --width=400 2>/dev/null
-    log_message "Erro: O disco Mirror não está montado."
-    exit 1
-  else
-    log_message "Disco Mirror montado em $mount_point"
-  fi
-}
-
 # Diretório fonte
 src_dir="/mnt/trabalho/"
 
-# Início do log da operação
-log_message "Iniciando operação CPMIRROR - Espelhando arquivos de $src_dir para Mirror"
-
-# Encontrar ponto de montagem do destino
-find_mount_point
-dest_dir="$mount_point"
-
-# Tela de progresso com saída detalhada de arquivos
-(
-  echo "#Espelhando de $src_dir → $dest_dir"
-  log_message "Iniciando rsync de $src_dir para $dest_dir"
-
-  rsync -razv --update --delete \
-  --info=progress2,name1 \
-  --exclude-from=/usr/local/share/scripts/v3rtech-scripts/configs/exclude-list.txt "$src_dir" "$dest_dir" | \
-  while IFS= read -r line; do
-    [ -n "$line" ] && echo "#  $line"
-  done
-
-  rsync_status=${PIPESTATUS[0]}
-  if [[ $rsync_status -ne 0 ]]; then
-    log_message "ERRO ao espelhar $src_dir → $dest_dir (Código: $rsync_status)"
-    echo "#!!! ERRO durante sincronização (Código: $rsync_status) !!!"
+# --- MUDANÇA 1: Detecção de múltiplos pontos de montagem ---
+find_mount_points() {
+  # Cria um array (lista) com todos os pontos de montagem que possuem o Label 'Mirror'
+  mapfile -t mount_points < <(lsblk -o LABEL,MOUNTPOINT | grep -w 'Mirror' | awk '{print $2}')
+  
+  if [[ ${#mount_points[@]} -eq 0 ]]; then
+    yad --error \
+        --title="Disco Mirror não encontrado" \
+        --text="Nenhum disco com rótulo <b>Mirror</b> foi encontrado montado.\n\nVerifique as conexões." \
+        --width=400 2>/dev/null
+    log_message "Erro: Nenhum disco Mirror encontrado."
+    exit 1
   else
-    log_message "Sucesso ao espelhar $src_dir → $dest_dir"
-    echo "#Espelhamento concluído com sucesso."
+    # Lista no log quantos foram encontrados
+    log_message "Discos Mirror encontrados: ${#mount_points[@]} dispositivos em: ${mount_points[*]}"
   fi
+}
+
+# Início do log da operação global
+log_message "Iniciando operação MULTI-CPMIRROR - Fonte: $src_dir"
+
+# Busca os HDs
+find_mount_points
+
+# --- Início do bloco visual (YAD) ---
+(
+  # --- MUDANÇA 2: Loop para processar cada HD encontrado ---
+  count=1
+  total=${#mount_points[@]}
+
+  for dest_dir in "${mount_points[@]}"; do
+    
+    echo "#Verificando disco $count de $total: $dest_dir"
+    log_message ">>> Iniciando sincronização para o destino ($count/$total): $dest_dir"
+
+    # Pequena pausa para o usuário ler a mudança de status na tela
+    sleep 1
+
+    echo "#Sincronizando: $dest_dir"
+    
+    # Executa o rsync
+    rsync -razv --update --delete \
+    --info=progress2,name1 \
+    --exclude-from=/usr/local/share/scripts/v3rtech-scripts/configs/exclude-list.txt "$src_dir" "$dest_dir" | \
+    while IFS= read -r line; do
+       # Filtra linhas vazias e envia para o YAD atualizar o texto
+       [ -n "$line" ] && echo "# [$count/$total] $dest_dir: $line"
+    done
+
+    rsync_status=${PIPESTATUS[0]}
+    
+    if [[ $rsync_status -ne 0 ]]; then
+      log_message "ERRO ao espelhar para $dest_dir (Código: $rsync_status)"
+      echo "#!!! ERRO em $dest_dir (Código: $rsync_status) !!!"
+      # Não sai do script (exit), tenta fazer o próximo HD se houver erro neste
+    else
+      log_message "Sucesso ao espelhar para $dest_dir"
+      echo "#Concluído: $dest_dir"
+    fi
+    
+    ((count++))
+    echo "---------------------------------------------------" >> "$log_file"
+  done
+  
+  echo "#Todas as sincronizações foram finalizadas."
+
 ) | yad --progress \
-        --title="Espelhando Arquivos para Mirror" \
-        --text="<big>Espelhando conteúdo...</big>\n<i>Arquivos sendo copiados:</i>" \
+        --title="Espelhando Arquivos para Múltiplos Mirrors" \
+        --text="<big>Iniciando espelhamento...</big>" \
         --width=600 \
-        --height=200 \
+        --height=250 \
         --text-align=left \
         --pulsate \
         --auto-close \
@@ -72,27 +96,21 @@ dest_dir="$mount_point"
   exit 1
 }
 
-# Informa que a sincronização está finalizando
+# --- Finalização ---
+
+# Informa que a sincronização de cache (sync) está ocorrendo
 yad --info \
     --title="Gravando Dados" \
-    --text="<b>Finalizando gravação no disco Mirror</b>\n\nAguarde enquanto os dados são sincronizados para o disco.\nIsso pode levar alguns segundos." \
+    --text="<b>Finalizando gravação nos discos</b>\n\nAguarde enquanto o cache é esvaziado para os HDs.\nIsso garante que os dados não sejam corrompidos." \
     --no-buttons \
-    --timeout=1 \
+    --timeout=2 \
     --width=450 \
     --center 2>/dev/null &
 
-log_message "Forçando sync final..."
-# Informa o usuário que o sistema está finalizando a gravação
-yad --info \
-  --title="Gravando Dados no Pendrive" \
-  --text="<big><b>Finalizando gravação nos dispositivos</b></big>\n\nAguarde enquanto os dados são sincronizados para os pendrives.\nEssa etapa pode demorar alguns segundos, dependendo da quantidade de arquivos." \
-  --no-buttons \
-  --width=450 \
-  --timeout=1 \
-  --center 2>/dev/null &
+log_message "Executando sync do sistema..."
 sync
-log_message "Sync concluído."
+log_message "Sync do sistema concluído."
 
 # Conclusão
-log_message "Operação CPMIRROR concluída com sucesso"
+log_message "Operação MULTI-CPMIRROR finalizada"
 exit 0

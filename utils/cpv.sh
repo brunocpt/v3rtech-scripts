@@ -52,6 +52,7 @@ mount_dir "$mount_point"
     case "$category" in
       "Criancas"|"SeriesCriancas") eval $filebot_cmd --format "\"{n} ({y})/{n} ({y}) [{vf}]\"" --db TheMovieDB --lang pt >> "$log_file" 2>&1 ;;
       "TVSeries") eval $filebot_cmd --format "\"{n}/Season {s.pad(2)}/{n}.s{s.pad(2)}e{e.pad(2)}.{t}.[{airdate.format('yyyy.MM.dd')}]\"" --db TheTVDB >> "$log_file" 2>&1 ;;
+      "Cursos") log_message "Diretório $category ignorado." && echo "#Categoria '$category' ignorada." ;;
       "XXX") log_message "Diretório $category ignorado." && echo "#Categoria '$category' ignorada." ;;
       *) eval $filebot_cmd --format "\"{n} ({y})/{n} ({y}) [{vf}]\"" --db TheMovieDB --lang en >> "$log_file" 2>&1 ;;
     esac

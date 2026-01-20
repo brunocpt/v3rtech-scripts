@@ -104,6 +104,7 @@ add_app "TRUE" "Impressão" "Gutenprint" "Drivers Genéricos" "printer-driver-gu
 # --- IA E CLI ---
 add_app "TRUE" "IA" "OpenAI Whisper" "Reconhecimento de Fala" "" "" "" "openai-whisper" "pipx"
 add_app "TRUE" "IA" "Subliminal" "Baixador de Legendas" "" "" "" "subliminal" "pipx"
+add_app "TRUE" "IA" "Trans" "Tradutor de Texto" "" "" "" "translate-shell googletrans" "pipx"
 add_app "FALSE" "IA" "YT-DLP" "Downloader de Vídeos" "yt-dlp" "yt-dlp" "yt-dlp" "yt-dlp" "native"
 
 # --- CUSTOM SCRIPTS ---
