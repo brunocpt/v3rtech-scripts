@@ -5,6 +5,13 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.9.5] - 2026-01-20
+### 🔧 Alterado
+- **Tradutor de Legendas (`utils/ts.sh`):**
+  - **Estabilidade:** Adicionado timeout de 10 segundos nas requisições ao Google Translate para evitar travamentos indefinidos.
+  - **Interface:** Removido timeout automático da janela de progresso para evitar fechamento prematuro durante traduções longas.
+  - **Autodocumentação:** Adicionado cabeçalho padrão com metadados do script.
+
 ## [3.9.4] - 2026-01-20
 ### ✨ Adicionado
 - **Tradutor de Legendas:** Novo utilitário `utils/ts.sh` que traduz legendas SRT para Português Brasileiro usando Google Translate API (sem necessidade de chave de API).
@@ -516,7 +523,7 @@ Análise completa do projeto v3rtech-scripts para identificação de bugs e opor
 
 ---
 
-**Versão Atual:** 3.9.4  
+**Versão Atual:** 3.9.5  
 **Status:** ✅ Estável  
 **Última Atualização:** 2026-01-20  
 **Desenvolvedor:** Bruno (v3rtech)

@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# ============================================================
+# Script de Tradução de Legendas (SRT) para Português Brasileiro
+# ============================================================
+# Versão: 2.0
+# Data: 2026-01-20
+# Descrição: Traduz arquivos .srt para português usando Google Translate
+# Autor: V3RTECH
+# ============================================================
+
 LOGFILE="$HOME/translate_subtitles_$(date +'%Y%m%d_%H%M%S').log"
 CACHE_FILE="$HOME/.translate_cache_$(date +'%Y%m%d').txt"
 
@@ -46,8 +55,8 @@ translate_text() {
   # URL encoding usando sed
   local encoded_text=$(echo -n "$text" | sed 's/ /%20/g;s/!/%21/g;s/"/%22/g;s/#/%23/g;s/\$/%24/g;s/&/%26/g;s/'\''/%27/g;s/(/%28/g;s/)/%29/g;s/\*/%2A/g;s/+/%2B/g;s/,/%2C/g;s/\//%2F/g;s/:/%3A/g;s/;/%3B/g;s/=/%3D/g;s/?/%3F/g;s/@/%40/g;s/\[/%5B/g;s/\]/%5D/g;s/{/%7B/g;s/}/%7D/g')
   
-  # Chamar API do Google Translate
-  local translated=$(curl -s "https://translate.googleapis.com/translate_a/single?client=gtx&sl=${source_lang}&tl=${target_lang}&dt=t&q=${encoded_text}" 2>/dev/null | grep -oP '(?<=\[\[")[^"]*' | head -1)
+  # Chamar API do Google Translate com timeout de 10 segundos
+  local translated=$(curl -s --max-time 10 "https://translate.googleapis.com/translate_a/single?client=gtx&sl=${source_lang}&tl=${target_lang}&dt=t&q=${encoded_text}" 2>/dev/null | grep -oP '(?<=\[\[")[^"]*' | head -1)
   
   # Se a tradução estiver vazia, retornar o texto original
   if [ -z "$translated" ]; then
@@ -261,7 +270,7 @@ done <<< "$files_with_newlines"
 
 # Executa a função de processamento e envia a saída para a janela de log do YAD
 process_all_files | yad --text-info --tail --title="Tradução em Andamento" \
-    --width=800 --height=600 --button="Fechar:1" --timeout=5 --timeout-indicator=bottom
+    --width=800 --height=600 --button="Fechar:1"
 
 # Exibe a tela final com o resumo
 printf -v FINAL_MESSAGE 'Tradução finalizada!\n\nArquivos processados:\n'
