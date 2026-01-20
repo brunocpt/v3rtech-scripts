@@ -334,6 +334,7 @@ ENTRADAS=(
     "video-converter-gui|Converte arquivos de vídeo|video-converter-gui.sh|video-converter-gui.svg"
     "restaura-config|Restaurar Configurações|restaura-config.sh|restaura-config.svg"
     "configs-zip|Backup de Configurações Pessoais|configs-zip.sh|configs-zip.svg"
+    "ts|Tradutor de Legendas|ts.sh|ts.svg"
 )
 
 DESKTOP_ENTRIES_CREATED=0
