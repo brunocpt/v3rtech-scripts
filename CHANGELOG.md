@@ -5,6 +5,14 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.9.6] - 2026-01-23
+### 🔧 Alterado
+- **Wavebox Fix (`lib/logic-apps-reader.sh`):** Implementada correção automática para o problema de GPU compositing.
+  - Adiciona a flag `--disable-gpu-compositing` ao arquivo `.desktop` global (`/usr/share/applications/wavebox.desktop`) após a instalação.
+  - Garante compatibilidade com drivers NVIDIA.
+  - Aplica-se a todas as ações do launcher (New Window, Incognito, etc).
+
+
 ## [3.9.5] - 2026-01-20
 ### 🔧 Alterado
 - **Tradutor de Legendas (`utils/ts.sh`):**
@@ -523,7 +531,7 @@ Análise completa do projeto v3rtech-scripts para identificação de bugs e opor
 
 ---
 
-**Versão Atual:** 3.9.5  
+**Versão Atual:** 3.9.6  
 **Status:** ✅ Estável  
-**Última Atualização:** 2026-01-20  
+**Última Atualização:** 2026-01-23  
 **Desenvolvedor:** Bruno (v3rtech)

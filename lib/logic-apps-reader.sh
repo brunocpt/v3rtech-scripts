@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: lib/logic-apps-reader.sh
-# Versão: 11.5.0 (Com Suporte Especializado a Whisper)
+# Versão: 11.6.0 (Wavebox GPU Fix)
 # Descrição: Define lógica de instalação e integra alias 'i'.
 # ==============================================================================
 
@@ -241,6 +241,33 @@ post_install_whisper() {
     log "SUCCESS" "✓ Whisper configurado com sucesso"
 }
 
+# ==============================================================================
+# FUNÇÃO: Correção Wavebox Desktop (GPU Issue)
+# ==============================================================================
+fix_wavebox_desktop() {
+    log "INFO" "Verificando necessidade de correção GPU no Wavebox (GLOBAL)..."
+
+    local desktop_target="/usr/share/applications/wavebox.desktop"
+
+    # Tenta encontrar em /opt se não estiver em /usr/share
+    if [ ! -f "$desktop_target" ] && [ -f "/opt/wavebox.io/wavebox/wavebox.desktop" ]; then
+         desktop_target="/opt/wavebox.io/wavebox/wavebox.desktop"
+    fi
+
+    if [ -f "$desktop_target" ]; then
+        log "INFO" "Aplicando correção '--disable-gpu-compositing' em $desktop_target..."
+
+        # Aplica a correção via SUDO para garantir permissão de escrita em arquivos do sistema
+        # Regex: Adiciona a flag em TODAS as linhas Exec se ainda não estiver presente.
+        $SUDO sed -i '/^Exec=/ { /--disable-gpu-compositing/! s/$/ --disable-gpu-compositing/ }' "$desktop_target"
+
+        $SUDO update-desktop-database /usr/share/applications 2>/dev/null || true
+        log "SUCCESS" "✓ Correção Wavebox (Global) aplicada com sucesso."
+    else
+        log "WARN" "Arquivo .desktop do Wavebox não encontrado. Correção ignorada."
+    fi
+}
+
 # --- 1. FUNÇÃO DE DEFINIÇÃO (Modo Lógico) ---
 add_app() {
     local active="$1"
@@ -321,6 +348,10 @@ install_app_by_name() {
                 elif command -v pacman &>/dev/null; then $SUDO pacman -S --noconfirm $pkg_native && installed=true;
                 elif command -v dnf &>/dev/null; then $SUDO dnf install -y $pkg_native && installed=true;
                 fi
+            fi
+
+            if [ "$installed" = true ] && [ "$app_name" = "Wavebox" ]; then
+                fix_wavebox_desktop
             fi
 
             if [ "$installed" = false ] && [ -n "$pkg_flatpak" ]; then
