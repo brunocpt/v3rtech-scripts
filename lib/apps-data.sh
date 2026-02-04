@@ -54,6 +54,8 @@ add_app "FALSE" "Escritório" "PDF Adobe Reader" "Leitor de PDF Adobe Reader" ""
 add_app "TRUE" "Escritório" "Sejda PDF" "Editor PDF Desktop" "" "sejda-desktop" "sejda-desktop" "com.sejda.Sejda" "native"
 add_app "TRUE" "Escritório" "OCRmyPDF" "OCR em PDFs" "ocrmypdf ghostscript jbig2dec" "ocrmypdf ghostscript jbig2dec" "ocrmypdf ghostscript jbig2dec" "" "native"
 add_app "TRUE" "Escritório" "Tesseract OCR" "Motor OCR" "tesseract-ocr tesseract-ocr-por tesseract-ocr-eng" "tesseract tesseract-data-por tesseract-data-eng" "tesseract tesseract-langpack-por" "" "native"
+add_app "TRUE" "Escritório" "TextSnatcher" "Snatch Text with just a Drag" "" "" "" "com.github.rajsolai.textsnatcher" "flatpak"
+add_app "TRUE" "Escritório" "gImageReader" "A graphical (gtk) frontend to tesseract-ocr" "" "" "" "io.github.manisandro.gImageReader" "flatpak"
 
 # --- DESIGN & IMAGEM ---
 add_app "TRUE" "Design" "Inkscape" "Vetorial" "inkscape" "inkscape" "inkscape" "org.inkscape.Inkscape" "native"

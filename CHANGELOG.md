@@ -5,6 +5,12 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.9.7] - 2026-02-04
+### ✨ Adicionado
+- **Apps de Produtividade:** Novos aplicativos adicionados à categoria "Escritório" em `lib/apps-data.sh`:
+  - **TextSnatcher:** Ferramenta para extração rápida de texto a partir de imagens (Flatpak).
+  - **gImageReader:** Interface gráfica robusta para o Tesseract OCR (Flatpak).
+
 ## [3.9.6] - 2026-01-23
 ### 🔧 Alterado
 - **Wavebox Fix (`lib/logic-apps-reader.sh`):** Implementada correção automática para o problema de GPU compositing.
