@@ -196,6 +196,9 @@ alias truenas-train='ssh -i '$SSH_KEY' bruno@189.50.92.154 -p 9223'
 alias uplucky='ssh -i '$SSH_KEY' bruno@192.168.0.186'
 alias ijud-dev='ssh -i '$SSH_KEY' ijud@189.50.92.154 -p 8222'
 
+# Hetzner
+alias v3gabi='ssh -i '$SSH_KEY' root@5.78.138.143 -p 8222'
+
 # IoT / Local
 alias DB='sshpass -p admin ssh root@DNS-320B'
 alias DL='sshpass -p br100171 ssh -oHostKeyAlgorithms=+ssh-dss admin@DNS-320L'

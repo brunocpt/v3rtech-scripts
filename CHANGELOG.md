@@ -5,11 +5,13 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
-## [3.9.7] - 2026-02-04
+## [3.9.8] - 2026-02-05
 ### ✨ Adicionado
 - **Apps de Produtividade:** Novos aplicativos adicionados à categoria "Escritório" em `lib/apps-data.sh`:
+  - **Tesseract OCR:** Motor OCR robusto (inclui suporte completo a PDF/A via OCRmyPDF).
+  - **gImageReader:** Interface gráfica completa para o Tesseract OCR (Native).
   - **TextSnatcher:** Ferramenta para extração rápida de texto a partir de imagens (Flatpak).
-  - **gImageReader:** Interface gráfica robusta para o Tesseract OCR (Flatpak).
+  - **OCRFeeder:** Suíte completa de análise de layout e OCR (Flatpak).
 
 ## [3.9.6] - 2026-01-23
 ### 🔧 Alterado
