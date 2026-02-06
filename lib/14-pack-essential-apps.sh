@@ -93,6 +93,7 @@ case "$DISTRO_FAMILY" in
           cnrdrvcups-lb \
           cups-bjnp \
           exfatprogs \
+          reflector \
           ; do
           i "$pkg"  || echo "Falha ao instalar $pkg"
         done

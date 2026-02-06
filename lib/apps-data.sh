@@ -60,7 +60,7 @@ add_app "FALSE" "Escritório" "TextSnatcher" "Snatch Text with just a Drag" "" "
 # --- DESIGN & IMAGEM ---
 add_app "TRUE" "Design" "Inkscape" "Vetorial" "inkscape" "inkscape" "inkscape" "org.inkscape.Inkscape" "native"
 add_app "TRUE" "Design" "GIMP" "Imagens" "gimp" "gimp" "gimp" "org.gimp.GIMP" "native"
-add_app "FALSE" "Design" "Upscayl" "Upscaling IA" "" "upscayl-bin" "upscayl" "org.upscayl.Upscayl" "flatpak"
+add_app "FALSE" "Design" "Upscayl" "Upscaling IA" "" "upscayl-bin" "upscayl" "org.upscayl.Upscayl" "native"
 add_app "FALSE" "Design" "Penpot" "Prototipagem" "" "" "" "com.authormore.penpotdesktop" "flatpak"
 add_app "FALSE" "Design" "FreeCAD" "Modelagem 3D" "freecad" "freecad" "freecad" "org.freecad.FreeCAD" "native"
 add_app "FALSE" "Design" "Scribus" "Desktop Publishing" "scribus" "scribus" "scribus" "net.scribus.Scribus" "native"
