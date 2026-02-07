@@ -5,6 +5,17 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.9.9] - 2026-02-07
+### ✨ Adicionado
+- **Rclone + RIT-GDrive:** Adicionado suporte a montagem RIT-GDrive no `utils/rclone-config.sh`.
+- **Rclone Helpers:** Novos aliases `rccp`, `rcsync` e `rcls` em `configs/aliases.geral` para facilitar operações com Rclone.
+
+### 🔧 Alterado
+- **Rclone Cache:** Otimização de flags de cache (VFS Full, 10G max size) para montagens Rclone em `utils/rclone-config.sh`.
+
+### 🐛 Corrigido
+- **FUSE Deduplication:** Correção na lógica de deduplicação da diretiva `user_allow_other` em `/etc/fuse.conf` no script `lib/07-setup-user-dirs.sh`.
+
 ## [3.9.8] - 2026-02-05
 ### ✨ Adicionado
 - **Apps de Produtividade:** Novos aplicativos adicionados à categoria "Escritório" em `lib/apps-data.sh`:

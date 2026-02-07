@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: lib/07-setup-user-dirs.sh
-# Versão: 2.3.0 (Corrigido - Sem Loop de Atalhos Simbólicos)
+# Versão: 2.3.1 (Logic Fix - Fuse Config Deduplication)
 # Descrição: Configura diretórios do usuário, links simbólicos, bookmarks GTK
 # Compatível com: Arch, Debian/Ubuntu, Fedora
 # ==============================================================================
@@ -249,12 +249,27 @@ log "INFO" "Configurando FUSE..."
 FUSE_CONF="/etc/fuse.conf"
 
 if [ -f "$FUSE_CONF" ]; then
-    # Verifica se user_allow_other já está presente e descomentada
-    if grep -qE "^[[:space:]]*user_allow_other[[:space:]]*$" "$FUSE_CONF"; then
-        log "INFO" "user_allow_other já está configurado em $FUSE_CONF"
-    elif grep -qE "^[[:space:]]*#.*user_allow_other" "$FUSE_CONF"; then
-        log "INFO" "Descomentando user_allow_other em $FUSE_CONF..."
-        $SUDO sed -i "s|^[[:space:]]*#\s*user_allow_other|user_allow_other|" "$FUSE_CONF"
+    # 1. Limpeza de Duplicatas e Normalização:
+    # Remove todas as linhas que são EXATAMENTE 'user_allow_other' ou '#user_allow_other'
+    # exceto a primeira ocorrência encontrada. Isso evita conflitos de múltiplas definições.
+    
+    # Conta quantas vezes a diretiva (ativa ou comentada) aparece de forma isolada
+    OCURRENCIAS=$(grep -cE "^#?[[:space:]]*user_allow_other[[:space:]]*$" "$FUSE_CONF")
+
+    if [ "$OCURRENCIAS" -gt 1 ]; then
+        log "INFO" "Limpando duplicatas de user_allow_other em $FUSE_CONF..."
+        # Mantém apenas a primeira ocorrência e remove as demais
+        $SUDO sed -i '0,/^#\?[[:space:]]*user_allow_other[[:space:]]*$/{s/^#\?[[:space:]]*user_allow_other[[:space:]]*$/USER_KEEP_MARKER/}; /^#\?[[:space:]]*user_allow_other[[:space:]]*$/d; s/USER_KEEP_MARKER/user_allow_other/' "$FUSE_CONF"
+    fi
+
+    # 2. Verificação e Ativação:
+    if grep -qE "^user_allow_other[[:space:]]*$" "$FUSE_CONF"; then
+        log "INFO" "user_allow_other já está configurado e único em $FUSE_CONF"
+    
+    elif grep -qE "^#[[:space:]]*user_allow_other[[:space:]]*$" "$FUSE_CONF"; then
+        log "INFO" "Descomentando a linha única de user_allow_other..."
+        $SUDO sed -i "s|^#[[:space:]]*user_allow_other[[:space:]]*$|user_allow_other|" "$FUSE_CONF"
+    
     else
         log "INFO" "Adicionando user_allow_other a $FUSE_CONF..."
         echo "user_allow_other" | $SUDO tee -a "$FUSE_CONF" > /dev/null

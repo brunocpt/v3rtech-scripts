@@ -15,8 +15,8 @@ if command -v rclone &> /dev/null && [ "$USER" = "bruno" ]; then
   echo "Configurando montagens de SharePoint via systemd user services (Rclone)..."
 
   # Cria diretórios de montagem
-  sudo mkdir -p /mnt/LAN/ModalDiretoria /mnt/LAN/ModalProjetos/{RUI,AMA}
-  sudo chown -R "$USER:$USER" /mnt/LAN/ModalDiretoria /mnt/LAN/ModalProjetos
+  sudo mkdir -p /mnt/LAN/ModalDiretoria /mnt/LAN/ModalProjetos/{RUI,AMA} /mnt/LAN/RIT-GDrive
+  sudo chown -R "$USER:$USER" /mnt/LAN/ModalDiretoria /mnt/LAN/ModalProjetos /mnt/LAN/RIT-GDrive
   mkdir -p "$HOME/.config/systemd/user"
 
   # Cria arquivos de serviço systemd
@@ -27,7 +27,7 @@ After=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/rclone mount SharepointModal:/ /mnt/LAN/ModalDiretoria --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode writes --allow-other
+ExecStart=/usr/bin/rclone mount SharepointModal:/ /mnt/LAN/ModalDiretoria --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode full --vfs-cache-max-size 10G --vfs-cache-max-age 1h --vfs-read-chunk-size 32M --allow-other
 ExecStop=/usr/bin/fusermount -u /mnt/LAN/ModalDiretoria
 Restart=always
 RestartSec=10
@@ -43,7 +43,7 @@ After=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/rclone mount SharePointModalProjetosAMA:/ /mnt/LAN/ModalProjetos/AMA --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode writes --allow-other
+ExecStart=/usr/bin/rclone mount SharePointModalProjetosAMA:/ /mnt/LAN/ModalProjetos/AMA --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode full --vfs-cache-max-size 10G --vfs-cache-max-age 1h --vfs-read-chunk-size 32M --allow-other
 ExecStop=/usr/bin/fusermount -u /mnt/LAN/ModalProjetos/AMA
 Restart=always
 RestartSec=10
@@ -59,8 +59,24 @@ After=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/rclone mount SharePointModalProjetosRUI:/ /mnt/LAN/ModalProjetos/RUI --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode writes --allow-other
+ExecStart=/usr/bin/rclone mount SharePointModalProjetosRUI:/ /mnt/LAN/ModalProjetos/RUI --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode full --vfs-cache-max-size 10G --vfs-cache-max-age 1h --vfs-read-chunk-size 32M --allow-other
 ExecStop=/usr/bin/fusermount -u /mnt/LAN/ModalProjetos/RUI
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target
+EOF
+
+  tee "$HOME/.config/systemd/user/rclone-RIT-GDrive.service" > /dev/null <<EOF
+[Unit]
+Description=Mount RIT Google Drive via rclone
+After=network-online.target
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/rclone mount RIT-GDrive:/ /mnt/LAN/RIT-GDrive --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode full --vfs-cache-max-size 10G --vfs-cache-max-age 1h --vfs-read-chunk-size 32M --vfs-cache-max-size 10G --vfs-cache-max-age 1h --vfs-read-chunk-size 32M --allow-other
+ExecStop=/usr/bin/fusermount -u /mnt/LAN/RIT-GDrive
 Restart=always
 RestartSec=10
 
@@ -79,7 +95,8 @@ EOF
   systemctl --user enable --now \
     rclone-SharepointModal.service \
     rclone-SharepointModalProjetosAMA.service \
-    rclone-SharePointModalProjetosRUI.service
+    rclone-SharePointModalProjetosRUI.service \
+    rclone-RIT-GDrive.service
 
   echo "OK: Serviços de montagem de SharePoint configurados."
 

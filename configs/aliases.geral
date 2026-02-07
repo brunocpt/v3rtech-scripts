@@ -3,7 +3,7 @@
 # Projeto: v3rtech-scripts
 # Arquivo: aliases.geral
 # Local de Instalação: .../v3rtech-scripts/configs/aliases.geral
-# Versão: 2.0.0 (Optimized & Refactored)
+# Versão: 2.1.0 (Rclone Helpers Added)
 # Descrição: Aliases globais, funções de utilidade e atalhos por distribuição.
 # ==============================================================================
 
@@ -157,9 +157,26 @@ alias fpl='flatpak list'
 # Lista de exclusão padrão
 RC_EXCLUDE="/usr/local/share/scripts/v3rtech-scripts/configs/exclude-list.txt"
 
-# Helpers
-rc_copy() {
-    rclone copy -u -q -P --exclude-from "$RC_EXCLUDE" "$1" "$2"
+# --- Rclone Helpers ---
+
+# Copiar com Update e Conversão (Google Drive ignora o que não é Office, SharePoint ignora a flag de conversão)
+rccp() {
+    rclone copy "$1" "$2" \
+    --update \
+    --drive-import-formats docx,xlsx,pptx,odt,ods,odp \
+    --progress \
+    --exclude-from "$RC_EXCLUDE"
+}
+
+# Sincronizar (CUIDADO: Deleta no destino o que não existe na origem)
+rcsync() {
+    echo "⚠️ Atenção: Isso tornará o destino IDÊNTICO à origem (pode deletar arquivos)."
+    rclone sync "$1" "$2" --update --progress --exclude-from "$RC_EXCLUDE"
+}
+
+# Listar de forma legível
+rcls() {
+    rclone lsf "$1" --format "p" --dir-slash
 }
 
 # GEJA
