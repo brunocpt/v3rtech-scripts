@@ -1,6 +1,6 @@
 # V3RTECH Scripts - Automação de Pós-Instalação Linux
 
-> **Versão:** 3.9.9
+> **Versão:** 3.9.10
 > **Autor:** V3RTECH Tecnologia, Consultoria e Inovação
 > **Website:** [v3rtech.com.br](https://v3rtech.com.br/)
 
@@ -309,4 +309,4 @@ Para dúvidas ou problemas, acesse [v3rtech.com.br](https://v3rtech.com.br/) ou 
 
 ---
 
-**Versão:** 3.9.9 | **Última atualização:** 2026-02-07
+**Versão:** 3.9.10 | **Última atualização:** 2026-02-07

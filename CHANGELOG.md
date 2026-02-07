@@ -5,6 +5,13 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 ---
 
 
+## [3.9.10] - 2026-02-07
+### ✨ Adicionado
+- **Rclone RC:** Adicionada flag `--rc` (Remote Control) aos serviços de montagem Rclone para controle remoto via API.
+
+### 🔧 Alterado
+- **Rclone Cache:** Simplificação das flags de cache em `utils/rclone-config.sh` (removidos limites manuais de chunk/age, confiando nos defaults otimizados do modo `full`).
+
 ## [3.9.9] - 2026-02-07
 ### ✨ Adicionado
 - **Rclone + RIT-GDrive:** Adicionado suporte a montagem RIT-GDrive no `utils/rclone-config.sh`.

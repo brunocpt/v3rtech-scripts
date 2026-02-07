@@ -166,12 +166,20 @@ rccp() {
     --drive-import-formats docx,xlsx,pptx,odt,ods,odp \
     --progress \
     --exclude-from "$RC_EXCLUDE"
+
+    # 2. Avisa o mount para atualizar (limpa o cache de diretórios)
+    echo "Atualizando cache do mount..."
+    rclone rc vfs/forget
 }
 
 # Sincronizar (CUIDADO: Deleta no destino o que não existe na origem)
 rcsync() {
     echo "⚠️ Atenção: Isso tornará o destino IDÊNTICO à origem (pode deletar arquivos)."
     rclone sync "$1" "$2" --update --progress --exclude-from "$RC_EXCLUDE"
+
+    # 2. Avisa o mount para atualizar (limpa o cache de diretórios)
+    echo "Atualizando cache do mount..."
+    rclone rc vfs/forget
 }
 
 # Listar de forma legível

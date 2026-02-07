@@ -27,7 +27,7 @@ After=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/rclone mount SharepointModal:/ /mnt/LAN/ModalDiretoria --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode full --vfs-cache-max-size 10G --vfs-cache-max-age 1h --vfs-read-chunk-size 32M --allow-other
+ExecStart=/usr/bin/rclone mount SharepointModal:/ /mnt/LAN/ModalDiretoria --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode full --allow-other --rc
 ExecStop=/usr/bin/fusermount -u /mnt/LAN/ModalDiretoria
 Restart=always
 RestartSec=10
@@ -43,7 +43,7 @@ After=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/rclone mount SharePointModalProjetosAMA:/ /mnt/LAN/ModalProjetos/AMA --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode full --vfs-cache-max-size 10G --vfs-cache-max-age 1h --vfs-read-chunk-size 32M --allow-other
+ExecStart=/usr/bin/rclone mount SharePointModalProjetosAMA:/ /mnt/LAN/ModalProjetos/AMA --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode full --allow-other --rc
 ExecStop=/usr/bin/fusermount -u /mnt/LAN/ModalProjetos/AMA
 Restart=always
 RestartSec=10
@@ -59,7 +59,7 @@ After=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/rclone mount SharePointModalProjetosRUI:/ /mnt/LAN/ModalProjetos/RUI --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode full --vfs-cache-max-size 10G --vfs-cache-max-age 1h --vfs-read-chunk-size 32M --allow-other
+ExecStart=/usr/bin/rclone mount SharePointModalProjetosRUI:/ /mnt/LAN/ModalProjetos/RUI --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode full --allow-other --rc
 ExecStop=/usr/bin/fusermount -u /mnt/LAN/ModalProjetos/RUI
 Restart=always
 RestartSec=10
@@ -75,7 +75,7 @@ After=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/rclone mount RIT-GDrive:/ /mnt/LAN/RIT-GDrive --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode full --vfs-cache-max-size 10G --vfs-cache-max-age 1h --vfs-read-chunk-size 32M --vfs-cache-max-size 10G --vfs-cache-max-age 1h --vfs-read-chunk-size 32M --allow-other
+ExecStart=/usr/bin/rclone mount RIT-GDrive:/ /mnt/LAN/RIT-GDrive --config=$HOME/.config/rclone/rclone.conf --vfs-cache-mode full --allow-other --rc
 ExecStop=/usr/bin/fusermount -u /mnt/LAN/RIT-GDrive
 Restart=always
 RestartSec=10
