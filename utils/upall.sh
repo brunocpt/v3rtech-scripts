@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: upall.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Atualização total (Sistema, Flatpak, Snap, Pipx) com interface YAD
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

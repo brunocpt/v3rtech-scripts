@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # Script: rclone-config.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Configuração do Rclone e serviços systemd para montagem de drives
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

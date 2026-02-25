@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: fpk-limpa-atalhos-orfaos.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Limpeza de atalhos em /usr/local/bin de apps Flatpak desinstalados
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

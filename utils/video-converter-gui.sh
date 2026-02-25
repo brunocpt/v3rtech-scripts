@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: video-converter-gui.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Conversor de vídeos com interface YAD e aceleração de hardware
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # Script: convert-images.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Conversão de imagens para JPG ou WebP com interface gráfica YAD
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

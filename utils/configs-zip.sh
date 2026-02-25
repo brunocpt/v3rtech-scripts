@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: configs-zip.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Backup de configurações de aplicativos com interface gráfica YAD
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

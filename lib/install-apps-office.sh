@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: lib/install-apps-office.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Instalar aplicativos de Escritório, PDF e OCR
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: truenas_transmission_clear.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Limpeza remota de torrents concluídos no Transmission (TrueNAS)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

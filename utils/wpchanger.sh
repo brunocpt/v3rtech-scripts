@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # Script: wpchanger.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Troca automática de papel de parede para múltiplos desktops via systemd
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

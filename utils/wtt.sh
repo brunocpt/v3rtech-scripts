@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: wtt.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Interface gráfica (YAD) para transcrição de áudio/vídeo via Whisper
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

@@ -59,11 +59,11 @@ if grep -q "$PATH_MARKER_BEGIN" /etc/bash.bashrc 2>/dev/null; then
 fi
 
 log "INFO" "Adicionando PATH global para $UTILS_DIR..."
-cat << 'EOF' | $SUDO tee -a /etc/bash.bashrc > /dev/null
+cat << EOF | $SUDO tee -a /etc/bash.bashrc > /dev/null
 # === V3RTECH SCRIPTS: Global PATH BEGIN ====
 if [ -d "$UTILS_DIR" ]; then
-    if [[ ":$PATH:" != *":$UTILS_DIR:"* ]]; then
-        export PATH="$PATH:$UTILS_DIR"
+    if [[ ":\$PATH:" != *":$UTILS_DIR:"* ]]; then
+        export PATH="\$PATH:$UTILS_DIR"
     fi
 fi
 # === V3RTECH SCRIPTS: Global PATH END ====
@@ -85,7 +85,7 @@ fi
 
 if [ -f "$CONFIGS_DIR/aliases.geral" ]; then
     log "INFO" "Carregando aliases de $CONFIGS_DIR/aliases.geral..."
-    cat << 'EOF' | $SUDO tee -a /etc/bash.bashrc > /dev/null
+    cat << EOF | $SUDO tee -a /etc/bash.bashrc > /dev/null
 # === V3RTECH SCRIPTS: Aliases BEGIN ====
 if [ -f "$CONFIGS_DIR/aliases.geral" ]; then
     source "$CONFIGS_DIR/aliases.geral"

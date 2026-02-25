@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: lib/apps-data.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Banco de dados centralizado de aplicativos para instalação
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
@@ -155,9 +155,9 @@ add_app "FALSE" "Multimídia" "MuseAmp" "Player estilo Winamp" "" "" "" "io.gith
 add_app "TRUE" "Multimídia" "MusicBrainz Picard" "Tagger de Música" "picard libchromaprint-tools mp3gain ffmpeg" "picard chromaprint ffmpeg mp3gain puddletag" "picard chromaprint-tools mp3gain ffmpeg" "org.musicbrainz.Picard" "native"
 add_app "FALSE" "Multimídia" "Avidemux" "Editor de Vídeo" "avidemux" "avidemux-qt" "avidemux" "org.avidemux.Avidemux" "native"
 add_app "TRUE" "Multimídia" "MKVToolNix" "Ferramentas MKV" "mkvtoolnix" "mkvtoolnix-cli mkvtoolnix-gui" "mkvtoolnix" "org.bunkus.mkvtoolnix-gui" "native"
+add_app "TRUE" "Multimídia" "YT-DLP" "Downloader de Vídeos" "yt-dlp" "yt-dlp" "yt-dlp" "yt-dlp" "native"
 
 # --- JOGOS ---
-# FIX: 'steam-installer' substituído por 'steam' (meta-pacote non-free correto)
 add_app "FALSE" "Jogos" "Steam" "Loja de Jogos" "steam" "steam" "steam" "com.valvesoftware.Steam" "native"
 add_app "FALSE" "Jogos" "Bottles" "Wine Manager" "" "" "" "com.usebottles.bottles" "flatpak"
 add_app "FALSE" "Jogos" "Extreme Tux Racer" "Corrida" "extremetuxracer" "extremetuxracer" "extremetuxracer" "" "native"
@@ -184,9 +184,8 @@ add_app "TRUE" "Impressão" "Drivers Epson" "Drivers para Epson" "printer-driver
 add_app "TRUE" "Impressão" "Gutenprint" "Drivers Genéricos" "printer-driver-gutenprint" "gutenprint" "gutenprint" "" "native"
 
 # --- IA E CLI ---
-add_app "FALSE" "IA" "OpenAI Whisper" "Reconhecimento de Fala" "" "" "" "openai-whisper" "pipx"
+#add_app "FALSE" "IA" "OpenAI Whisper" "Reconhecimento de Fala" "" "" "" "openai-whisper" "pipx"  =====> Instalado pelo install-ia-stack.sh
 add_app "TRUE" "IA" "Subliminal" "Baixador de Legendas" "" "" "" "subliminal" "pipx"
 add_app "TRUE" "IA" "Trans" "Tradutor de Texto" "" "" "" "translate-shell googletrans" "pipx"
-add_app "FALSE" "IA" "YT-DLP" "Downloader de Vídeos" "yt-dlp" "yt-dlp" "yt-dlp" "yt-dlp" "native"
 
 log "SUCCESS" "Banco de dados de aplicativos carregado"

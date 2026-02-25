@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # Script: fpk-gera-atalhos.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Gerador de atalhos em /usr/local/bin para aplicativos Flatpak
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

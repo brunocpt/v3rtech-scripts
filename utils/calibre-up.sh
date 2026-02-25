@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: calibre-up.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Instalação e atualização automatizada do Calibre E-book Manager
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: restaura-config.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Assistente gráfico (YAD) para restauração de backups de aplicativos
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
@@ -108,8 +108,7 @@ SELECTION=$(yad --title="Restauração de Configurações" \
     FALSE "FIREFOX" FALSE "FLOORP" FALSE "VIVALDI" FALSE "OPERA" FALSE "BROWSEROS" FALSE "ZEN_BROWSER" FALSE "CALIBRE" \
     FALSE "WAVEBOX" FALSE "RAMBOX" FALSE "FERDIUM" FALSE "NEXTCLOUD" \
     FALSE "FILEZILLA" FALSE "TRANSMISSION" FALSE "OBSIDIAN" FALSE "ZOTERO" \
-    FALSE "MASTER_PDF" FALSE "PICARD" FALSE "VSCODE" FALSE "SYSTEM_SETTINGS" FALSE "KWALLET" \
-    FALSE "GEANY" FALSE "ANTIGRAVITY" \
+    FALSE "MASTER_PDF" FALSE "PICARD" FALSE "VSCODE" FALSE "GEANY" FALSE "ANTIGRAVITY" \
     --button="Selecionar Todos:2" --button="Desmarcar Todos:3" --button="Iniciar:0" --button="Cancelar:1")
 
 EXIT_CODE=$?
@@ -294,20 +293,6 @@ for app in "${selected_apps[@]}"; do
         "VSCODE")
             restore_app "VSCODE (Flatpak)" "$DEST_DIR/vscode-flatpak-$USERNAME.zip" && ((SUCCESS++)) || true
             restore_app "VSCODE (Nativo)" "$DEST_DIR/vscode-$USERNAME.zip" && ((SUCCESS++)) || true
-            ;;
-        "KWALLET")
-            restore_app "KWALLET" "$DEST_DIR/kwallet-$USERNAME.zip" && ((SUCCESS++)) || ((FAILED++))
-            ;;
-        "SYSTEM_SETTINGS")
-            restore_app "SYSTEM_SETTINGS" "$DEST_DIR/system-settings-$USERNAME.zip" && ((SUCCESS++)) || ((FAILED++))
-
-            # Tenta restaurar dconf se disponível
-            if unzip -p "$DEST_DIR/system-settings-$USERNAME.zip" dconf-settings.dump > /tmp/dconf-settings.dump 2>/dev/null; then
-                if [ -s /tmp/dconf-settings.dump ]; then
-                    log_msg "  Aplicando dconf-settings.dump"
-                    dconf load / < /tmp/dconf-settings.dump && log_success "dconf restaurado" || log_error "Erro ao aplicar dconf"
-                fi
-            fi
             ;;
     esac
 

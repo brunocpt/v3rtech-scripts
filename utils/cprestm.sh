@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: cprestm.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Restauração de backup do HD externo Mirror para o diretório local
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

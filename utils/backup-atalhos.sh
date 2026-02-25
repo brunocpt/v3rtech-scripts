@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: backup-atalhos.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Backup universal de atalhos de teclado e configurações do Dolphin (KDE/GNOME/XFCE)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

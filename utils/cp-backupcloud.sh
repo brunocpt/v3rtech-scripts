@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: cp-backupcloud.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Cópia de segurança dos arquivos Cloud para o backup na rede (LAN)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

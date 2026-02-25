@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: metaflatpaks.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Instalador interativo (YAD) para conjuntos de aplicativos Flatpak
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: install-essentials.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Instalar pacotes e aplicativos essenciais do sistema
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
@@ -162,7 +162,7 @@ case "$DISTRO_FAMILY" in
             "guake" "geany" "geany-plugins"
             
             # Compactadores
-            "exfatprogs" "arj" "p7zip" "unrar"
+            "exfatprogs" "arj" "p7zip" "unrar" "zip" "unzip"
             
             # Sistema de impressão
             "cups" "cups-pdf" "cups-browsed"
@@ -170,8 +170,7 @@ case "$DISTRO_FAMILY" in
             "foomatic-db-nonfree" "foomatic-db-ppds"
             "foomatic-db-nonfree-ppds" "foomatic-db-gutenprint-ppds"
             "epson-inkjet-printer-escpr" "cnijfilter2" "scangearmp2"
-            "samsung-unified-driver" "samsung-ml2160"
-            "cnrdrvcups-lb" "cups-bjnp"
+            "samsung-unified-driver" "cnrdrvcups-lb" "cups-bjnp"
             
             # Processamento de imagem
             "imagemagick"
@@ -214,7 +213,7 @@ case "$DISTRO_FAMILY" in
             "guake" "geany" "geany-plugins"
             
             # Compactadores
-            "arj" "p7zip" "p7zip-plugins" "unrar"
+            "arj" "p7zip" "p7zip-plugins" "unrar" "zip" "unzip"
             
             # Sistema de impressão
             "cups-pdf" "gutenprint" "hplip" "hplip-gui"

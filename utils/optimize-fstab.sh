@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: optimize-fstab.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Otimiza opções de montagem (Btrfs/Ext4) no /etc/fstab
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

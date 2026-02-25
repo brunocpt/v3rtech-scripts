@@ -4,6 +4,17 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 ---
 
+## [4.0.5] - 2026-02-24
+
+### ✨ Refatoração e Melhorias
+
+- **lib/install-essentials.sh:** Adicionados `zip` e `unzip` à lista de pacotes essenciais em todas as distribuições suportadas. Removidos drivers redundantes de impressão Samsung (`samsung-ml2160`).
+- **lib/setup-system.sh:** Corrigida expansão de variáveis no bloco de configuração do `/etc/bash.bashrc`. Agora `$UTILS_DIR` e `$CONFIGS_DIR` são corretamente interpolados no shell persistente.
+- **lib/apps-data.sh:** Limpeza do banco de dados de aplicativos. `OpenAI Whisper` removido (agora gerenciado pelo `install-ia-stack.sh`) e `YT-DLP` removido da seção de IA.
+- **utils/restaura-config.sh:** Removida lógica legada para restauração de `KWALLET` e `SYSTEM_SETTINGS`, simplificando o script.
+
+---
+
 ## [4.0.4] - 2026-02-24
 
 ### ✨ Refatoração e Melhorias
@@ -168,7 +179,7 @@ Se encontrar algum bug, por favor abra uma issue no repositório.
 
 ## 📊 Estatísticas
 
-- **Versão:** 4.0.0
+- **Versão:** 4.0.5
 - **Data de Lançamento:** 2026-02-23
 - **Scripts Principais:** 20+
 - **Funções Auxiliares:** 50+

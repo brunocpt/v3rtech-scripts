@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: zotero_install.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Instalação manual e configuração do Zotero (Versão Beta)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

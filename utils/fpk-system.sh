@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: fpk-system.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Instalação de utilitários de sistema via Flatpak
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

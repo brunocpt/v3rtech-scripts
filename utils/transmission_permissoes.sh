@@ -1,7 +1,7 @@
 #!/bin/sh
 # ==============================================================================
 # Script: transmission_permissoes.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Ajuste de permissões e limpeza de torrents do Transmission local
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

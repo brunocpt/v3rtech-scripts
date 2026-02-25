@@ -2,9 +2,9 @@
 
 # ==============================================================================
 # Script: v3rtech-install.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
-# Objetivo: Script-mestre orquestrador da suite V3RTECH Scripts v4.0.4
+# Objetivo: Script-mestre orquestrador da suite V3RTECH Scripts v4.0.5
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
 # ==============================================================================
@@ -343,7 +343,7 @@ run_specific_script() {
 # MENU PRINCIPAL
 # ==============================================================================
 
-section "V3RTECH Scripts v4.0.4"
+section "V3RTECH Scripts v4.0.5"
 
 while true; do
     echo ""

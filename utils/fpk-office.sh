@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: fpk-office.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Instalação de suítes de escritório e produtividade via Flatpak
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

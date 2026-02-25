@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: install-desktop-cosmic.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Instalar e configurar ambiente Cosmic (Pop!_OS)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação

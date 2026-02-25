@@ -35,3 +35,5 @@ configs/filebot-osdb.conf
 
 # Arquivos específicos
 configs/Cloudflare_APITokens.txt
+configs/rclone.conf
+configs/rclone.conf.local_backup

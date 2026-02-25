@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # Script: pack-icp-brasil.sh
-# Versão: 4.0.4
+# Versão: 4.0.5
 # Data: 2026-02-24
 # Objetivo: Instalação da cadeia ICP-Brasil e Assinador SERPRO (Multi-distro)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
