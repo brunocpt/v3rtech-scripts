@@ -2,8 +2,8 @@
 
 # ==============================================================================
 # Script: ts.sh
-# Versão: 4.0.5
-# Data: 2026-02-24
+# Versão: 4.7.0
+# Data: 2026-02-25
 # Objetivo: Tradução de legendas SRT para Português Brasileiro (Google Translate)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/

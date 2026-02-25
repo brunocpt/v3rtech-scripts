@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: cp-dns320l.sh
-# Versão: 4.0.5
-# Data: 2026-02-24
+# Versão: 4.7.0
+# Data: 2026-02-25
 # Objetivo: Sincronização de arquivos Cloud para o NAS D-Link DNS-320L
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/

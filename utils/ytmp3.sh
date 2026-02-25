@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: ytmp3.sh
-# Versão: 4.0.5
-# Data: 2026-02-24
+# Versão: 4.7.0
+# Data: 2026-02-25
 # Objetivo: Download de playlists do YouTube em formato MP3 (yt-dlp + YAD)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/

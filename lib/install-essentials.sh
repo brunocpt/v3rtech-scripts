@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: install-essentials.sh
-# Versão: 4.0.5
-# Data: 2026-02-24
+# Versão: 4.7.0
+# Data: 2026-02-25
 # Objetivo: Instalar pacotes e aplicativos essenciais do sistema
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/

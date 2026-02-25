@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: lib/install-apps-dev.sh
-# Versão: 4.0.5
-# Data: 2026-02-24
+# Versão: 4.7.0
+# Data: 2026-02-25
 # Objetivo: Instalar aplicativos de Desenvolvimento
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -36,66 +36,59 @@ fi
 install_native_app() {
     local app_name="$1"
     local package="${APP_MAP_NATIVE[$app_name]}"
-    
-    if [ -z "$package" ]; then
-        log "WARN" "Pacote nativo não disponível para $app_name em $DISTRO_FAMILY"
-        return 1
+    if [ -z "$package" ]; then return 1; fi
+    if is_installed "$package"; then
+        log "INFO" "Pacote '$package' ($app_name) já está instalado."
+        return 10
     fi
-    
     log "INFO" "Instalando $app_name (nativo)..."
-    log "DEBUG" "Pacote: $package"
-    
-    i $package
-    
-    if [ $? -eq 0 ]; then
-        log "SUCCESS" "$app_name instalado com sucesso"
-        return 0
-    else
-        log "WARN" "Falha ao instalar $app_name"
-        return 1
-    fi
+    i "$package"
+    return $?
 }
 
 install_flatpak_app() {
     local app_name="$1"
     local flatpak_id="${APP_MAP_FLATPAK[$app_name]}"
-    
-    if [ -z "$flatpak_id" ]; then
-        log "WARN" "Flatpak ID não disponível para $app_name"
-        return 1
+    if [ -z "$flatpak_id" ]; then return 1; fi
+    if flatpak list 2>/dev/null | grep -q "$flatpak_id"; then
+        log "INFO" "Flatpak '$flatpak_id' ($app_name) já está instalado."
+        return 10
     fi
-    
     log "INFO" "Instalando $app_name (Flatpak)..."
-    log "DEBUG" "Flatpak ID: $flatpak_id"
-    
     install_flatpak "$flatpak_id"
-    
-    if [ $? -eq 0 ]; then
-        log "SUCCESS" "$app_name instalado com sucesso"
-        return 0
-    else
-        log "WARN" "Falha ao instalar $app_name"
-        return 1
-    fi
+    return $?
 }
 
 install_app() {
     local app_name="$1"
     local app_method="${APP_MAP_METHOD[$app_name]}"
-    local prefer_method="$PREFER_NATIVE"
-    
+    local prefer_native="${PREFER_NATIVE:-false}"
+    local install_status=1
+    local install_type=""
+
+    if [ "$app_method" = "pipx" ] || [ "$app_method" = "custom" ]; then return 0; fi
+
+    log "STEP" "Processando $app_name..."
+
     if [ "$app_method" = "flatpak" ]; then
-        install_flatpak_app "$app_name"
-    elif [ "$app_method" = "pipx" ] || [ "$app_method" = "custom" ]; then
-        log "DEBUG" "$app_name será tratado por outro script ($app_method)"
-        return 0
+        install_flatpak_app "$app_name"; install_status=$?; install_type="flatpak"
+    elif [ "$prefer_native" = "true" ]; then
+        install_native_app "$app_name"; install_status=$?; install_type="native"
+        if [ $install_status -ne 0 ] && [ $install_status -ne 10 ]; then
+            install_flatpak_app "$app_name"; install_status=$?; install_type="flatpak"
+        fi
     else
-        if [ "$prefer_method" = "true" ]; then
-            install_native_app "$app_name" || install_flatpak_app "$app_name"
-        else
-            install_flatpak_app "$app_name" || install_native_app "$app_name"
+        install_flatpak_app "$app_name"; install_status=$?; install_type="flatpak"
+        if [ $install_status -ne 0 ] && [ $install_status -ne 10 ]; then
+            install_native_app "$app_name"; install_status=$?; install_type="native"
         fi
     fi
+
+    if [ $install_status -eq 0 ] || [ $install_status -eq 10 ]; then
+        [ $install_status -eq 0 ] && log "SUCCESS" "$app_name instalado via $install_type"
+        return 0
+    fi
+    return 1
 }
 
 # ==============================================================================
@@ -121,11 +114,8 @@ for i in "${!APP_NAMES_ORDERED[@]}"; do
     
     if [ "$category" = "Dev" ]; then
         var_name="SELECTED_APP_$i"
-        if [ "${!var_name}" = "true" ]; then
-            log "DEBUG" "App 
-álbum de fotos (índice $i) selecionado para instalação."
-            install_app "$app_name"
-            ((installed_count++))
+        if declare -p "$var_name" &>/dev/null && [ "${!var_name}" = "true" ]; then
+            install_app "$app_name" && ((installed_count++))
         fi
     fi
 done

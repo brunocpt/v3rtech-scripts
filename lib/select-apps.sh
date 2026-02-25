@@ -2,7 +2,7 @@
 # ==============================================================================
 # Script: lib/select-apps.sh
 # Versão: 4.1.1
-# Data: 2026-02-24
+# Data: 2026-02-25
 # Objetivo: Seleção gráfica de aplicativos a instalar
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/

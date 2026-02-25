@@ -4,6 +4,48 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 ---
 
+## [4.7.0] - 2026-02-25
+
+### ✨ Consolidação de Loop e Segurança de Variáveis
+
+- **Varredura de Segurança GPU (Interativo/Final):**
+  - Implementada uma varredura final exaustiva em `internet.sh` que detecta todos os apps baseados em Chromium instalados (nativos ou Flatpak) e aplica o patch de GPU de forma independente.
+  - O sistema agora é inteligente o suficiente para aplicar o fix mesmo se o app já estiver instalado antes da execução do script.
+  - Hooks de atualização (`pacman`, `apt`, `dnf`) e `systemd-timers` (Flatpak) refinados para maior persistência.
+
+- **Check de Robustez `declare -p`:**
+  - Todos os scripts de instalação de aplicativos (`lib/install-apps-*.sh`) agora utilizam o comando `declare -p` antes de acessar variáveis de seleção. Isso evita erros de "unbound variable" se o arquivo de configuração estiver incompleto.
+
+- **Sincronização Global v4.7.0:**
+  - Toda a suite foi sincronizada para a versão `4.7.0` e data `2026-02-25`.
+
+---
+
+## [4.6.0] - 2026-02-25
+
+### ✨ Consolidação de Motor e Sincronização Global
+
+- **Motor de Instalação Consolidado (v4.6.0):**
+  - Unificação da lógica de instalação robusta (com tratamento de erro `10` para "já instalado") para os scripts de **Internet** e **Multimídia**.
+  - **GPU Compositing Fix v4.6.0:** Otimização do sistema de correção de renderização GPU, agora integrado ao motor modular.
+  - **Correção de Mismatch:** Corrigido o erro onde a lógica de Internet havia sido aplicada no arquivo de Multimídia. Restaurada a lógica original de Multimídia (VLC, OBS, Spotify) e pós-instalação do Filebot, mas utilizando o novo motor consolidado.
+
+- **Sincronização de Versionamento:**
+  - Toda a suite `v3rtech-scripts` (incluindo `core/`, `lib/` e `utils/`) foi sincronizada para a versão **4.6.0** e data **2026-02-25**, garantindo uniformidade em todo o ecossistema.
+  - Atualização global de cabeçalhos e documentação (`README.md`, `ARCHITECTURE.md`).
+
+---
+
+## [4.0.6] - 2026-02-24
+
+### ✨ Refatoração e Melhorias
+
+- **utils/configs-zip.sh:** Removida a opção `SYSTEM_SETTINGS` da `APP_LIST` e sua respectiva lógica de backup, simplificando o escopo do utilitário de backup de configurações.
+- **v3rtech-install.sh:** Movida a verificação e instalação automática de dependências críticas (`rsync`, `yad`) para o topo do script. Isso garante que as ferramentas necessárias estejam presentes antes de qualquer lógica operacional, corrigindo o fluxo onde o `rsync` só era verificado durante a configuração inicial.
+- **v3rtech-install.sh:** Sincronização da versão para v4.0.6.
+
+---
+
 ## [4.0.5] - 2026-02-24
 
 ### ✨ Refatoração e Melhorias
@@ -179,7 +221,7 @@ Se encontrar algum bug, por favor abra uma issue no repositório.
 
 ## 📊 Estatísticas
 
-- **Versão:** 4.0.5
+- **Versão:** 4.7.0
 - **Data de Lançamento:** 2026-02-23
 - **Scripts Principais:** 20+
 - **Funções Auxiliares:** 50+
@@ -203,4 +245,4 @@ MIT License - Veja LICENSE para detalhes
 
 ---
 
-**Última Atualização:** 2026-02-24
+**Última Atualização:** 2026-02-25

@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: configs-zip.sh
-# Versão: 4.0.5
-# Data: 2026-02-24
+# Versão: 4.7.0
+# Data: 2026-02-25
 # Objetivo: Backup de configurações de aplicativos com interface gráfica YAD
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -17,7 +17,7 @@ USERNAME="$USER"
 declare -a APP_LIST=(
     "BRAVE" "CHROME" "EDGE" "FALKON" "FIREFOX" "FLOORP" "VIVALDI" "OPERA" "ZEN BROWSER" "BROWSEROS" "CALIBRE"
     "WAVEBOX" "RAMBOX" "FERDIUM" "NEXTCLOUD" "FILEZILLA" "TRANSMISSION" "OBSIDIAN" "ZOTERO" "TINTERO"
-    "MASTER_PDF" "PICARD" "VSCODE" "ANTIGRAVITY" "GEANY" "PYCHARM" "DBEAVER" "POSTMAN" "REMMINA" "SYSTEM_SETTINGS"
+    "MASTER_PDF" "PICARD" "VSCODE" "ANTIGRAVITY" "GEANY" "PYCHARM" "DBEAVER" "POSTMAN" "REMMINA"
 )
 
 # --- FUNÇÕES AUXILIARES ---
@@ -317,13 +317,6 @@ for app in "${selected_apps[@]}"; do
                 backup_zip "POSTMAN (Flatpak)" "$TMP_DIR/postman-flatpak-${USERNAME}.zip" ".var/app/com.getpostman.Postman"
             else
                 backup_zip "POSTMAN (Nativo)" "$TMP_DIR/postman-${USERNAME}.zip" ".postman" ".config/postman"
-            fi
-            ;;
-        "SYSTEM_SETTINGS")
-            if command -v dconf &>/dev/null; then dconf dump / > "$TMP_DIR/dconf-settings.dump"; fi
-            backup_zip "SYSTEM_SETTINGS" "$TMP_DIR/system-settings-${USERNAME}.zip" ".config" ".local/share" ".themes" ".icons" -x "*/Cache/*" "*/cache/*" ".config/google-chrome/*" ".config/BraveSoftware/*" ".mozilla/*"
-            if [ -f "$TMP_DIR/dconf-settings.dump" ]; then
-                zip -qju "$DEST_DIR/system-settings-${USERNAME}.zip" "$TMP_DIR/dconf-settings.dump"
             fi
             ;;
         *)

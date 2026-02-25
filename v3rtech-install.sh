@@ -2,9 +2,9 @@
 
 # ==============================================================================
 # Script: v3rtech-install.sh
-# Versão: 4.0.5
-# Data: 2026-02-24
-# Objetivo: Script-mestre orquestrador da suite V3RTECH Scripts v4.0.5
+# Versão: 4.7.0
+# Data: 2026-02-25
+# Objetivo: Script-mestre orquestrador da suite V3RTECH Scripts v4.7.0
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
 # ==============================================================================
@@ -19,6 +19,40 @@
 # ==============================================================================
 
 # ==============================================================================
+# INSTALAÇÃO DE PACOTES ESSENCIAIS PARA O SCRIPT FUNCIONAR
+# ==============================================================================
+
+# Verifica e instala o rsync se necessário
+  if ! command -v rsync &> /dev/null; then
+    echo -e "\033[0;32m[INFO] rsync não encontrado. Instalando...\033[0m"
+    if command -v pacman &> /dev/null; then
+        sudo pacman -S --noconfirm rsync
+    elif command -v apt-get &> /dev/null; then
+        sudo apt-get update && sudo apt-get install -y rsync
+    elif command -v dnf &> /dev/null; then
+        sudo dnf install -y rsync
+      else
+        echo -e "\033[1;31m[ERRO] Gerenciador de pacotes não suportado. Instale 'rsync' manualmente.\033[0m"
+        exit 1
+    fi
+  fi
+
+# Verifica e instala o yad se necessário
+  if ! command -v yad &> /dev/null; then
+    echo -e "\033[0;32m[INFO] yad não encontrado. Instalando...\033[0m"
+    if command -v pacman &> /dev/null; then
+      sudo pacman -S --noconfirm yad
+    elif command -v apt-get &> /dev/null; then
+      sudo apt-get update && sudo apt-get install -y yad
+    elif command -v dnf &> /dev/null; then
+      sudo dnf install -y yad
+    else
+      echo -e "\033[1;31m[ERRO] Gerenciador de pacotes não suportado. Instale 'yad' manualmente.\033[0m"
+      exit 1
+    fi
+  fi
+
+# ==============================================================================
 # SETUP AUTOMÁTICO NA PRIMEIRA EXECUÇÃO
 # ==============================================================================
 
@@ -27,21 +61,6 @@ SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ "$SOURCE_DIR" != "$TARGET_DIR" ]; then
     echo -e "\033[1;33m[SETUP] Primeira execução detectada. Configurando o ambiente...\033[0m"
-
-    # Verifica e instala o rsync se necessário
-    if ! command -v rsync &> /dev/null; then
-        echo -e "\033[0;32m[INFO] rsync não encontrado. Instalando...\033[0m"
-        if command -v pacman &> /dev/null; then
-            sudo pacman -S --noconfirm rsync
-        elif command -v apt-get &> /dev/null; then
-            sudo apt-get update && sudo apt-get install -y rsync
-        elif command -v dnf &> /dev/null; then
-            sudo dnf install -y rsync
-        else
-            echo -e "\033[1;31m[ERRO] Gerenciador de pacotes não suportado. Instale 'rsync' manualmente.\033[0m"
-            exit 1
-        fi
-    fi
 
     # Copia os scripts para o diretório de destino
     echo -e "\033[0;32m[INFO] Copiando scripts para $TARGET_DIR...\033[0m"
@@ -343,7 +362,7 @@ run_specific_script() {
 # MENU PRINCIPAL
 # ==============================================================================
 
-section "V3RTECH Scripts v4.0.5"
+section "V3RTECH Scripts v4.0.6"
 
 while true; do
     echo ""
