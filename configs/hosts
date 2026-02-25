@@ -1,0 +1,21 @@
+
+# Storages (NAS - Modal) (configuração dhcp)
+  192.168.0.105   DNS-320L                # MAC: E4:6F:13:28:13:E6
+
+# Pi
+  192.168.0.101    pi                     # MAC: E4-5F-01-8C-B5-8B
+
+# Impressoras (configuração dhcp)
+  192.168.0.106   BRN3C2AF48FCE96         # MAC: 3C:2A:F4:8F:CE:96
+  192.168.0.119   CANON G7010             # MAC: DC-C2-C9-FB-E4-B0
+  192.168.0.143   EPSON L4160             # MAC: 50-57-9C-B4-A2-55
+
+# Hosts TrueNAS Modal
+  131.0.22.165    truenas-modal           # MAC: 04:d9:f5:79:c4:3f
+
+# Hosts TrueNAS Bruno
+  189.50.92.154   truenas-v3rtech         # MAC: 1C-1B-0D-08-68-65
+  192.168.0.12    truenas-v3rtech-local   # MAC: 1C-1B-0D-08-68-65
+
+# DDns Deco M5 Popov
+  bpky.tplinkdns.com

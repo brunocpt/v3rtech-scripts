@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: up
+# Versão: 4.0.3
+# Data: 2026-02-24
+# Objetivo: Script universal de atualização de pacotes (Multi-distro)
+# Autor: V3RTECH Tecnologia, Consultoria e Inovação
+# Website: https://v3rtech.com.br/
+# ==============================================================================
+
+set -e
+
+echo "--- Atualizando sistema ---"
+
+# Carrega informações da distro
+if [ -f /etc/os-release ]; then
+    source /etc/os-release
+fi
+
+VARIANT="${VARIANT:-}"
+
+# Fedora Kinoite (ostree-based)
+if [[ "$VARIANT" == "Kinoite" ]]; then
+    echo "[INFO] Atualizando Fedora Kinoite..."
+    if sudo fuser /var/lib/rpm/.rpm.lock &>/dev/null; then
+        echo "[ERRO] Banco de dados RPM em uso. Aguarde."
+        exit 1
+    fi
+    sudo rpm-ostree upgrade
+    echo "--- Atualização concluída (Kinoite). Reinicie para aplicar. ---"
+    exit 0
+fi
+
+# Arch Linux
+if [[ "$ID" =~ ^(arch|rebornos|archcraft|cachyos|endeavouros|manjaro|biglinux)$ ]]; then
+    echo "[INFO] Atualizando Arch Linux..."
+    
+    # Aguarda lock do pacman se necessário
+    LOCK="/var/lib/pacman/db.lck"
+    timeout=15
+    waited=0
+    while [[ -e "$LOCK" ]] && sudo fuser "$LOCK" &>/dev/null; do
+        sleep 1
+        ((waited++))
+        if (( waited >= timeout )); then
+            echo "[AVISO] Lock do pacman não liberado. Tentando forçar..."
+            sudo rm -f "$LOCK" 2>/dev/null || true
+            break
+        fi
+    done
+    
+    if command -v paru &>/dev/null; then
+        paru -Syu --noconfirm
+    else
+        sudo pacman -Syu --noconfirm
+    fi
+    
+    # Limpeza
+    if command -v paccache &>/dev/null; then
+        sudo paccache -r -k3
+    fi
+    
+    # Remove pacotes órfãos
+    orphans="$(pacman -Qtdq 2>/dev/null || true)"
+    if [[ -n "$orphans" ]]; then
+        echo "[INFO] Removendo pacotes órfãos..."
+        sudo pacman -Rns --noconfirm $orphans || true
+    fi
+    exit 0
+fi
+
+# Debian/Ubuntu
+if [[ "$ID" =~ ^(debian|ubuntu|elementary|neon|zorin|lingmo|siduction)$ ]]; then
+    echo "[INFO] Atualizando Debian/Ubuntu..."
+    
+    # Repara dependências quebradas
+    if ! sudo apt -f install -y; then
+        echo "[AVISO] Reconfigurando pacotes..."
+        sudo dpkg --configure -a
+    fi
+    
+    sudo apt update
+    
+    if command -v apt-fast &>/dev/null; then
+        sudo DEBIAN_FRONTEND=noninteractive apt-fast full-upgrade -y
+    else
+        sudo DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
+    fi
+    
+    sudo apt autoremove -y
+    sudo apt clean
+    exit 0
+fi
+
+# Fedora
+if [[ "$ID" =~ ^(fedora|rhel|nobara)$ ]]; then
+    echo "[INFO] Atualizando Fedora..."
+    
+    if sudo fuser /var/lib/rpm/.rpm.lock &>/dev/null; then
+        echo "[ERRO] Banco de dados RPM em uso. Aguarde."
+        exit 1
+    fi
+    
+    sudo dnf upgrade --refresh -y
+    sudo dnf autoremove -y
+    sudo dnf clean all
+    exit 0
+fi
+
+echo "[ERRO] Distribuição não suportada: $ID"
+exit 1

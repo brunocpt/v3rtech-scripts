@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: upsnapshot
+# Versão: 4.0.3
+# Data: 2026-02-24
+# Objetivo: Manutenção completa do sistema (Pacotes, Flatpak, Snap, Pipx)
+# Autor: V3RTECH Tecnologia, Consultoria e Inovação
+# Website: https://v3rtech.com.br/
+# ==============================================================================
+
+set -e
+
+echo "--- Iniciando manutenção completa ---"
+
+# 1. Atualização de pacotes
+echo "[1/4] Atualizando pacotes do sistema..."
+/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/utils/up || true
+
+# 2. Flatpak (se disponível)
+if command -v flatpak &>/dev/null; then
+    echo "[2/4] Atualizando Flatpaks..."
+    sudo flatpak update --noninteractive --assumeyes || true
+    
+    echo "[2/4] Removendo runtimes não utilizados..."
+    sudo flatpak uninstall --unused --assumeyes || true
+fi
+
+# 3. Pipx (se disponível)
+if command -v pipx &>/dev/null; then
+    echo "[3/4] Atualizando pacotes pipx..."
+    pipx upgrade-all || true
+fi
+
+# 4. Snap (se disponível)
+if command -v snap &>/dev/null; then
+    echo "[4/4] Atualizando pacotes snap..."
+    sudo snap refresh || true
+fi
+
+# Limpeza de logs
+echo "[Limpeza] Limpando logs do journal..."
+sudo journalctl --vacuum-time=2d
+
+echo "--- Manutenção completa finalizada ---"
