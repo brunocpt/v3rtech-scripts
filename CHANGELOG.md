@@ -4,6 +4,16 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 ---
 
+## [4.8.0] - 2026-02-25
+
+### ✨ Melhorias e Novidades
+
+- **lib/setup-system.sh:** Atualizada para `4.8.0` — adicionada a criação de `desktop entries` para utilitários do diretório `utils/`; introduzida a variável `UTILS_DIR` e a função `create_desktop_entries` que gera arquivos `.desktop` idempotentes em `~/.local/share/applications`.
+- **lib/install-desktop-kde.sh:** Expansão das listas de pacotes KDE (`kde-applications`, `kde-utilities`) em múltiplas distribuições e pequenas correções de formatação no script.
+- **Geral:** Ajuste nas mensagens finais de `setup-system.sh` e sincronização do versionamento do script para `4.8.0`.
+
+---
+
 ## [4.7.0] - 2026-02-25
 
 ### ✨ Consolidação de Loop e Segurança de Variáveis
@@ -20,6 +30,7 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
   - Toda a suite foi sincronizada para a versão `4.7.0` e data `2026-02-25`.
 
 ---
+
 
 ## [4.6.0] - 2026-02-25
 
@@ -222,6 +233,7 @@ Se encontrar algum bug, por favor abra uma issue no repositório.
 ## 📊 Estatísticas
 
 - **Versão:** 4.7.0
+ - **Versão:** 4.8.0
 - **Data de Lançamento:** 2026-02-23
 - **Scripts Principais:** 20+
 - **Funções Auxiliares:** 50+

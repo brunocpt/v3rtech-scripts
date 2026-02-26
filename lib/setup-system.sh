@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script: setup-system.sh
-# Versão: 4.7.0
+# Versão: 4.8.0
 # Data: 2026-02-25
 # Objetivo: Script completo para configuração de sistema
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
@@ -19,6 +19,7 @@
 # 8. Mounts de rede (fstab e hosts)
 # 9. Plymouth (com hooks) e otimizações de Bootloader (GRUB/Systemd-boot)
 # 10. Restauração de atalhos de teclado por ambiente de desktop
+# 11. Criação de desktop entries para scripts utilitários
 #
 # ==============================================================================
 
@@ -26,6 +27,7 @@
 BASE_DIR="/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts"
 [ ! -d "$BASE_DIR" ] && BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
 [ -z "$BASE_DIR" ] && BASE_DIR="$(cd "$(dirname "$0")/../" && pwd)"
+UTILS_DIR="$BASE_DIR/utils"
 
 source "$BASE_DIR/core/env.sh" || { echo "[ERRO] Não foi possível carregar core/env.sh"; exit 1; }
 source "$BASE_DIR/core/logging.sh" || { echo "[ERRO] Não foi possível carregar core/logging.sh"; exit 1; }
@@ -504,11 +506,103 @@ fi
 $SUDO chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config/" 2>/dev/null || true
 log "SUCCESS" "Restauração de atalhos concluída (se aplicável)"
 
+
+
+# ==============================================================================
+# 11. CRIAÇÃO DE DESKTOP ENTRIES
+# ==============================================================================
+
+log "STEP" "Criando desktop entries para scripts utilitários..."
+
+create_desktop_entries() {
+    local LOCATION_DEST="$REAL_HOME/.local/share/applications"
+    local SCRIPT_BASE="$UTILS_DIR"
+    local ICON_BASE="$RESOURCES_DIR/atalhos"
+
+    # Cria pasta de destino, se necessário
+    mkdir -p "$LOCATION_DEST"
+
+    # Array de entradas: "id|nome|script|ícone"
+    local ENTRADAS=(
+        "metaflatpaks|Instalador de Metapacks Flatpaks|metaflatpaks.sh|metapacks.svg"
+        "cpa|Copiador de Pastas|cpa|cpa.svg"
+        "cpplay|Copiador de Playlists para Pendrive|cpplay.sh|cpplay.svg"
+        "upall|Atualizador de Aplicativos|upall.sh|upall.svg"
+        "wtt|Whisper Transcriber|wtt.sh|wtt.svg"
+        "extrai-legendas|Extrai Legendas|extrai-legendas.sh|extrai-legendas.svg"
+        "video-converter-gui|Converte arquivos de vídeo|video-converter-gui.sh|video-converter-gui.svg"
+        "restaura-config|Restaurar Configurações|restaura-config.sh|restaura-config.svg"
+        "configs-zip|Backup de Configurações Pessoais|configs-zip.sh|configs-zip.svg"
+        "ts|Tradutor de Legendas|ts.sh|ts.svg"
+    )
+
+    local DESKTOP_ENTRIES_CREATED=0
+    local DESKTOP_ENTRIES_FAILED=0
+
+    for entry in "${ENTRADAS[@]}"; do
+        IFS="|" read -r file name script_file icon_file <<< "$entry"
+        local EXEC_CMD="$SCRIPT_BASE/$script_file"
+        local ICON_PATH="$ICON_BASE/$icon_file"
+        local DESKTOP_FILE="$LOCATION_DEST/${file}.desktop"
+
+        # Idempotência: Verifica se o arquivo .desktop já existe e tem o conteúdo correto
+        if [ -f "$DESKTOP_FILE" ]; then
+            if grep -q "Exec=$EXEC_CMD" "$DESKTOP_FILE" && grep -q "Icon=$ICON_PATH" "$DESKTOP_FILE"; then
+                log "DEBUG" "Desktop entry ✓ $file já está atualizada."
+                continue
+            fi
+        fi
+
+        # Verifica se o script existe e é executável
+        if [ ! -f "$EXEC_CMD" ]; then
+            log "WARN" "Script não encontrado: $EXEC_CMD"
+            ((DESKTOP_ENTRIES_FAILED++))
+            continue
+        fi
+
+        # Torna o script executável
+        $SUDO chmod +x "$EXEC_CMD" 2>/dev/null || true
+
+        # Verifica se o ícone existe
+        if [ ! -f "$ICON_PATH" ]; then
+            log "WARN" "Ícone não encontrado: $ICON_PATH (usando ícone padrão)"
+            ICON_PATH="application-x-executable"
+        fi
+
+        # Cria o arquivo .desktop
+        log "DEBUG" "Criando/Atualizando desktop entry: $file"
+        tee "$DESKTOP_FILE" > /dev/null <<EOF
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=$name
+Comment=
+Exec=$EXEC_CMD
+Icon=$ICON_PATH
+Type=Application
+Terminal=false
+NoDisplay=false
+Categories=Utility
+X-KDE-Trusted=true
+EOF
+
+        # Ajusta permissões do arquivo .desktop
+        $SUDO chmod 644 "$DESKTOP_FILE"
+        log "SUCCESS" "✓ Desktop entry criada/atualizada: $file"
+        ((DESKTOP_ENTRIES_CREATED++))
+    done
+
+    log "INFO" "Desktop entries: $DESKTOP_ENTRIES_CREATED criadas/atualizadas, $DESKTOP_ENTRIES_FAILED falhadas"
+}
+
+# Chama a função para criar os desktop entries
+create_desktop_entries
+
 # ==============================================================================
 # CONCLUSÃO
 # ==============================================================================
 
 section "Sistema Configurado"
 log "SUCCESS" "Configuração de sistema concluída!"
-log "INFO" "PATH, aliases, sudo, kernel, boot, Plymouth, mounts e atalhos foram configurados globalmente"
-log "INFO" "Reinicie o terminal para aplicar as mudanças"
+log "INFO" "PATH, aliases, sudo, kernel, boot, Plymouth, mounts, atalhos e desktop entries foram configurados globalmente"
+log "INFO" "Reinicie o terminal ou a sessão para aplicar todas as mudanças"

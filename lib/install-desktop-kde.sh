@@ -54,77 +54,77 @@ section "Instalação de Pacotes KDE/Plasma"
 # ==============================================================================
 
 case "$DISTRO_FAMILY" in
-    
+
     # ========== DEBIAN / UBUNTU ==========
     debian)
         log "STEP" "Instalando pacotes KDE para Debian/Ubuntu..."
-        
+
         local kde_packages=(
             # Plasma Desktop
             "plasma-desktop" "plasma-workspace" "plasma-framework" "kde-applications" "kde-utilities"
-            
+
             # Aplicativos KDE
             "dolphin" "konsole" "kate" "kwrite"
             "okular" "gwenview" "kolourpaint"
             "kcalc" "kdeconnect" "kdeplasma-addons"
-            
+
             # Temas e ícones
             "breeze-icon-theme" "breeze" "oxygen-icon-theme"
-            
+
             # Utilitários
             "khotkeys" "kmenuedit" "ksysguard"
             "kscreen" "bluedevil"
         )
-        
+
         for pkg in "${kde_packages[@]}"; do
             i "$pkg" || log "WARN" "Falha ao instalar: $pkg"
         done
         ;;
-    
+
     # ========== ARCH LINUX ==========
     arch)
         log "STEP" "Instalando pacotes KDE para Arch Linux..."
-        
+
         local kde_packages=(
             # Plasma Desktop
-            "plasma" "plasma-desktop" "plasma-workspace"
-            
+            "plasma" "plasma-desktop" "plasma-workspace" "kde-applications" "kde-utilities"
+
             # Aplicativos KDE
             "dolphin" "konsole" "kate" "okular"
             "gwenview" "kolourpaint" "kcalc" "kdeconnect"
             "kdeplasma-addons"
-            
+
             # Temas
             "breeze" "breeze-icons" "oxygen-icons"
         )
-        
+
         for pkg in "${kde_packages[@]}"; do
             i "$pkg" || log "WARN" "Falha ao instalar: $pkg"
         done
         ;;
-    
+
     # ========== FEDORA ==========
     fedora)
         log "STEP" "Instalando pacotes KDE para Fedora..."
-        
+
         local kde_packages=(
             # Plasma Desktop
-            "plasma-desktop" "plasma-workspace" "plasma-framework"
-            
+            "plasma-desktop" "plasma-workspace" "plasma-framework" "kde-applications" "kde-utilities"
+
             # Aplicativos KDE
             "dolphin" "konsole" "kate" "okular"
             "gwenview" "kolourpaint" "kcalc" "kdeconnect"
             "kdeplasma-addons"
-            
+
             # Temas
             "breeze-icon-theme" "breeze" "oxygen-icon-theme"
         )
-        
+
         for pkg in "${kde_packages[@]}"; do
             i "$pkg" || log "WARN" "Falha ao instalar: $pkg"
         done
         ;;
-    
+
     *)
         die "Distribuição não suportada: $DISTRO_FAMILY"
         ;;
