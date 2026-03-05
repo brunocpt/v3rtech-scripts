@@ -37,3 +37,5 @@ configs/filebot-osdb.conf
 configs/Cloudflare_APITokens.txt
 configs/rclone.conf
 configs/rclone.conf.local_backup
+configs/github*
+configs/*.psm

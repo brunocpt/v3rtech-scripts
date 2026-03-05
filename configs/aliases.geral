@@ -155,7 +155,7 @@ alias fpl='flatpak list'
 # 6. RCLONE & CLOUD SYNC
 # ==============================================================================
 # Lista de exclusão padrão
-RC_EXCLUDE="/usr/local/share/scripts/v3rtech-scripts/configs/exclude-list.txt"
+RC_EXCLUDE="/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs/exclude-list.txt"
 
 # --- Rclone Helpers ---
 
@@ -189,21 +189,22 @@ rcls() {
 
 # GEJA
 alias rc-down-bruno-geja='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy GEJA-Pessoal: /mnt/trabalho/Cloud/Bruno/Escotismo/GEJA'
-alias rc-up-bruno-geja='rclone -u -q -P --drive-allow-import-name-change --drive-import-formats docx,odt,xls,xlsx,ods,ppt,pptx,odp --exclude Diretoria/** --exclude *.mp4 --exclude *.mkv copy /mnt/trabalho/Cloud/Bruno/Escotismo/GEJA/ GEJA-Pessoal:'
-alias rc-up-geja-diretoria='rclone -u -q -P --drive-allow-import-name-change --drive-import-formats docx,odt,xls,xlsx,ods,ppt,pptx,odp --exclude-from '$RC_EXCLUDE' --exclude *.mp4 --exclude *.mkv copy /mnt/trabalho/Cloud/Bruno/Escotismo/GEJA/Diretoria/ GEJA-Diretoria:'
-alias rc-down-geja-diretoria='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy GEJA-Diretoria: /mnt/trabalho/Cloud/Bruno/Escotismo/GEJA/Diretoria/'
+alias rc-up-bruno-geja='rclone -u -q -P --drive-allow-import-name-change --drive-import-formats docx,odt,xls,xlsx,ods,ppt,pptx,odp --exclude Diretoria/** --exclude *.mp4 --exclude *.mkv copy /mnt/trabalho/Cloud/GEJA/ GEJA-Pessoal:'
+alias rc-up-geja-diretoria='rclone -u -q -P --drive-allow-import-name-change --drive-import-formats docx,odt,xls,xlsx,ods,ppt,pptx,odp --exclude-from '$RC_EXCLUDE' --exclude *.mp4 --exclude *.mkv copy /mnt/trabalho/Cloud/GEJA/Diretoria/ GEJA-Diretoria:'
+alias rc-down-geja-diretoria='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy GEJA-Diretoria: /mnt/trabalho/Cloud/GEJA/Diretoria/'
 
 # MODAL
-alias rc-up-modal-gdrive='rclone -u -q -P --exclude-from '$RC_EXCLUDE' --exclude Diretoria/** copy /mnt/trabalho/Cloud/Modal Modal:'
-alias rc-up-modal-diretoria-gdrive='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/Modal/Diretoria Modal-Diretoria:'
-alias rc-up-modal-projetos-gdrive='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/Modal/Projetos Modal-Projetos:'
+alias rc-up-modal-gdrive='rclone -u -P -q --drive-import-formats docx,xlsx,pptx,odt,ods,odp --progress --exclude-from '$RC_EXCLUDE' --exclude Diretoria/** copy /mnt/trabalho/Cloud/Modal Modal:'
+alias rc-up-modal-diretoria-gdrive='rclone -u -P -q --drive-import-formats docx,xlsx,pptx,odt,ods,odp --progress --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/Modal/Diretoria Modal-Diretoria:'
+alias rc-up-modal-projetos-gdrive='rclone -u -P -q --drive-import-formats docx,xlsx,pptx,odt,ods,odp --progress --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/Modal/Projetos Modal-Projetos:'
 alias rc-up-modal-onedrive='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/Modal OneDriveModal:/Modal'
 alias rc-up-modals3='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/Modal ModalS3:/modal-backup'
 
-# RIT & OUTROS
-alias rc-up-rit-gdrive='rclone -n -q -P --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/RIT/Diretoria RIT-GDrive:'
-alias rc-down-gphotos='rclone sync -v -u -P --exclude-from /usr/local/share/scripts/config/exclude-photos.txt GooglePhotos:album/FamiliaBPKY /mnt/trabalho/Cloud/Multimidia/Pessoais/FamiliaBPKY ; cd /mnt/trabalho/Cloud/Multimidia/Pessoais/FamiliaBPKY/ ; rm *.mp4 *}.jpg *.gif *.JPG *.jpeg 2>/dev/null'
-alias rc-up-musicas='rclone -u -q -P --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/Multimidia/Musicas Dropbox:/Musicas'
+# RIT
+alias rc-up-rit-gdrive='rclone -u -P -q --drive-import-formats docx,xlsx,pptx,odt,ods,odp --progress --exclude-from '$RC_EXCLUDE' copy /mnt/trabalho/Cloud/RIT/Diretoria RIT-GDrive:'
+
+# OUTROS
+alias rc-down-gphotos='rclone sync -v -u -P --exclude-from '$RC_EXCLUDE' GooglePhotos:album/FamiliaBPKY /mnt/trabalho/Cloud/Multimidia/Pessoais/FamiliaBPKY ; cd /mnt/trabalho/Cloud/Multimidia/Pessoais/FamiliaBPKY/ ; rm *.mp4 *}.jpg *.gif *.JPG *.jpeg 2>/dev/null'
 alias rc-up-condominio='rclone -u -q -P --exclude-from '$RC_EXCLUDE' sync /mnt/trabalho/Cloud/Vale\ do\ Cedro Dropbox:/Vale\ do\ Cedro'
 
 # ==============================================================================
@@ -212,17 +213,17 @@ alias rc-up-condominio='rclone -u -q -P --exclude-from '$RC_EXCLUDE' sync /mnt/t
 SSH_KEY="/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/resources/ssh-keys/id_rsa"
 
 # AWS & Cloudron
-alias aws.cloudron='ssh -i '$SSH_KEY' ubuntu@3.215.113.99'
-alias truenas-modal='ssh -i '$SSH_KEY' modal@131.0.22.165 -p 8222'
-alias cloudron-geja='ssh -i '$SSH_KEY' root@85.31.63.91'
-alias truenas-cloudron-geja='ssh -i '$SSH_KEY' bruno@192.168.0.157'
-alias truenas-v3rtech='ssh -i '$SSH_KEY' 189.50.92.154 -p 9222'
-alias truenas-train='ssh -i '$SSH_KEY' bruno@189.50.92.154 -p 9223'
-alias uplucky='ssh -i '$SSH_KEY' bruno@192.168.0.186'
-alias ijud-dev='ssh -i '$SSH_KEY' ijud@189.50.92.154 -p 8222'
+alias aws.cloudron='sudo chmod 600 '$SSH_KEY' && ssh -i '$SSH_KEY' ubuntu@3.215.113.99'
+alias truenas-modal='sudo chmod 600 '$SSH_KEY' && ssh -i '$SSH_KEY' modal@131.0.22.165 -p 8222'
+alias cloudron-geja='sudo chmod 600 '$SSH_KEY' && ssh -i '$SSH_KEY' root@85.31.63.91'
+alias truenas-cloudron-geja='sudo chmod 600 '$SSH_KEY' && ssh -i '$SSH_KEY' bruno@192.168.0.157'
+alias truenas-v3rtech='sudo chmod 600 '$SSH_KEY' && ssh -i '$SSH_KEY' 189.50.92.154 -p 9222'
+alias sandros='sudo chmod 600 '$SSH_KEY' && ssh -i '$SSH_KEY' bruno@189.50.92.154 -p 9223'
+alias uplucky='sudo chmod 600 '$SSH_KEY' && ssh -i '$SSH_KEY' bruno@192.168.0.186'
+alias ijud-dev='sudo chmod 600 '$SSH_KEY' && ssh -i '$SSH_KEY' ijud@189.50.92.154 -p 8222'
 
 # Hetzner
-alias v3gabi='ssh -i '$SSH_KEY' root@5.78.138.143 -p 8222'
+alias v3gabi='sudo chmod 600 '$SSH_KEY' && ssh -i '$SSH_KEY' root@5.78.138.143 -p 8222'
 
 # IoT / Local
 alias DB='sshpass -p admin ssh root@DNS-320B'

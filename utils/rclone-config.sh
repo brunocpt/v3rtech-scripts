@@ -11,7 +11,7 @@
 
 echo "Configurando Rclone..."
 
-USER_CONFIG_DIR="/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs"
+USER_CONFIG_DIR="/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts"
 
 if command -v rclone &> /dev/null && [ "$USER" = "bruno" ]; then
 
