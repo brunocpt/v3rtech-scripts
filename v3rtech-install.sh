@@ -237,43 +237,48 @@ run_full_setup() {
     log "STEP" "Abrindo seletor de aplicativos..."
     bash "$LIB_DIR/select-apps.sh" || log "WARN" "Seleção de apps cancelada"
     
-    # 2. Instalar opções adicionais automaticamente (sem perguntar)
-    INSTALL_DOCKER=1
-    INSTALL_IA_STACK=1
-    INSTALL_CERTIFICATES=1
-    INSTALL_VIRTUALBOX=1
-    
+    # 2. Perguntar sobre opções adicionais
+    select_additional_options
+
     # 3. Instalar essenciais
     log "STEP" "Instalando apps essenciais..."
     bash "$LIB_DIR/install-essentials.sh" || log "ERROR" "Falha ao instalar essenciais"
-    
+
     # 4. Configurar sistema
     log "STEP" "Configurando sistema..."
     bash "$LIB_DIR/setup-system.sh" || log "ERROR" "Falha ao configurar sistema"
-    
+
     # 5. Configurar desktop
     log "STEP" "Configurando desktop..."
     configure_desktop
-    
+
     # 6. Instalar apps selecionados
     log "STEP" "Instalando aplicativos selecionados..."
     install_selected_apps
-    
+
     # 7. Docker
-    log "STEP" "Instalando Docker..."
-    bash "$LIB_DIR/install-docker.sh" || log "WARN" "Falha ao instalar Docker"
-    
+    if [ "$INSTALL_DOCKER" -eq 1 ]; then
+        log "STEP" "Instalando Docker..."
+        bash "$LIB_DIR/install-docker.sh" || log "WARN" "Falha ao instalar Docker"
+    fi
+
     # 8. Stack IA
-    log "STEP" "Instalando Stack IA/ML..."
-    bash "$LIB_DIR/install-ia-stack.sh" || log "WARN" "Falha ao instalar Stack IA"
-    
+    if [ "$INSTALL_IA_STACK" -eq 1 ]; then
+        log "STEP" "Instalando Stack IA/ML..."
+        bash "$LIB_DIR/install-ia-stack.sh" || log "WARN" "Falha ao instalar Stack IA"
+    fi
+
     # 9. Certificados
-    log "STEP" "Instalando certificados ICP-Brasil..."
-    bash "$LIB_DIR/install-certificates.sh" || log "WARN" "Falha ao instalar certificados"
-    
+    if [ "$INSTALL_CERTIFICATES" -eq 1 ]; then
+        log "STEP" "Instalando certificados ICP-Brasil..."
+        bash "$LIB_DIR/install-certificates.sh" || log "WARN" "Falha ao instalar certificados"
+    fi
+
     # 10. VirtualBox
-    log "STEP" "Instalando VirtualBox..."
-    # bash "$LIB_DIR/install-virtualbox.sh" || log "WARN" "Falha ao instalar VirtualBox"
+    if [ "$INSTALL_VIRTUALBOX" -eq 1 ]; then
+        log "STEP" "Instalando VirtualBox..."
+        bash "$LIB_DIR/install-virtualbox.sh" || log "WARN" "Falha ao instalar VirtualBox"
+    fi
     
     # 11. Gera atalhos para apps Flatpak
     log "STEP" "Gerando atalhos para apps Flatpak..."
