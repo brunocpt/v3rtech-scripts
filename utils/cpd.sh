@@ -93,16 +93,25 @@ total=$(tr -cd '\0' < "$file_list" | wc -c)
 log "Arquivos encontrados: $total"
 
 parallel -0 -j "$THREADS" --line-buffer < "$file_list" '
+rel="${1#'"$src_dir"'/}"
+dest="'"$dest_dir"'/$rel"
+
+mkdir -p "$(dirname "$dest")"
+
 echo "#Transferindo ({#}/'"$total"'): {/.}"
+
 rsync \
 --partial \
 --inplace \
+--whole-file \
 --size-only \
 --human-readable \
 --update \
+--no-times \
+--omit-dir-times \
 --remove-source-files \
-{} "'"$dest_dir"'" >> "'"$log_file"'" 2>&1
-'
+"$1" "$dest" >> "'"$log_file"'" 2>&1
+' _ {}
 
 rm "$file_list"
 
