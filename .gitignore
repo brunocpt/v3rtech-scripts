@@ -39,3 +39,6 @@ configs/rclone.conf
 configs/rclone.conf.local_backup
 configs/github*
 configs/*.psm
+
+# Certificados digitais e senhas
+/resources/CertificadoDigital/
