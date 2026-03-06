@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Arquivo: core/logging.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
+# Versão: 6.0.0
+# Data: 2026-03-06
 # Objetivo: Funções de logging padronizado (Terminal apenas)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -31,7 +31,7 @@ setup_log() {
     if [ -n "$LOG_FILE" ] && [ -w "$(dirname "$LOG_FILE")" ]; then
         {
             echo "======================================================================"
-            echo "V3RTECH Scripts v4.7.0 - Sessão iniciada em $(date '+%Y-%m-%d %H:%M:%S')"
+            echo "V3RTECH Scripts v$SCRIPT_VERSION - Sessão iniciada em $(date '+%Y-%m-%d %H:%M:%S')"
             echo "Usuário: $REAL_USER | Distro: $DISTRO_FAMILY | Desktop: $DESKTOP_ENV"
             echo "======================================================================"
         } >> "$LOG_FILE" 2>/dev/null || true

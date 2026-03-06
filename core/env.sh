@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Arquivo: core/env.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
+# Versão: 6.0.0
+# Data: 2026-03-06
 # Objetivo: Variáveis globais, caminhos, cores e detecção de ambiente
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -90,7 +90,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
     # pois são detectadas dinamicamente no env.sh e não devem ser sobrescritas
     cat > "$CONFIG_FILE" << 'EOF'
 #!/bin/bash
-# Configuração V3RTECH Scripts v4.7.0
+# Configuração V3RTECH Scripts v6.0.0
 # Gerada automaticamente
 
 DISTRO_FAMILY=""
@@ -184,16 +184,21 @@ else
     SUDO="sudo"
 fi
 
-# --- 7. EXPORTAÇÃO DE VARIÁVEIS CRÍTICAS ---
+# --- 7. VERSÃO DO PROJETO ---
+
+SCRIPT_VERSION="6.0.0"
+
+# --- 8. EXPORTAÇÃO DE VARIÁVEIS CRÍTICAS ---
 
 # Garante que subshells enxerguem estas variáveis
 export BASE_DIR CORE_DIR LIB_DIR DATA_DIR RESOURCES_DIR UTILS_DIR BACKUP_DIR CONFIGS_DIR
 export LOG_FILE CONFIG_FILE CONFIG_HOME LOG_DIR
 export REAL_USER REAL_HOME
 export SUDO DRY_RUN AUTO_CONFIRM VERBOSE
+export SCRIPT_VERSION
 export RED GREEN YELLOW BLUE CYAN MAGENTA BOLD NC
 
-# --- 8. FUNÇÃO AUXILIAR: ATUALIZAR CONFIG.CONF ---
+# --- 9. FUNÇÃO AUXILIAR: ATUALIZAR CONFIG.CONF ---
 
 # Função para salvar variáveis no arquivo de configuração
 save_config() {
@@ -211,21 +216,19 @@ save_config() {
     
     # Cria backup antes de modificar
     [ -f "$CONFIG_FILE" ] && cp "$CONFIG_FILE" "$CONFIG_FILE.bak" 2>/dev/null || true
-    
-    # Atualiza ou adiciona a variável
-    if grep -q "^$key=" "$CONFIG_FILE" 2>/dev/null; then
-        # Usa sed para substituir valor existente (escapa caracteres especiais)
-        sed -i "s|^$key=.*|$key=\"$value\"|" "$CONFIG_FILE"
-    else
-        # Adiciona nova variável
-        echo "$key=\"$value\"" >> "$CONFIG_FILE"
-    fi
-    
-    # Atualiza timestamp
-    sed -i "s|^LAST_UPDATE=.*|LAST_UPDATE=\"$(date '+%Y-%m-%d %H:%M:%S')\"|" "$CONFIG_FILE"
+
+    # Atualiza ou adiciona a variável usando arquivo temporário (evita injeção via sed)
+    local tmp_file
+    tmp_file=$(mktemp)
+    grep -v "^$key=" "$CONFIG_FILE" > "$tmp_file" 2>/dev/null || true
+    echo "$key=\"$value\"" >> "$tmp_file"
+    # Garante que LAST_UPDATE fique no final
+    grep -v "^LAST_UPDATE=" "$tmp_file" > "$CONFIG_FILE" 2>/dev/null || true
+    echo "LAST_UPDATE=\"$(date '+%Y-%m-%d %H:%M:%S')\""  >> "$CONFIG_FILE"
+    rm -f "$tmp_file"
 }
 
-# --- 9. VALIDAÇÃO BÁSICA ---
+# --- 10. VALIDAÇÃO BÁSICA ---
 
 # Verifica se os diretórios críticos existem
 if [ ! -d "$LIB_DIR" ] || [ ! -d "$UTILS_DIR" ]; then
@@ -239,7 +242,7 @@ if [ ! -d "$LIB_DIR" ] || [ ! -d "$UTILS_DIR" ]; then
     exit 1
 fi
 
-# --- 10. INICIALIZAÇÃO DE LOG ---
+# --- 11. INICIALIZAÇÃO DE LOG ---
 
 # Cria o arquivo de log se não existir
 if [ ! -f "$LOG_FILE" ]; then

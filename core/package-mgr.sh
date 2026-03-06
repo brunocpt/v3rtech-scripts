@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Arquivo: core/package-mgr.sh
-# Versão: 4.1.0
+# Versão: 6.0.0
 # Data: 2026-03-06
 # Objetivo: Abstração dos gerenciadores de pacotes (multi-distro)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
@@ -38,27 +38,31 @@ ensure_paru() {
         $SUDO pacman -S --noconfirm base-devel || log "WARN" "Falha ao instalar base-devel"
     fi
 
-    # Instala Paru
+    # Instala Paru num subshell isolado para não afetar o trap EXIT do processo pai
     local temp_dir
     temp_dir=$(mktemp -d)
-    trap 'rm -rf "$temp_dir"' EXIT
 
-    pushd "$temp_dir" >/dev/null || return 1
+    (
+        trap 'rm -rf "$temp_dir"' EXIT
+        cd "$temp_dir" || exit 1
 
-    log "INFO" "Clonando repositório Paru..."
-    git clone https://aur.archlinux.org/paru.git 2>/dev/null || {
-        log "WARN" "Falha ao clonar Paru"
-        popd >/dev/null || true
-        return 1
-    }
+        log "INFO" "Clonando repositório Paru..."
+        git clone https://aur.archlinux.org/paru.git 2>/dev/null || {
+            log "WARN" "Falha ao clonar Paru"
+            exit 1
+        }
 
-    if [ -d "paru" ]; then
-        cd paru || { popd >/dev/null || true; return 1; }
+        cd paru || exit 1
         log "INFO" "Compilando Paru (isso pode levar alguns minutos)..."
         makepkg -si --noconfirm 2>/dev/null || log "WARN" "Falha ao compilar Paru"
-    fi
+    )
+    local subshell_status=$?
+    rm -rf "$temp_dir"
 
-    popd >/dev/null || true
+    if [ $subshell_status -ne 0 ]; then
+        log "ERROR" "Falha ao instalar Paru"
+        return 1
+    fi
 
     if _check_cmd paru; then
         log "SUCCESS" "Paru instalado com sucesso"

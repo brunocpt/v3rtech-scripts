@@ -4,7 +4,7 @@
 # Script: v3rtech-install.sh
 # Versão: 6.0.0
 # Data: 2026-03-06
-# Objetivo: Script-mestre orquestrador da suite V3RTECH Scripts v4.7.0
+# Objetivo: Script-mestre orquestrador da suite V3RTECH Scripts v6.0.0
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
 # ==============================================================================
@@ -372,7 +372,7 @@ run_specific_script() {
 # MENU PRINCIPAL
 # ==============================================================================
 
-section "V3RTECH Scripts v4.0.6"
+section "V3RTECH Scripts v$SCRIPT_VERSION"
 
 while true; do
     echo ""
@@ -428,12 +428,25 @@ while true; do
             show_summary 7
             echo "Preferência atual: PREFER_NATIVE=$PREFER_NATIVE"
             echo ""
-            read -p "Mudar para NATIVO? (s/n) [n]: " change_pref
-            if [ "$change_pref" = "s" ]; then
-                PREFER_NATIVE="true"
-                save_config "PREFER_NATIVE" "$PREFER_NATIVE"
-                log "INFO" "Preferência alterada para NATIVO"
-            fi
+            echo "1) NATIVO (mais integrado ao sistema)"
+            echo "2) FLATPAK (mais isolado e portável)"
+            echo ""
+            read -p "Escolha [1-2, Enter para cancelar]: " change_pref
+            case "$change_pref" in
+                1)
+                    PREFER_NATIVE="true"
+                    save_config "PREFER_NATIVE" "$PREFER_NATIVE"
+                    log "INFO" "Preferência alterada para NATIVO"
+                    ;;
+                2)
+                    PREFER_NATIVE="false"
+                    save_config "PREFER_NATIVE" "$PREFER_NATIVE"
+                    log "INFO" "Preferência alterada para FLATPAK"
+                    ;;
+                *)
+                    log "INFO" "Preferência mantida: $PREFER_NATIVE"
+                    ;;
+            esac
             ;;
         8)
             log "INFO" "Saindo..."
