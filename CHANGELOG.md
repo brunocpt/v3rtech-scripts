@@ -4,6 +4,23 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 ---
 
+## [6.0.0] - 2026-03-06
+
+### ✨ Paralelismo e Orquestração de Performance (e Hotfix de Instalação)
+
+- **core/package-mgr.sh:**
+    - **Bug Fix:** Corrigida falha na instalação de múltiplos pacotes (ex: `libreoffice-fresh`) no Arch Linux. As funções `i()`, `r()` e `is_installed()` agora tratam corretamente strings com espaços, dividindo-as em argumentos individuais para o `paru`/`pacman`.
+- **utils/cpv.sh (v6.0.0) & utils/cpd.sh (v5.0.0):** 
+    - Implementação de **Transferência Paralela** utilizando `GNU Parallel`.
+    - Substituição do `rsync` sequencial por múltiplas threads (`THREADS=4`) para otimizar a largura de banda em redes locais (SMB/LAN).
+    - Orquestração completa: `cpv.sh` agora executa o `fbr` (renomeação) antes de iniciar a transferência.
+    - Sistema de `LOCK` para evitar execuções simultâneas.
+    - Logs detalhados em `~/logs/` com timestamp.
+- **lib/install-essentials.sh:** Adicionado `parallel` como dependência essencial para suportar os novos motores de transferência.
+- **Sincronização Global v6.0.0:** Suite completa sincronizada para a nova versão maior para refletir a mudança de paradigma na movimentação de dados.
+
+---
+
 ## [4.8.0] - 2026-02-25
 
 ### ✨ Melhorias e Novidades
@@ -232,8 +249,7 @@ Se encontrar algum bug, por favor abra uma issue no repositório.
 
 ## 📊 Estatísticas
 
-- **Versão:** 4.7.0
- - **Versão:** 4.8.0
+- **Versão:** 6.0.0
 - **Data de Lançamento:** 2026-02-23
 - **Scripts Principais:** 20+
 - **Funções Auxiliares:** 50+
@@ -257,4 +273,4 @@ MIT License - Veja LICENSE para detalhes
 
 ---
 
-**Última Atualização:** 2026-02-25
+**Última Atualização:** 2026-03-06

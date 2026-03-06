@@ -95,16 +95,14 @@ add_app "FALSE" "Internet" "Opera" "Navegador com VPN" "" "opera" "" "com.opera.
 add_app "FALSE" "Internet" "Microsoft Edge" "Navegador Microsoft" "microsoft-edge-stable" "microsoft-edge-stable-bin" "microsoft-edge-stable" "com.microsoft.Edge" "native"
 add_app "FALSE" "Internet" "BrowserOS" "The Open source agentic browser" "" "browseros-bin" "" "" "native"
 add_app "TRUE" "Internet" "Wavebox" "Navegador focado em trabalho" "wavebox" "wavebox" "wavebox" "" "native"
+add_app "FALSE" "Internet" "Discord" "Chat e Voz" "discord" "discord" "discord" "com.discordapp.Discord" "flatpak"
+add_app "FALSE" "Internet" "MailViewer" "Visualizador EML/MSG" "" "" "" "io.github.alescdb.mailviewer" "flatpak"
 
 # --- NUVEM E TRANSFERÊNCIA ---
 add_app "TRUE" "Nuvem" "Nextcloud" "Sync Nextcloud" "nextcloud-desktop" "nextcloud-client" "nextcloud-client" "com.nextcloud.desktopclient.nextcloud" "native"
 add_app "FALSE" "Nuvem" "Packet" "Simple, fast file sharing between Linux and Android" "" "" "" "io.github.nozwock.Packet" "flatpak"
 add_app "FALSE" "Nuvem" "SendWorm" "Ferramenta segura e fácil de usar para transferir arquivos rapidamente" "" "" "" "to.bnt.sendworm" "flatpak"
 add_app "FALSE" "Nuvem" "Filezilla" "Cliente FTP" "filezilla" "filezilla" "filezilla" "org.filezilla.FileZilla" "native"
-
-# --- COMUNICAÇÃO ---
-add_app "FALSE" "Comunicação" "Discord" "Chat e Voz" "discord" "discord" "discord" "com.discordapp.Discord" "flatpak"
-add_app "FALSE" "Comunicação" "MailViewer" "Visualizador EML/MSG" "" "" "" "io.github.alescdb.mailviewer" "flatpak"
 
 # --- DESENVOLVIMENTO & TERMINAL ---
 add_app "TRUE" "Dev" "Antigravity" "Ambiente Google (VSCode)" "antigravity" "antigravity" "antigravity" "" "native"
@@ -116,7 +114,7 @@ add_app "TRUE" "Dev" "Dev Utils" "JQ, CCache, Duf, Eza" "jq ccache duf eza" "jq 
 add_app "FALSE" "Dev" "DBeaver" "Cliente SQL" "dbeaver-ce" "dbeaver" "dbeaver" "io.dbeaver.DBeaverCommunity" "native"
 add_app "FALSE" "Dev" "Postman" "Plataforma API" "postman" "postman-bin" "postman" "com.getpostman.Postman" "native"
 add_app "FALSE" "Dev" "Terminator" "Terminal Avançado" "terminator" "terminator" "terminator" "" "native"
-add_app "FALSE" "Dev" "VS Code" "Editor Microsoft" "code" "visual-studio-code-bin" "code" "com.visualstudio.code" "native"
+add_app "TRUE" "Dev" "VS Code" "Editor Microsoft" "code" "visual-studio-code-bin" "code" "com.visualstudio.code" "native"
 
 # --- ESCRITÓRIO E PRODUTIVIDADE ---
 add_app "TRUE" "Escritório" "LibreOffice" "Suíte Office" "libreoffice libreoffice-l10n-pt-br" "libreoffice-fresh libreoffice-fresh-pt-br" "libreoffice libreoffice-langpack-pt-BR" "org.libreoffice.LibreOffice" "native"
@@ -173,7 +171,7 @@ add_app "TRUE" "Sistema" "ZRAM" "Compressão RAM" "zram-tools" "zram-generator" 
 add_app "FALSE" "Utilitários" "ISO Image Writer" "Gravador USB" "" "" "" "org.kde.isoimagewriter" "flatpak"
 add_app "FALSE" "Utilitários" "Letterpress" "Conversor ASCII" "" "" "" "io.gitlab.gregorni.Letterpress" "flatpak"
 add_app "FALSE" "Utilitários" "SaveDesktop" "Salvar estado janelas" "" "" "" "io.github.vikdevelop.SaveDesktop" "flatpak"
-add_app "TRUE" "Utilitários" "7Zip e Rar" "Compactação" "7zip 7zip-rar unrar arj" "p7zip unrar arj" "p7zip p7zip-plugins unrar arj" "" "native"
+add_app "TRUE" "Utilitários" "7Zip e Rar" "Compactação" "7zip 7zip-rar unrar arj" "7zip unrar arj" "p7zip p7zip-plugins unrar arj" "" "native"
 add_app "TRUE" "Utilitários" "Grsync" "Rsync GUI" "grsync" "grsync" "grsync" "" "native"
 add_app "FALSE" "Utilitários" "Ventoy" "Criador USB Bootável" "" "ventoy-bin" "" "ventoy" "native"
 

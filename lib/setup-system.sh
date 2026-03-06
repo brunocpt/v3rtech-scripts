@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: setup-system.sh
-# Versão: 4.8.0
-# Data: 2026-02-25
+# Versão: 6.0.0
+# Data: 2026-03-06
 # Objetivo: Script completo para configuração de sistema
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/

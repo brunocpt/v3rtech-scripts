@@ -303,7 +303,7 @@ EOF
 start_containers() {
     log "STEP" "Iniciando containers Docker..."
 
-    local docker_dir="$HOME/ai-stack"
+    local docker_dir="$HOME/docker/stack/ai-stack"
 
     cd "$docker_dir"
     sudo docker compose up -d

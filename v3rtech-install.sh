@@ -2,8 +2,8 @@
 
 # ==============================================================================
 # Script: v3rtech-install.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
+# Versão: 6.0.0
+# Data: 2026-03-06
 # Objetivo: Script-mestre orquestrador da suite V3RTECH Scripts v4.7.0
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -104,6 +104,11 @@ fi
 if [ -z "$DISTRO_FAMILY" ]; then
     log "INFO" "Detectando sistema..."
     source "$(dirname "$0")/lib/detect-system.sh" || die "Falha ao detectar sistema"
+fi
+
+# Garante que o paru esteja instalado no Arch Linux
+if [[ "$DISTRO_FAMILY" == "arch" ]]; then
+    ensure_paru || log "WARN" "Falha técnica ao tentar garantir o paru. Algumas instalações nativas podem falhar."
 fi
 
 # ==============================================================================

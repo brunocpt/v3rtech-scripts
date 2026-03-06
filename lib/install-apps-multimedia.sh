@@ -132,14 +132,73 @@ log "SUCCESS" "Instalação de $installed_count aplicativo(s) de Multimídia con
 # PÓS-INSTALAÇÃO DE FILEBOT
 # ==============================================================================
 if [ "$filebot_selected" = true ]; then
-    log "INFO" "Configurando Filebot..."
+    log "INFO" "Iniciando pós-instalação do Filebot..."
+
     if flatpak list --app 2>/dev/null | grep -q "net.filebot.FileBot"; then
+
+        # ----------------------------------------------------------------------
+        # 1. Aplicar licença (se existir)
+        # ----------------------------------------------------------------------
         LICENSE_FILE="$BASE_DIR/configs/FileBot_License_PX10290120.psm"
+
         if [ -f "$LICENSE_FILE" ]; then
-            log "INFO" "Aplicando licença..."
-            cat "$LICENSE_FILE" | flatpak run net.filebot.FileBot --license || true
+            log "INFO" "Aplicando licença do Filebot..."
+            if cat "$LICENSE_FILE" | flatpak run net.filebot.FileBot --license 2>/dev/null; then
+                log "SUCCESS" "✓ Licença aplicada"
+            else
+                log "WARN" "⚠ Falha ao aplicar licença"
+            fi
+        else
+            log "DEBUG" "Arquivo de licença não encontrado: $LICENSE_FILE"
         fi
+
+        # ----------------------------------------------------------------------
+        # 2. Ativar OpenSubtitles v2
+        # ----------------------------------------------------------------------
         log "INFO" "Configurando OpenSubtitles v2..."
-        flatpak run net.filebot.FileBot -script fn:properties --def net.filebot.WebServices.OpenSubtitles.v2=true 2>/dev/null || true
+
+        if flatpak run net.filebot.FileBot \
+            -script fn:properties \
+            --def net.filebot.WebServices.OpenSubtitles.v2=true \
+            2>/dev/null; then
+            log "SUCCESS" "✓ OpenSubtitles v2 configurado"
+        else
+            log "WARN" "⚠ Falha ao configurar OpenSubtitles v2"
+        fi
+
+        # ----------------------------------------------------------------------
+        # 3. Configurar credenciais OpenSubtitles (opcional)
+        # ----------------------------------------------------------------------
+        OSDB_CONFIG="$BASE_DIR/v3rtech-scripts/configs/filebot-osdb.conf"
+
+        if [ -f "$OSDB_CONFIG" ]; then
+            log "INFO" "Lendo credenciais OpenSubtitles..."
+
+            # shellcheck disable=SC1090
+            source "$OSDB_CONFIG"
+
+            if [ -n "${OSDB_USER:-}" ] && [ -n "${OSDB_PWD:-}" ]; then
+                log "INFO" "Configurando credenciais OpenSubtitles..."
+
+                if flatpak run net.filebot.FileBot \
+                    -script fn:configure \
+                    --def osdbUser="$OSDB_USER" \
+                    --def osdbPwd="$OSDB_PWD" \
+                    2>/dev/null; then
+                    log "SUCCESS" "✓ Credenciais OpenSubtitles configuradas"
+                else
+                    log "WARN" "⚠ Falha ao configurar credenciais OpenSubtitles"
+                fi
+            else
+                log "DEBUG" "Credenciais OpenSubtitles não definidas em $OSDB_CONFIG"
+            fi
+        else
+            log "DEBUG" "Arquivo de configuração OpenSubtitles não encontrado: $OSDB_CONFIG"
+        fi
+
+        log "SUCCESS" "✓ Pós-instalação do Filebot concluída"
+
+    else
+        log "WARN" "Filebot não está instalado via Flatpak. Pós-instalação ignorada."
     fi
 fi

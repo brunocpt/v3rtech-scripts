@@ -65,7 +65,7 @@ case "$DISTRO_FAMILY" in
             "build-essential" "git" "ccache" "pipx" "jq"
             
             # Utilitários de sistema
-            "curl" "wget" "duf" "eza" "bat" "bash-completion" "rsync"
+            "curl" "wget" "duf" "eza" "bat" "bash-completion" "rsync" "parallel"
             
             # Compactadores
             "exfatprogs" "arj" "p7zip-full" "unrar" "zip" "unzip"
@@ -105,45 +105,15 @@ case "$DISTRO_FAMILY" in
     arch)
         log "STEP" "Instalando pacotes essenciais para Arch Linux..."
         
-        # Instala Paru se preferir nativo
-        if [ "$PREFER_NATIVE" = "true" ] && ! command -v paru &>/dev/null; then
-            log "STEP" "Instalando Paru (AUR helper)..."
-            
-            # Verifica pré-requisitos
-            if ! command -v git &>/dev/null; then
-                log "INFO" "Git não está instalado, instalando..."
-                $SUDO pacman -S --noconfirm git || log "WARN" "Falha ao instalar Git"
+        # Garante que o Paru foi instalado pelo orquestrador
+        if [ "$PREFER_NATIVE" = "true" ]; then
+            if _check_cmd paru; then
+                paru_version=$(paru --version | head -1)
+                log "SUCCESS" "Paru já está configurado: $paru_version"
+            else
+                log "INFO" "Garantindo Paru..."
+                ensure_paru || log "WARN" "Falha ao garantir o Paru"
             fi
-            
-            if ! pacman -Qi base-devel &>/dev/null; then
-                log "INFO" "base-devel não está instalado, instalando..."
-                $SUDO pacman -S --noconfirm base-devel || log "WARN" "Falha ao instalar base-devel"
-            fi
-            
-            # Instala Paru
-            TEMP_DIR=$(mktemp -d)
-            trap "rm -rf $TEMP_DIR" EXIT
-            
-            cd "$TEMP_DIR" || die "Falha ao criar diretório temporário"
-            
-            log "INFO" "Clonando repositório Paru..."
-            git clone https://aur.archlinux.org/paru.git 2>/dev/null || log "WARN" "Falha ao clonar Paru"
-            
-            if [ -d "paru" ]; then
-                cd paru || die "Falha ao entrar no diretório paru"
-                log "INFO" "Compilando Paru (isso pode levar alguns minutos)..."
-                makepkg -si --noconfirm 2>/dev/null || log "WARN" "Falha ao compilar Paru"
-                
-                # Verifica se Paru foi instalado com sucesso
-                if command -v paru &>/dev/null; then
-                    log "SUCCESS" "Paru instalado com sucesso"
-                else
-                    log "WARN" "Paru pode nao estar no PATH. Tente executar: source /etc/profile"
-                fi
-            fi
-        elif [ "$PREFER_NATIVE" = "true" ] && command -v paru &>/dev/null; then
-            paru_version=$(paru --version | head -1)
-            log "SUCCESS" "Paru ja esta instalado: $paru_version"
         fi
         
         # Instala pacotes essenciais
@@ -156,7 +126,7 @@ case "$DISTRO_FAMILY" in
             
             # Utilitários de sistema
             "curl" "wget" "duf" "eza" "bat" "acpi" "bc" "rsync"
-            "lsb-release" "bchunk" "ntfs-3g" "bash-completion"
+            "lsb-release" "bchunk" "ntfs-3g" "bash-completion" "parallel"
             
             # Editores e terminais
             "guake" "geany" "geany-plugins"
@@ -191,6 +161,12 @@ case "$DISTRO_FAMILY" in
         for pkg in "${arch_packages[@]}"; do
             i "$pkg" || log "WARN" "Falha ao instalar: $pkg"
         done
+
+        # Otimiza espelhos (mirrors) com Reflector
+        if command -v reflector &>/dev/null; then
+            log "INFO" "Otimizando mirrors com Reflector..."
+            $SUDO reflector --country Brazil,Chile,"United States" --protocol https,http --latest 12 --sort rate --verbose || log "WARN" "Falha ao otimizar mirrors"
+        fi
         ;;
     
     # ========== FEDORA ==========
@@ -207,7 +183,7 @@ case "$DISTRO_FAMILY" in
             
             # Utilitários de sistema
             "curl" "wget" "duf" "eza" "exa" "bat" "thefuck"
-            "exfatprogs" "bash-completion" "rsync"
+            "exfatprogs" "bash-completion" "rsync" "parallel"
             
             # Editores e terminais
             "guake" "geany" "geany-plugins"

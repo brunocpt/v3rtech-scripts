@@ -1,9 +1,9 @@
 #!/bin/bash
 # ==============================================================================
 # Script: install-desktop-cosmic.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
-# Objetivo: Instalar e configurar ambiente Cosmic (Pop!_OS)
+# Versão: 5.2.0
+# Data: 2026-03-05
+# Objetivo: Instalar COSMIC Desktop e Componentes Independentes (Arch/Ubuntu/Fedora)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
 # ==============================================================================
@@ -21,22 +21,54 @@ if [ -z "$DISTRO_FAMILY" ]; then
     source "$(dirname "$0")/detect-system.sh" || die "Falha ao detectar sistema"
 fi
 
-section "Instalação de Pacotes Cosmic"
+section "Instalação do COSMIC Desktop Environment"
 
-log "WARN" "Cosmic é um ambiente relativamente novo. Suporte limitado."
+# Lista de componentes independentes conforme documentação do Arch
+# Adaptado para funcionar como array para a função 'i'
+COSMIC_INDEPENDENT=("cosmic-text-editor" "cosmic-files" "cosmic-terminal" "cosmic-player" "cosmic-wallpapers" "gnome-keyring")
 
 case "$DISTRO_FAMILY" in
     debian)
-        log "STEP" "Instalando pacotes Cosmic para Debian/Ubuntu..."
-        # Cosmic é baseado em GNOME, usa pacotes similares
-        i "cosmic-desktop" "cosmic-terminal" || log "WARN" "Falha ao instalar Cosmic"
+        if grep -iq "ubuntu" /etc/os-release; then
+            log "STEP" "Configurando PPA System76 para Ubuntu..."
+            $SUDO apt update && $SUDO apt install -y software-properties-common
+            $SUDO add-apt-repository -y ppa:system76/cosmic-beta
+            $SUDO apt update
+        fi
+        log "STEP" "Instalando metapacote cosmic e componentes independentes..."
+        # No Ubuntu/Debian, cosmic-text-editor pode ser apenas cosmic-edit em algumas versões do PPA
+        i "cosmic" || log "WARN" "Alguns componentes independentes podem não estar disponíveis no PPA"
+        i "${COSMIC_INDEPENDENT[@]}" || log "WARN" "Alguns componentes independentes podem não estar disponíveis no PPA"
         ;;
+
+    arch)
+        log "STEP" "Instalando COSMIC via Arch Extra..."
+        # Grupo 'cosmic' + componentes independentes citados na Wiki
+        i "cosmic" "packagekit" "power-profiles-daemon" || log "WARN" "Falha na instalação de componentes"
+        i "${COSMIC_INDEPENDENT[@]}" || log "WARN" "Falha na instalação de componentes"
+
+        log "INFO" "Habilitando serviços de sistema essenciais..."
+        $SUDO systemctl enable --now power-profiles-daemon
+        ;;
+
+    fedora)
+        log "STEP" "Configurando repositório COPR para Fedora..."
+        $SUDO dnf copr enable -y ryanbr/cosmic
+        i "cosmic-desktop" || log "WARN" "Falha ao instalar pacotes no Fedora"
+        i "${COSMIC_INDEPENDENT[@]}" || log "WARN" "Falha ao instalar pacotes no Fedora"
+        ;;
+
     *)
-        log "ERROR" "Cosmic não é suportado em $DISTRO_FAMILY"
-        log "INFO" "Cosmic é disponível principalmente em Pop!_OS (Ubuntu-based)"
+        log "ERROR" "COSMIC não suportado nativamente em: $DISTRO_FAMILY"
         exit 1
         ;;
 esac
 
-log "SUCCESS" "Instalação de pacotes Cosmic concluída!"
-log "INFO" "Reinicie o sistema para aplicar todas as mudanças"
+# Configuração de Portais XDG (Essencial para o funcionamento do cosmic-files e diálogos)
+log "STEP" "Configurando Portais XDG..."
+i "xdg-desktop-portal-cosmic" "xdg-desktop-portal-gtk"
+
+log "SUCCESS" "COSMIC Desktop e Componentes Independentes instalados!"
+log "INFO" "Componentes instalados: ${COSMIC_INDEPENDENT[*]}"
+
+save_config "DESKTOP_ENV" "cosmic"

@@ -1,9 +1,9 @@
-# V3RTECH Scripts v4.0
+# V3RTECH Scripts v6.0
 
 Suite completa de scripts de automação para instalação e configuração de sistemas Linux.
 
-**Versão:** 4.7.0  
-**Data:** 2026-02-25  
+**Versão:** 6.0.0  
+**Data:** 2026-03-06  
 **Autor:** V3RTECH Tecnologia, Consultoria e Inovação  
 **Website:** https://v3rtech.com.br/
 
@@ -257,5 +257,5 @@ Veja o arquivo `CHANGELOG.md` para um histórico completo de versões e mudança
 
 Desenvolvido pela V3RTECH Tecnologia, Consultoria e Inovação.
 
-**Versão:** 4.7.0  
-**Última atualização:** 2026-02-25
+**Versão:** 6.0.0  
+**Última atualização:** 2026-03-06

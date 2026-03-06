@@ -2,78 +2,259 @@
 
 # ==============================================================================
 # Script: fbr
-# Versão: 4.0.3
-# Data: 2026-02-25
+# Versão: 4.2.0
+# Data: 2026-03-06
 # Objetivo: Renomeação de mídias (FileBot) e padronização de legendas (.pt-BR)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
-# Website: https://v3rtech.com.br/
 # ==============================================================================
-log_file="$HOME/fbr.log"
 
-# Definindo os diretórios
-src_dir="/mnt/trabalho/Videos/"
+set -u
 
-# Função para escrever no log
-log_message() {
-  local message=$1
-  echo "$(date '+%Y-%m-%d %H:%M:%S') - $message" >> "$log_file"
+# ------------------------------------------------------------------------------
+# CONFIGURAÇÃO
+# ------------------------------------------------------------------------------
+
+src_dir="/mnt/trabalho/Videos"
+src_dir="${src_dir%/}"
+
+log_dir="$HOME/logs"
+mkdir -p "$log_dir"
+
+log_file="$log_dir/fbr-$(date '+%Y-%m-%d_%H-%M-%S').log"
+
+LOCKFILE="/tmp/fbr.lock"
+
+# ------------------------------------------------------------------------------
+# LOCKFILE (evita execução simultânea)
+# ------------------------------------------------------------------------------
+
+if [ -f "$LOCKFILE" ]; then
+  echo "Script já está em execução."
+  exit 1
+fi
+
+trap 'rm -f "$LOCKFILE"' EXIT
+touch "$LOCKFILE"
+
+# ------------------------------------------------------------------------------
+# CONTADORES
+# ------------------------------------------------------------------------------
+
+processed_dirs=0
+failed_dirs=0
+total_dirs=0
+
+# ------------------------------------------------------------------------------
+# LOG
+# ------------------------------------------------------------------------------
+
+log() {
+  local level="$1"
+  shift
+  local message="$*"
+  local ts
+  ts="$(date '+%Y-%m-%d %H:%M:%S')"
+
+  echo "[$ts] [$level] $message" | tee -a "$log_file"
 }
 
-# Função para renomear legendas após o filebot
+# ------------------------------------------------------------------------------
+# EXECUÇÃO DE COMANDOS
+# ------------------------------------------------------------------------------
+
+run_cmd() {
+
+  local description="$1"
+  shift
+
+  log "INFO" "$description"
+  log "DEBUG" "Comando: $*"
+
+  "$@" >> "$log_file" 2>&1
+  rc=$?
+
+  if [ $rc -eq 0 ]; then
+    log "SUCCESS" "$description concluído"
+  else
+    log "ERROR" "$description falhou (exit $rc)"
+  fi
+
+  return $rc
+}
+
+# ------------------------------------------------------------------------------
+# RENOMEAR LEGENDAS
+# ------------------------------------------------------------------------------
+
 rename_subtitles_after_filebot() {
+
   local dir="$1"
 
-  # Renomeia TUDO que terminar em .srt para .pt-BR.srt
+  log "INFO" "Iniciando renomeação de legendas em: $dir"
+
   find "$dir" -type f -iname "*.srt" | while read -r subtitle_file; do
-    local base_name="${subtitle_file%.srt}"
-    local new_name="${base_name}.pt-BR.srt"
-    if [[ "$subtitle_file" != "$new_name" ]]; then
-      mv -f "$subtitle_file" "$new_name"
-      log_message "Arquivo de legenda renomeado (após o filebot): $subtitle_file -> $new_name"
+
+    if [[ "$subtitle_file" =~ \.pt-BR\.srt$ ]]; then
+      log "DEBUG" "Legenda já padronizada: $subtitle_file"
+      continue
     fi
+
+    base="${subtitle_file%.srt}"
+    base="${base%.pt-BR}"
+
+    new_name="${base}.pt-BR.srt"
+
+    if mv -f "$subtitle_file" "$new_name"; then
+      log "SUCCESS" "Legenda renomeada: $subtitle_file -> $new_name"
+    else
+      log "ERROR" "Falha ao renomear legenda: $subtitle_file"
+    fi
+
   done
 
-  log_message "Renomeação de legendas concluída no diretório: $dir"
+  log "INFO" "Renomeação de legendas concluída"
 }
 
-# Início do log da operação
-log_message "Iniciando operação FBR - Renomeando arquivos de legenda em $src_dir"
+# ------------------------------------------------------------------------------
+# CHECAGENS INICIAIS
+# ------------------------------------------------------------------------------
 
-# Executa o filebot para renomear os arquivos de mídia e legendas
-log_message "Executando filebot para renomeação de mídia e legendas"
+log "INFO" "Iniciando operação FBR em $src_dir"
+
+if [ ! -d "$src_dir" ]; then
+  log "ERROR" "Diretório não encontrado: $src_dir"
+  exit 1
+fi
+
+if ! command -v flatpak >/dev/null 2>&1; then
+  log "ERROR" "Flatpak não encontrado"
+  exit 1
+fi
+
+if ! flatpak list --app | grep -q net.filebot.FileBot; then
+  log "ERROR" "FileBot não instalado"
+  exit 1
+fi
+
+# ------------------------------------------------------------------------------
+# CONTAGEM DE DIRETÓRIOS
+# ------------------------------------------------------------------------------
+
 for dir in "$src_dir"/*/; do
-  category=$(basename "$dir")
-  case "$category" in
-    "Criancas"|"SeriesCriancas")
-      flatpak run net.filebot.FileBot -rename "$dir" --format "{n} ({y})/{n} ({y}) [{vf}]" --db TheMovieDB --lang pt -non-strict >> "$log_file" 2>&1 || {
-        log_message "Erro ao executar o filebot no diretório $category"
-      }
-      ;;
-    "TVSeries")
-      flatpak run net.filebot.FileBot -rename "$dir" --format "{n}/Season {s.pad(2)}/{n}.s{s.pad(2)}e{e.pad(2)}.{t}.[{airdate.format('yyyy.MM.dd')}]" --db TheTVDB -non-strict >> "$log_file" 2>&1 || {
-        log_message "Erro ao executar o filebot no diretório $category"
-      }
-      ;;
-    "XXX")
-      log_message "Diretório $category não processado"
-      ;;
-    *)
-      flatpak run net.filebot.FileBot -rename "$dir" --format "{n} ({y})/{n} ({y}) [{vf}]" --db TheMovieDB --lang en -non-strict >> "$log_file" 2>&1 || {
-        log_message "Erro ao executar o filebot no diretório $category"
-      }
-      ;;
-  esac
+  [ -d "$dir" ] && ((total_dirs++))
 done
 
-# Renomeia legendas após o filebot
-log_message "Renomeando legendas após a execução do filebot"
+# ------------------------------------------------------------------------------
+# BARRA DE PROGRESSO YAD
+# ------------------------------------------------------------------------------
+
+(
+progress=0
+
+for dir in "$src_dir"/*/; do
+
+  [ -d "$dir" ] || continue
+
+  category=$(basename "$dir")
+
+  ((processed_dirs++))
+  progress=$((processed_dirs * 100 / total_dirs))
+
+  echo "# Processando: $category"
+  echo "$progress"
+
+  log "INFO" "Processando categoria: $category"
+
+  # --------------------------------------------------------------------------
+  # DETECÇÃO DE DIRETÓRIO VAZIO
+  # --------------------------------------------------------------------------
+
+  if ! find "$dir" -type f \( -iname "*.mkv" -o -iname "*.mp4" -o -iname "*.avi" \) | grep -q .; then
+      log "INFO" "Nenhum arquivo de mídia em $category — ignorando"
+      continue
+  fi
+
+  # --------------------------------------------------------------------------
+  # EXECUÇÃO FILEBOT
+  # --------------------------------------------------------------------------
+
+  case "$category" in
+
+    "Criancas"|"SeriesCriancas")
+
+      run_cmd "FileBot em $category" \
+        flatpak run net.filebot.FileBot \
+        -rename "$dir" \
+        -r \
+        --output "$dir" \
+        --format "{n} ({y})/{n} ({y}) [{vf}]" \
+        --db TheMovieDB \
+        --lang pt \
+        -non-strict || ((failed_dirs++))
+
+      ;;
+
+    "TVSeries")
+
+      run_cmd "FileBot em $category" \
+        flatpak run net.filebot.FileBot \
+        -rename "$dir" \
+        -r \
+        --output "$dir" \
+        --format "{n}/Season {s.pad(2)}/{n}.s{s.pad(2)}e{e.pad(2)}.{t}.[{airdate.format('yyyy.MM.dd')}]" \
+        --db TheTVDB \
+        -non-strict || ((failed_dirs++))
+
+      ;;
+
+    "XXX")
+
+      log "WARN" "Diretório ignorado por regra: $category"
+
+      ;;
+
+    *)
+
+      run_cmd "FileBot em $category" \
+        flatpak run net.filebot.FileBot \
+        -rename "$dir" \
+        -r \
+        --output "$dir" \
+        --format "{n} ({y})/{n} ({y}) [{vf}]" \
+        --db TheMovieDB \
+        --lang en \
+        -non-strict || ((failed_dirs++))
+
+      ;;
+
+  esac
+
+done
+
+echo 100
+
+) | yad --progress \
+  --title="FBR - Renomeação de Mídia" \
+  --text="Inicializando..." \
+  --percentage=0 \
+  --auto-close \
+  --width=500
+
+# ------------------------------------------------------------------------------
+# RENOMEAÇÃO DE LEGENDAS
+# ------------------------------------------------------------------------------
+
+log "INFO" "Iniciando etapa de renomeação de legendas"
+
 rename_subtitles_after_filebot "$src_dir"
 
-# Finalização do log da operação
-log_message "Operação FBR concluída com sucesso"
+# ------------------------------------------------------------------------------
+# RESUMO FINAL
+# ------------------------------------------------------------------------------
 
-# Exibe resumo da operação
-#zenity --info --text="Operação FBR concluída com sucesso. Verifique o log para detalhes: $log_file" --timeout=10
+log "INFO" "Resumo final"
+log "INFO" "Diretórios processados: $processed_dirs"
+log "INFO" "Diretórios com falha: $failed_dirs"
+log "INFO" "Log salvo em: $log_file"
 
 exit 0
-

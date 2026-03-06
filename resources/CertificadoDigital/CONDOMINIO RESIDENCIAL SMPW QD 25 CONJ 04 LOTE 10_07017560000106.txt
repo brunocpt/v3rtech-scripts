@@ -1,0 +1,9 @@
+Senha área do cliente FENACON:
+vale2022
+
+Senha Certificado Digial FENACON:
+310517
+
+Dados para realizar a revogação do seu certificado:
+Código de revogação: 88955a3 Pedido: CD43793575
+

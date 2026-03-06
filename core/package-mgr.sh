@@ -1,77 +1,113 @@
 #!/bin/bash
 # ==============================================================================
 # Arquivo: core/package-mgr.sh
-# Versão: 4.0.0
-# Data: 2026-02-23
+# Versão: 4.1.0
+# Data: 2026-03-06
 # Objetivo: Abstração dos gerenciadores de pacotes (multi-distro)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
 # ==============================================================================
-#
-# Fornece uma interface unificada para instalar/remover pacotes em qualquer
-# distribuição Linux suportada (Debian, Arch, Fedora).
-#
-# Comandos disponíveis:
-#   i <pacote>     -> Install (Instalar)
-#   r <pacote>     -> Remove (Remover)
-#   up             -> Update (Atualizar sistema)
-#   s <pacote>     -> Show/Search (Informações do pacote)
-#
-# ==============================================================================
 
 # --- 1. FUNÇÃO AUXILIAR INTERNA ---
 
-# Verifica se um comando existe
 _check_cmd() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# --- 2. FUNÇÃO: INSTALL (Instalar pacotes) ---
+# --- 2. FUNÇÃO: ENSURE PARU (Arch Linux) ---
 
-# Instala um ou mais pacotes
-# Uso: i pacote1 pacote2 pacote3
+ensure_paru() {
+    if [[ "$DISTRO_FAMILY" != "arch" ]]; then
+        return 0
+    fi
+
+    if _check_cmd paru; then
+        return 0
+    fi
+
+    log "STEP" "Instalando Paru (AUR helper)..."
+
+    # Verifica pré-requisitos
+    if ! _check_cmd git; then
+        log "INFO" "Git não está instalado, instalando..."
+        $SUDO pacman -S --noconfirm git || log "WARN" "Falha ao instalar Git"
+    fi
+
+    if ! pacman -Qi base-devel &>/dev/null; then
+        log "INFO" "base-devel não está instalado, instalando..."
+        $SUDO pacman -S --noconfirm base-devel || log "WARN" "Falha ao instalar base-devel"
+    fi
+
+    # Instala Paru
+    local temp_dir
+    temp_dir=$(mktemp -d)
+    trap 'rm -rf "$temp_dir"' EXIT
+
+    pushd "$temp_dir" >/dev/null || return 1
+
+    log "INFO" "Clonando repositório Paru..."
+    git clone https://aur.archlinux.org/paru.git 2>/dev/null || {
+        log "WARN" "Falha ao clonar Paru"
+        popd >/dev/null || true
+        return 1
+    }
+
+    if [ -d "paru" ]; then
+        cd paru || { popd >/dev/null || true; return 1; }
+        log "INFO" "Compilando Paru (isso pode levar alguns minutos)..."
+        makepkg -si --noconfirm 2>/dev/null || log "WARN" "Falha ao compilar Paru"
+    fi
+
+    popd >/dev/null || true
+
+    if _check_cmd paru; then
+        log "SUCCESS" "Paru instalado com sucesso"
+        return 0
+    else
+        log "ERROR" "Falha ao instalar Paru"
+        return 1
+    fi
+}
+
+# --- 3. FUNÇÃO: INSTALL ---
+
 i() {
-    local packages=("$@")
-    
-    # Validação
+    # Coleta todos os argumentos e os separa por espaços, depois reconstrói o array
+    # Isso permite passar "pkg1 pkg2" como um único argumento e ainda assim separá-los
+    local all_args="$*"
+    local packages=($all_args)
+
     if [ ${#packages[@]} -eq 0 ]; then
         log "WARN" "Função 'i' chamada sem argumentos."
         return 1
     fi
-    
-    # Detecta distro e instala
+
     case "$DISTRO_FAMILY" in
+
         debian)
-            # Prioriza apt-fast se disponível
             if _check_cmd apt-fast; then
                 $SUDO apt-fast install -y "${packages[@]}"
             else
                 $SUDO apt install -y "${packages[@]}"
             fi
             ;;
-        
+
         arch)
-            # Prioriza Paru/Yay para cobrir AUR e Repo Oficial
-            if _check_cmd paru; then
-                paru -S --noconfirm --needed "${packages[@]}"
-            elif _check_cmd yay; then
-                yay -S --noconfirm --needed "${packages[@]}"
-            else
-                $SUDO pacman -S --noconfirm --needed "${packages[@]}"
-            fi
+            ensure_paru
+            paru -S --noconfirm --needed "${packages[@]}"
             ;;
-        
+
         fedora)
             $SUDO dnf install -y --skip-unavailable "${packages[@]}"
             ;;
-        
+
         *)
+
             log "ERROR" "Distro não suportada para instalação: $DISTRO_FAMILY"
             return 1
             ;;
     esac
-    
-    # Verifica resultado
+
     if [ $? -eq 0 ]; then
         [ "$VERBOSE" -eq 1 ] && log "DEBUG" "Pacotes instalados: ${packages[*]}"
         return 0
@@ -81,69 +117,51 @@ i() {
     fi
 }
 
-# --- 3. FUNÇÃO: REMOVE (Remover pacotes) ---
+# --- 3. FUNÇÃO: REMOVE ---
 
-# Remove um ou mais pacotes
-# Uso: r pacote1 pacote2
 r() {
-    local packages=("$@")
-    
-    # Validação
+    local all_args="$*"
+    local packages=($all_args)
     if [ ${#packages[@]} -eq 0 ]; then
         log "WARN" "Função 'r' chamada sem argumentos."
         return 1
     fi
-    
     log "INFO" "Removendo: ${packages[*]}"
-    
     case "$DISTRO_FAMILY" in
         debian)
             $SUDO apt remove -y "${packages[@]}"
             ;;
         arch)
-            # -Rs remove o pacote e dependências não usadas
-            $SUDO pacman -Rs --noconfirm "${packages[@]}"
+            paru -Rs --noconfirm "${packages[@]}"
             ;;
         fedora)
             $SUDO dnf remove -y "${packages[@]}"
             ;;
     esac
-    
     return $?
 }
 
-# --- 4. FUNÇÃO: UPDATE (Atualizar sistema) ---
+# --- 4. FUNÇÃO: UPDATE ---
 
-# Atualiza todos os pacotes do sistema
 up() {
     log "INFO" "Iniciando atualização do sistema..."
-    
     case "$DISTRO_FAMILY" in
         debian)
-            # Prioriza apt-fast
             if _check_cmd apt-fast; then
                 $SUDO apt-fast update && $SUDO apt-fast upgrade -y
             else
                 $SUDO apt update && $SUDO apt upgrade -y
             fi
             ;;
-        
         arch)
-            # Prioriza Paru
-            if _check_cmd paru; then
-                $SUDO paru -Syu --noconfirm
-            elif _check_cmd yay; then
-                $SUDO yay -Syu --noconfirm
-            else
-                $SUDO pacman -Syu --noconfirm
-            fi
+            ensure_paru
+            paru -Syu --noconfirm
             ;;
-        
         fedora)
             $SUDO dnf upgrade -y
             ;;
     esac
-    
+
     if [ $? -eq 0 ]; then
         log "SUCCESS" "Sistema atualizado com sucesso"
         return 0
@@ -153,24 +171,20 @@ up() {
     fi
 }
 
-# --- 5. FUNÇÃO: SEARCH (Pesquisar pacote) ---
+# --- 5. FUNÇÃO: SEARCH ---
 
-# Pesquisa informações sobre um pacote
-# Uso: s pacote
 s() {
     local package="$1"
-    
     if [ -z "$package" ]; then
         log "WARN" "Função 's' chamada sem argumentos."
         return 1
     fi
-    
     case "$DISTRO_FAMILY" in
         debian)
             apt show "$package"
             ;;
         arch)
-            pacman -Si "$package" || pacman -Ss "$package"
+            paru -Si "$package" || paru -Ss "$package"
             ;;
         fedora)
             dnf info "$package"
@@ -178,78 +192,81 @@ s() {
     esac
 }
 
-# --- 6. FUNÇÃO: INSTALAR FLATPAK ---
+# --- 6. FUNÇÃO: CONFIGURAR OVERRIDES GLOBAIS DO FLATPAK ---
 
-# Instala um aplicativo via Flatpak
-# Uso: install_flatpak com.example.App
+configure_flatpak_overrides() {
+    if ! _check_cmd flatpak; then
+        log "WARN" "Flatpak não instalado; overrides globais não aplicados."
+        return 1
+    fi
+    log "INFO" "Verificando overrides globais do Flatpak..."
+
+    # Verifica se já existe override configurado
+    if flatpak override --system --show | grep -q "/mnt"; then
+        log "DEBUG" "Overrides globais do Flatpak já configurados."
+        return 0
+    fi
+    log "INFO" "Aplicando overrides globais do Flatpak..."
+
+    if $SUDO flatpak override --system \
+        --filesystem=xdg-config/gtk-3.0 \
+        --filesystem=xdg-config/gtk-4.0 \
+        --filesystem=~/.themes \
+        --filesystem=~/.icons \
+        --filesystem=/mnt \
+        --filesystem=host-etc \
+        --env=TMPDIR=/tmp ; then
+        log "SUCCESS" "Overrides globais do Flatpak aplicados com sucesso."
+
+    else
+        log "WARN" "Falha ao aplicar alguns overrides globais do Flatpak."
+    fi
+}
+
+# --- 7. FUNÇÃO: INSTALAR FLATPAK APP ---
+
 install_flatpak() {
     local flatpak_id="$1"
-    
     if [ -z "$flatpak_id" ]; then
         log "WARN" "install_flatpak chamado sem ID de Flatpak"
         return 1
     fi
-    
-    # Verifica se Flatpak está instalado
+
     if ! _check_cmd flatpak; then
         log "INFO" "Instalando Flatpak..."
         i flatpak || return 1
     fi
-    
-    # Instala a aplicação
     log "INFO" "Instalando Flatpak: $flatpak_id"
-    $SUDO flatpak install -y flathub "$flatpak_id" || return 1
-    
-    # Aplica overrides globais do Flatpak
-    log "INFO" "Aplicando overrides do Flatpak para $flatpak_id..."
-    if $SUDO flatpak override --filesystem=xdg-config/gtk-3.0 "$flatpak_id" && \
-       $SUDO flatpak override --filesystem=xdg-config/gtk-4.0 "$flatpak_id" && \
-       $SUDO flatpak override --filesystem=~/.themes "$flatpak_id" && \
-       $SUDO flatpak override --filesystem=~/.icons "$flatpak_id" && \
-       $SUDO flatpak override --filesystem=/mnt "$flatpak_id" && \
-       $SUDO flatpak override --filesystem=host-etc "$flatpak_id"; then
-        log "SUCCESS" "Overrides do Flatpak aplicados com sucesso para $flatpak_id"
-    else
-        log "WARN" "Falha ao aplicar alguns overrides do Flatpak para $flatpak_id"
-    fi
-    
-    return 0
+
+    $SUDO flatpak install -y flathub "$flatpak_id"
+
+    return $?
 }
 
-# --- 7. FUNÇÃO: INSTALAR VIA PIPX ---
+# --- 8. FUNÇÃO: INSTALAR VIA PIPX ---
 
-# Instala um pacote Python via Pipx
-# Uso: install_pipx package-name
 install_pipx() {
     local package="$1"
-    
     if [ -z "$package" ]; then
         log "WARN" "install_pipx chamado sem nome de pacote"
         return 1
     fi
-    
-    # Verifica se Pipx está instalado
     if ! _check_cmd pipx; then
         log "INFO" "Instalando Pipx..."
         i pipx || return 1
     fi
-    
-    # Instala o pacote
     log "INFO" "Instalando via Pipx: $package"
     pipx install "$package"
-    
     return $?
 }
 
-# --- 8. FUNÇÃO: DETECTAR GERENCIADOR DE PACOTES ---
+# --- 9. FUNÇÃO: DETECTAR GERENCIADOR DE PACOTES ---
 
-# Detecta qual gerenciador de pacotes está disponível
 detect_package_manager() {
     if [ -z "$DISTRO_FAMILY" ]; then
         log "ERROR" "DISTRO_FAMILY não definido. Execute detect-system.sh primeiro."
         return 1
     fi
-    
     case "$DISTRO_FAMILY" in
         debian)
             PKG_MANAGER="apt"
@@ -265,12 +282,62 @@ detect_package_manager() {
             return 1
             ;;
     esac
-    
     log "DEBUG" "Gerenciador de pacotes detectado: $PKG_MANAGER"
+
     return 0
 }
 
-# --- 9. EXPORTAÇÃO DE FUNÇÕES ---
+# --- 10. FUNÇÃO: VERIFICAR SE PACOTE ESTÁ INSTALADO ---
 
-# Garante que as funções estejam disponíveis em subshells
-export -f i r up s install_flatpak install_pipx detect_package_manager
+is_installed() {
+    local all_args="$*"
+    local packages=($all_args)
+    if [ ${#packages[@]} -eq 0 ]; then
+        log "WARN" "Função 'is_installed' chamada sem argumentos."
+        return 1
+    fi
+
+    for package in "${packages[@]}"; do
+        case "$DISTRO_FAMILY" in
+            debian)
+                if ! dpkg -l "$package" 2>/dev/null | grep -q "^ii"; then
+                    return 1
+                fi
+                ;;
+            arch)
+                if _check_cmd paru; then
+                    if ! paru -Q "$package" >/dev/null 2>&1; then
+                        return 1
+                    fi
+                else
+                    if ! pacman -Q "$package" >/dev/null 2>&1; then
+                        return 1
+                    fi
+                fi
+                ;;
+            fedora)
+                if ! rpm -q "$package" >/dev/null 2>&1; then
+                    return 1
+                fi
+                ;;
+            *)
+                log "ERROR" "Distro não suportada para verificação de instalação: $DISTRO_FAMILY"
+                return 1
+                ;;
+        esac
+    done
+    return 0
+}
+
+# --- 11. EXPORTAÇÃO DE FUNÇÕES ---
+
+export -f \
+i \
+r \
+up \
+s \
+is_installed \
+install_flatpak \
+install_pipx \
+configure_flatpak_overrides \
+detect_package_manager

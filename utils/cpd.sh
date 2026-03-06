@@ -1,131 +1,162 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ==============================================================================
 # Script: cpd.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
-# Objetivo: Movimentação de downloads concluídos do NAS para o diretório local
-# Autor: V3RTECH Tecnologia, Consultoria e Inovação
-# Website: https://v3rtech.com.br/
+# Versão: 5.0.0
+# Data: 2026-03-06
+# Objetivo: Movimentação de downloads concluídos do NAS para diretório local
 # ==============================================================================
 
-# Diretório de log
-log_file="$HOME/cpd.log"
+set -u
 
-# --- FUNÇÕES (com export para máxima compatibilidade) ---
-log_message() {
-    local message=$1
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - $message" >> "$log_file"
+THREADS=4
+
+src_dir="/mnt/LAN/Downloads/complete"
+dest_dir="/mnt/trabalho/Downloads"
+mount_point="/mnt/LAN/Downloads"
+
+LOCKFILE="/tmp/cpd.lock"
+
+log_dir="$HOME/logs"
+mkdir -p "$log_dir"
+
+log_file="$log_dir/cpd-$(date '+%Y-%m-%d_%H-%M-%S').log"
+
+log(){ echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | tee -a "$log_file"; }
+
+# ------------------------------------------------------------------------------
+# LOCK
+# ------------------------------------------------------------------------------
+
+if [ -f "$LOCKFILE" ]; then
+  echo "cpd já está em execução."
+  exit 1
+fi
+
+trap 'rm -f "$LOCKFILE"' EXIT
+touch "$LOCKFILE"
+
+# ------------------------------------------------------------------------------
+# MOUNT
+# ------------------------------------------------------------------------------
+
+mount_dir(){
+
+if ! mountpoint -q "$mount_point"; then
+  log "Montando $mount_point"
+  mount "$mount_point" || {
+      log "Erro ao montar $mount_point"
+      yad --error --text="Erro ao montar $mount_point"
+      exit 1
+  }
+fi
+
 }
 
-mount_dir() {
-    local dir=$1
-    if ! mountpoint -q "$dir"; then
-        sudo mount "$dir" && log_message "Montado o diretório $dir" || {
-            log_message "Erro ao montar $dir"
-            yad --error --title="Erro Crítico de Montagem" --text="Erro ao montar $dir.\nA operação não pode continuar." 2>/dev/null
-            exit 1
-        }
-    else
-        log_message "Diretório $dir já está montado"
-    fi
+umount_dir(){
+
+mountpoint -q "$mount_point" && umount "$mount_point"
+
 }
-export -f mount_dir
 
-umount_dir() {
-    local dir=$1
-    if mountpoint -q "$dir"; then
-        sudo umount "$dir" && log_message "Desmontado o diretório $dir" || {
-            yad --warning --title="Aviso ao Desmontar" --text="Não foi possível desmontar $dir.\nPode ser necessário desmontá-lo manualmente." 2>/dev/null
-            log_message "Erro ao desmontar $dir"
-        }
-    else
-        log_message "Diretório $dir já está desmontado"
-    fi
+# ------------------------------------------------------------------------------
+# LIMPEZA
+# ------------------------------------------------------------------------------
+
+remove_empty_subdirs(){
+
+log "Removendo diretórios vazios"
+
+find "$src_dir" \
+-mindepth 1 \
+-type d \
+-empty \
+-delete
+
+mkdir -p "$src_dir"
+
 }
-export -f umount_dir
 
-remove_empty_subdirs() {
-    local dir_to_clean=$1
-    echo "#Limpando diretórios vazios na origem..."
-    log_message "Removendo subpastas vazias em $dir_to_clean"
-    find "$dir_to_clean" -depth -type d -empty -delete
-    mkdir -p "$dir_to_clean" # Garante que o diretório principal exista
-    log_message "Subpastas vazias removidas."
+# ------------------------------------------------------------------------------
+# TRANSFERÊNCIA PARALELA
+# ------------------------------------------------------------------------------
+
+parallel_rsync(){
+
+log "Construindo lista de arquivos"
+
+file_list=$(mktemp)
+
+find "$src_dir" -type f -print0 > "$file_list"
+
+total=$(tr -cd '\0' < "$file_list" | wc -c)
+
+log "Arquivos encontrados: $total"
+
+parallel -0 -j "$THREADS" --line-buffer < "$file_list" '
+echo "#Transferindo ({#}/'"$total"'): {/.}"
+rsync \
+--partial \
+--inplace \
+--size-only \
+--human-readable \
+--update \
+--remove-source-files \
+{} "'"$dest_dir"'" >> "'"$log_file"'" 2>&1
+'
+
+rm "$file_list"
+
 }
-export -f remove_empty_subdirs
-# --- FIM DAS FUNÇÕES ---
 
+# ------------------------------------------------------------------------------
+# EXECUÇÃO
+# ------------------------------------------------------------------------------
 
-# --- EXECUÇÃO PRINCIPAL ---
+log "=================================================="
+log "INICIANDO OPERAÇÃO CPD"
 
-log_message "=================================================="
-log_message "Iniciando operação CPD - Movendo downloads"
-
-# Definindo os diretórios
-src_dir="/mnt/LAN/Downloads/complete/"
-dest_dir="/mnt/trabalho/Downloads/"
-mount_point="/mnt/LAN/Downloads/"
-
-# A única janela do script.
-# A limpeza final foi movida para DENTRO deste bloco.
 (
-    log_message "Executando o script de limpeza do Transmission..."
-    echo "#Executando limpeza do Transmission..."
+echo "#Limpando queue do Transmission"
+log "Executando limpeza do Transmission"
 
-    /mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/utils/truenas_transmission_clear.sh
-    if [[ $? -ne 0 ]]; then
-        log_message "ERRO ao executar o script de limpeza do Transmission."
-        echo "#!!! ERRO ao limpar o query do Transmission. Abortando. !!!"
-        exit 1
-    fi
-    log_message "Script de limpeza do Transmission executado com sucesso."
+if ! /mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/utils/truenas_transmission_clear.sh >> "$log_file" 2>&1; then
+   log "Erro ao limpar Transmission"
+   exit 1
+fi
 
-    echo "#Montando diretório de origem..."
-    mount_dir "$mount_point"
+echo "#Montando origem"
+mount_dir
 
-    echo "#Movendo arquivos de '$src_dir'..."
-    log_message "Iniciando rsync de $src_dir para $dest_dir"
+echo "#Movendo downloads"
+parallel_rsync
 
-    rsync -rltD --update --remove-source-files --exclude-from=/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs/exclude-list.txt --info=name1 "$src_dir" "$dest_dir" | while IFS= read -r line; do
-        [ -n "$line" ] && echo "#$line"
-    done
+echo "#Removendo diretórios vazios"
+remove_empty_subdirs
 
-    rsync_status=${PIPESTATUS[0]}
-    if [ $rsync_status -ne 0 ]; then
-        log_message "ERRO ao mover arquivos (rsync código: $rsync_status)"
-        echo "#!!! ERRO durante a transferência dos arquivos. !!!"
-        exit 1 # Aciona o bloco de falha do YAD
-    fi
-    log_message "Arquivos movidos com sucesso."
+echo "#Desmontando origem"
+umount_dir
 
-    # --- LIMPEZA E DESMONTAGEM MOVIDAS PARA O FINAL DO PROCESSO BEM-SUCEDIDO ---
-    remove_empty_subdirs "$src_dir"
-
-    echo "#Desmontando diretório..."
-    umount_dir "$mount_point"
-    # --- FIM DA SEÇÃO MOVIDA ---
-
-    echo "#Operação concluída com sucesso."
+echo "#Concluído"
 
 ) | yad --progress \
-      --title="Movendo Downloads Concluídos" \
-      --text="<big>Operação em andamento...</big>\n<i>Movendo arquivos de Downloads...</i>" \
-      --width=700 \
-      --height=180 \
-      --text-align=left \
-      --pulsate \
-      --auto-close \
-      --no-buttons  2>/dev/null || {
-        # Este bloco só é executado se houver uma falha (exit 1).
-        # A desmontagem também é chamada aqui para garantir a limpeza em caso de erro.
-        yad --error --title="FALHA NA OPERAÇÃO" --width=450 --text="<b>A operação falhou!</b>\n\nOcorreu um erro durante a execução.\n\nConsulte o log para mais detalhes:\n<b>$log_file</b>" 2>/dev/null
-        umount_dir "$mount_point"
-        exit 1
-      }
+--title="Movendo Downloads Concluídos" \
+--text="Transferindo downloads..." \
+--width=650 \
+--pulsate \
+--auto-close \
+--no-buttons \
+2>/dev/null || {
 
-# O script principal agora só precisa registrar o sucesso final.
-log_message "Operação CPD concluída com sucesso."
-log_message "=================================================="
+yad --error \
+--title="Falha na operação" \
+--text="Erro durante execução.\n\nVeja o log:\n$log_file"
+
+umount_dir
+exit 1
+
+}
+
+log "Operação CPD concluída com sucesso"
+log "=================================================="
 
 exit 0
-
