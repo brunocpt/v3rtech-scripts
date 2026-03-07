@@ -103,6 +103,8 @@ add_app "TRUE" "Nuvem" "Nextcloud" "Sync Nextcloud" "nextcloud-desktop" "nextclo
 add_app "FALSE" "Nuvem" "Packet" "Simple, fast file sharing between Linux and Android" "" "" "" "io.github.nozwock.Packet" "flatpak"
 add_app "FALSE" "Nuvem" "SendWorm" "Ferramenta segura e fácil de usar para transferir arquivos rapidamente" "" "" "" "to.bnt.sendworm" "flatpak"
 add_app "FALSE" "Nuvem" "Filezilla" "Cliente FTP" "filezilla" "filezilla" "filezilla" "org.filezilla.FileZilla" "native"
+add_app "FALSE" "Nuvem" "SendAnywhere" "Compartilhamento de arquivos em tempo real" "sendanywhere" "sendanywhere" "sendanywhere" "" "native"
+add_app "TRUE" "Nuvem" "LocalSend" "Compartilhamento de arquivos em tempo real" "" "localsend-bin" "" "org.localsend.localsend_app" "native"
 
 # --- DESENVOLVIMENTO & TERMINAL ---
 add_app "TRUE" "Dev" "Antigravity" "Ambiente Google (VSCode)" "antigravity" "antigravity" "antigravity" "" "native"

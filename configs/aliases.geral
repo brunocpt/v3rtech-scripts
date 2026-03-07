@@ -284,6 +284,7 @@ alias cloudron-geja='chmod 600 "$SSH_KEY" && ssh -i "$SSH_KEY" root@85.31.63.91'
 alias truenas-cloudron-geja='chmod 600 "$SSH_KEY" && ssh -i "$SSH_KEY" bruno@192.168.0.157'
 alias truenas-v3rtech='chmod 600 "$SSH_KEY" && ssh -i "$SSH_KEY" 189.50.92.154 -p 9222'
 alias sandros='chmod 600 "$SSH_KEY" && ssh -i "$SSH_KEY" bruno@189.50.92.154 -p 9223'
+alias pi='chmod 600 "$SSH_KEY" ; ssh -i "$SSH_KEY" pi@189.50.92.154 -p 222'
 
 # ==============================================================================
 # 10. GERENCIAMENTO DE PACOTES (Distro Agnostic)
