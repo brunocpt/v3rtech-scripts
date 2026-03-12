@@ -17,7 +17,7 @@ USERNAME="$USER"
 declare -a APP_LIST=(
     "BRAVE" "CHROME" "EDGE" "FALKON" "FIREFOX" "FLOORP" "VIVALDI" "OPERA" "ZEN BROWSER" "BROWSEROS" "CALIBRE"
     "WAVEBOX" "RAMBOX" "FERDIUM" "NEXTCLOUD" "FILEZILLA" "TRANSMISSION" "OBSIDIAN" "ZOTERO" "TINTERO"
-    "MASTER_PDF" "PICARD" "VSCODE" "ANTIGRAVITY" "GEANY" "PYCHARM" "DBEAVER" "POSTMAN" "REMMINA"
+    "MASTER_PDF" "PICARD" "VSCODE" "VSCODIUM" "ANTIGRAVITY" "GEANY" "PYCHARM" "DBEAVER" "POSTMAN" "REMMINA"
 )
 
 # --- FUNÇÕES AUXILIARES ---
@@ -277,6 +277,14 @@ for app in "${selected_apps[@]}"; do
                 backup_zip "VSCODE (Flatpak)" "$TMP_DIR/vscode-flatpak-${USERNAME}.zip" ".var/app/com.visualstudio.code" -x "*/CachedData/*" "*/CachedExtensionVSIXs/*"
             else
                 backup_zip "VSCODE (Nativo)" "$TMP_DIR/vscode-${USERNAME}.zip" ".vscode" ".config/Code" -x ".config/Code/CachedData/*" ".config/Code/CachedExtensionVSIXs/*"
+            fi
+            ;;
+        "VSCODIUM")
+            killall vscodium &>/dev/null; sleep 1
+            if flatpak list --app 2>/dev/null | grep -q 'com.vscodium.codium'; then
+                backup_zip "VSCODIUM (Flatpak)" "$TMP_DIR/vscodium-flatpak-${USERNAME}.zip" ".var/app/com.vscodium.codium" -x "*/CachedData/*" "*/CachedExtensionVSIXs/*"
+            else
+                backup_zip "VSCODIUM (Nativo)" "$TMP_DIR/vscodium-${USERNAME}.zip" ".VSCodium" ".config/VSCodium" -x ".config/VSCodium/CachedData/*" ".config/VSCodium/CachedExtensionVSIXs/*"
             fi
             ;;
         "ANTIGRAVITY")

@@ -108,7 +108,7 @@ SELECTION=$(yad --title="Restauração de Configurações" \
     FALSE "FIREFOX" FALSE "FLOORP" FALSE "VIVALDI" FALSE "OPERA" FALSE "BROWSEROS" FALSE "ZEN_BROWSER" FALSE "CALIBRE" \
     FALSE "WAVEBOX" FALSE "RAMBOX" FALSE "FERDIUM" FALSE "NEXTCLOUD" \
     FALSE "FILEZILLA" FALSE "TRANSMISSION" FALSE "OBSIDIAN" FALSE "ZOTERO" \
-    FALSE "MASTER_PDF" FALSE "PICARD" FALSE "VSCODE" FALSE "GEANY" FALSE "ANTIGRAVITY" \
+    FALSE "MASTER_PDF" FALSE "PICARD" FALSE "VSCODE" FALSE "VSCODIUM"FALSE "GEANY" FALSE "ANTIGRAVITY" \
     --button="Selecionar Todos:2" --button="Desmarcar Todos:3" --button="Iniciar:0" --button="Cancelar:1")
 
 EXIT_CODE=$?
@@ -293,6 +293,10 @@ for app in "${selected_apps[@]}"; do
         "VSCODE")
             restore_app "VSCODE (Flatpak)" "$DEST_DIR/vscode-flatpak-$USERNAME.zip" && ((SUCCESS++)) || true
             restore_app "VSCODE (Nativo)" "$DEST_DIR/vscode-$USERNAME.zip" && ((SUCCESS++)) || true
+            ;;
+        "VSCODIUM")
+            restore_app "VSCODIUM (Flatpak)" "$DEST_DIR/vscodium-flatpak-$USERNAME.zip" && ((SUCCESS++)) || true
+            restore_app "VSCODIUM (Nativo)" "$DEST_DIR/vscodium-$USERNAME.zip" && ((SUCCESS++)) || true
             ;;
     esac
 
