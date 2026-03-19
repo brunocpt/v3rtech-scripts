@@ -31,8 +31,6 @@
 /tmp/
 /build/
 /backups/
-configs/filebot-osdb.conf
-/resources/ssh-keys/
 
 # Arquivos específicos
 configs/Cloudflare_APITokens.txt
@@ -43,3 +41,6 @@ configs/*.psm
 
 # Certificados digitais e senhas
 /resources/CertificadoDigital/
+/configs/FileBot_License_PX10290120.psm
+configs/filebot-osdb.conf
+/resources/ssh-keys/
