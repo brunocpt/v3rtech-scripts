@@ -6,9 +6,11 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 ## [6.1.0] - 2026-03-19
 
-### ✨ Integração do Cockpit e Atualização de Certificados
+### ✨ Novas Ferramentas, Integração do Cockpit e Certificados
 
-- **lib/apps-data.sh:** Atualização e refatoração dos plugins do `Cockpit` (inclusão de suporte a podman, storaged e file-sharing).
+- **lib/apps-data.sh:** 
+    - Inclusão da ferramenta **Stirling PDF** na categoria Escritório.
+    - Refatoração da entrada do **Cockpit**, ajustando sua descrição para "Gerenciamento de Servidores" e corrigindo a lista de pacotes exclusivos por distribuição.
 - **lib/install-apps-system.sh:** Adicionada rotina de pós-instalação para habilitar o serviço `cockpit.socket` via systemctl.
 - **lib/install-certificates.sh:** Implementada instalação automática da cadeia de certificados ICP-Brasil.
 - **Global:** Atualização do versionamento para v6.1.0 e revisão do Changelog.
