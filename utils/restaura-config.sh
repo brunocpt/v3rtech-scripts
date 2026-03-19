@@ -104,11 +104,11 @@ SELECTION=$(yad --title="Restauração de Configurações" \
     --text="<big><b>Selecione os aplicativos para restaurar</b></big>\n\nDiretório: <b>$DEST_DIR</b>\nArquivos encontrados: <b>$BACKUP_COUNT</b>" \
     --list --checklist --width=500 --height=600 \
     --column="Restaurar" --column="Aplicativo" \
-    FALSE "BRAVE" FALSE "CHROME" FALSE "EDGE" FALSE "FALKON" \
+    FALSE "BRAVE" FALSE "CHROME" FALSE "CHROMIUM" FALSE "EDGE" FALSE "FALKON" \
     FALSE "FIREFOX" FALSE "FLOORP" FALSE "VIVALDI" FALSE "OPERA" FALSE "BROWSEROS" FALSE "ZEN_BROWSER" FALSE "CALIBRE" \
     FALSE "WAVEBOX" FALSE "RAMBOX" FALSE "FERDIUM" FALSE "NEXTCLOUD" \
     FALSE "FILEZILLA" FALSE "TRANSMISSION" FALSE "OBSIDIAN" FALSE "ZOTERO" \
-    FALSE "MASTER_PDF" FALSE "PICARD" FALSE "VSCODE" FALSE "VSCODIUM"FALSE "GEANY" FALSE "ANTIGRAVITY" \
+    FALSE "MASTER_PDF" FALSE "PICARD" FALSE "VSCODE" FALSE "VSCODIUM" FALSE "GEANY" FALSE "ANTIGRAVITY" \
     --button="Selecionar Todos:2" --button="Desmarcar Todos:3" --button="Iniciar:0" --button="Cancelar:1")
 
 EXIT_CODE=$?
@@ -207,6 +207,10 @@ for app in "${selected_apps[@]}"; do
         "CHROME")
             restore_app "CHROME (Flatpak)" "$DEST_DIR/chrome-flatpak-$USERNAME.zip" && ((SUCCESS++)) || true
             restore_app "CHROME (Nativo)" "$DEST_DIR/google-chrome-$USERNAME.zip" && ((SUCCESS++)) || true
+            ;;
+        "CHROMIUM")
+            restore_app "CHROMIUM (Flatpak)" "$DEST_DIR/chromium-flatpak-$USERNAME.zip" && ((SUCCESS++)) || true
+            restore_app "CHROMIUM (Nativo)" "$DEST_DIR/chromium-$USERNAME.zip" && ((SUCCESS++)) || true
             ;;
         "EDGE")
             restore_app "EDGE (Flatpak)" "$DEST_DIR/edge-flatpak-$USERNAME.zip" && ((SUCCESS++)) || true

@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: lib/apps-data.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
+# Versão: 6.1.0
+# Data: 2026-03-19
 # Objetivo: Banco de dados centralizado de aplicativos para instalação
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -87,6 +87,7 @@ add_app() {
 
 # --- NAVEGADORES ---
 add_app "TRUE" "Internet" "Google Chrome" "Navegador do Google" "google-chrome-stable" "google-chrome" "google-chrome-stable" "com.google.Chrome" "native"
+add_app "TRUE" "Internet" "Chromium" "The web browser from Chromium project" "chromium" "chromium" "chromium" "org.chromium.Chromium" "native"
 add_app "TRUE" "Internet" "Firefox" "Navegador Mozilla" "firefox" "firefox" "firefox" "org.mozilla.firefox" "native"
 add_app "TRUE" "Internet" "Brave" "Navegador Privacidade" "brave-browser" "brave-bin" "brave-browser" "com.brave.Browser" "native"
 add_app "TRUE" "Internet" "Zen Browser" "Navegador zen com foco em privacidade e desempenho" "" "zen-browser-bin" "" "app.zen_browser.zen" "native"
@@ -171,6 +172,7 @@ add_app "FALSE" "Sistema" "Gparted" "Partições" "gparted" "gparted" "gparted" 
 add_app "FALSE" "Sistema" "Remmina" "Acesso Remoto" "remmina" "remmina" "remmina" "org.remmina.Remmina" "native"
 add_app "FALSE" "Sistema" "FlameShot" "Screenshot" "flameshot" "flameshot" "flameshot" "org.flameshot.Flameshot" "native"
 add_app "TRUE" "Sistema" "ZRAM" "Compressão RAM" "zram-tools" "zram-generator" "zram-generator" "" "native"
+add_app "TRUE" "Sistema" "Cockpit" "cockpit cockpit-podman cockpit-storaged cockpit-file-sharing" "cockpit cockpit-docker cockpit-files cockpit-packagekit cockpit-navigator cockpit-zfs-manager cockpit-sensors cockpit-storaged cockpit-pacman" "cockpit cockpit-docker cockpit-files cockpit-packagekit cockpit-navigator cockpit-zfs-manager cockpit-sensors cockpit-storaged cockpit-pacman" "cockpit cockpit-docker cockpit-files cockpit-packagekit cockpit-navigator cockpit-zfs-manager cockpit-sensors cockpit-storaged cockpit-pacman" "org.cockpit_project.CockpitClient" "native"
 add_app "FALSE" "Utilitários" "ISO Image Writer" "Gravador USB" "" "" "" "org.kde.isoimagewriter" "flatpak"
 add_app "FALSE" "Utilitários" "Letterpress" "Conversor ASCII" "" "" "" "io.gitlab.gregorni.Letterpress" "flatpak"
 add_app "FALSE" "Utilitários" "SaveDesktop" "Salvar estado janelas" "" "" "" "io.github.vikdevelop.SaveDesktop" "flatpak"

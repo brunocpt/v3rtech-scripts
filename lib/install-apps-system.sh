@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: lib/install-apps-system.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
+# Versão: 6.1.0
+# Data: 2026-03-19
 # Objetivo: Instalar aplicativos de Sistema
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -124,4 +124,14 @@ if [ $installed_count -eq 0 ]; then
     log "INFO" "Nenhum aplicativo de Sistema foi selecionado para instalação."
 else
     log "SUCCESS" "Instalação de $installed_count aplicativo(s) de Sistema concluída!"
+fi
+
+# ==============================================================================
+# PÓS-INSTALAÇÃO / CONFIGURAÇÃO DO COCKPIT
+# ==============================================================================
+
+# Habilita o serviço do Cockpit caso esteja instalado e o sistema use systemd
+if command -v systemctl &>/dev/null && systemctl list-unit-files cockpit.socket &>/dev/null; then
+    log "INFO" "Habilitando e iniciando o serviço do Cockpit..."
+    $SUDO systemctl enable --now cockpit.socket 2>/dev/null || true
 fi

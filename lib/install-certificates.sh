@@ -94,6 +94,18 @@ case "$DISTRO_FAMILY" in
         ;;
 esac
 
+
+# ==============================================================================
+# INSTALAÇÃO DA CADEIA DE CERTIFICADOS ICP-BRASIL
+# ==============================================================================
+
+log "STEP" "Instalando cadeia de certificados ICP-Brasil..."
+
+curl -L -o /tmp/instalar-certificados-ac-icp-brasil.sh 'http://bit.ly/instalar-certificados-ac-icp-brasil'
+sudo sh /tmp/instalar-certificados-ac-icp-brasil.sh
+
+log "INFO" "Cadeia de certificados ICP-Brasil instalada"
+
 # ==============================================================================
 # CONFIGURAÇÃO DE CERTIFICADOS
 # ==============================================================================

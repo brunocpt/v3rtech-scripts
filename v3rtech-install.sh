@@ -2,9 +2,9 @@
 
 # ==============================================================================
 # Script: v3rtech-install.sh
-# Versão: 6.0.0
-# Data: 2026-03-06
-# Objetivo: Script-mestre orquestrador da suite V3RTECH Scripts v6.0.0
+# Versão: 6.1.0
+# Data: 2026-03-19
+# Objetivo: Script-mestre orquestrador da suite V3RTECH Scripts v6.1.0
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
 # ==============================================================================

@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Arquivo: core/env.sh
-# Versão: 6.0.0
-# Data: 2026-03-06
+# Versão: 6.1.0
+# Data: 2026-03-19
 # Objetivo: Variáveis globais, caminhos, cores e detecção de ambiente
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -186,7 +186,7 @@ fi
 
 # --- 7. VERSÃO DO PROJETO ---
 
-SCRIPT_VERSION="6.0.0"
+SCRIPT_VERSION="6.1.0"
 
 # --- 8. EXPORTAÇÃO DE VARIÁVEIS CRÍTICAS ---
 

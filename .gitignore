@@ -30,6 +30,7 @@
 # Diretórios de teste ou build temporários
 /tmp/
 /build/
+/backups/
 configs/filebot-osdb.conf
 /resources/ssh-keys/
 

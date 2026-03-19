@@ -15,7 +15,7 @@ USERNAME="$USER"
 
 # --- LISTA DE APLICATIVOS PARA O YAD ---
 declare -a APP_LIST=(
-    "BRAVE" "CHROME" "EDGE" "FALKON" "FIREFOX" "FLOORP" "VIVALDI" "OPERA" "ZEN BROWSER" "BROWSEROS" "CALIBRE"
+    "BRAVE" "CHROME" "CHROMIUM" "EDGE" "FALKON" "FIREFOX" "FLOORP" "VIVALDI" "OPERA" "ZEN BROWSER" "BROWSEROS" "CALIBRE"
     "WAVEBOX" "RAMBOX" "FERDIUM" "NEXTCLOUD" "FILEZILLA" "TRANSMISSION" "OBSIDIAN" "ZOTERO" "TINTERO"
     "MASTER_PDF" "PICARD" "VSCODE" "VSCODIUM" "ANTIGRAVITY" "GEANY" "PYCHARM" "DBEAVER" "POSTMAN" "REMMINA"
 )
@@ -125,6 +125,14 @@ for app in "${selected_apps[@]}"; do
                 backup_zip "CHROME (Flatpak)" "$TMP_DIR/chrome-flatpak-${USERNAME}.zip" ".var/app/com.google.Chrome" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Service Worker/*" "*/Crashpad/*"
             else
                 backup_zip "CHROME (Nativo)" "$TMP_DIR/google-chrome-${USERNAME}.zip" ".config/google-chrome" ".config/google-chrome-beta" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Service Worker/*" "*/Crashpad/*" "*/Crash Reports/*" "*/Storage/*"
+            fi
+            ;;
+        "CHROMIUM")
+            killall chromium &>/dev/null; sleep 1
+            if flatpak list --app 2>/dev/null | grep -q 'org.chromium.Chromium'; then
+                backup_zip "CHROMIUM (Flatpak)" "$TMP_DIR/chromium-flatpak-${USERNAME}.zip" ".var/app/org.chromium.Chromium" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Service Worker/*" "*/Crashpad/*"
+            else
+                backup_zip "CHROMIUM (Nativo)" "$TMP_DIR/chromium-${USERNAME}.zip" ".config/chromium" -x "*/Cache/*" "*/Code Cache/*" "*/GPUCache/*" "*/Service Worker/*" "*/Crashpad/*" "*/Crash Reports/*" "*/Storage/*"
             fi
             ;;
         "EDGE")

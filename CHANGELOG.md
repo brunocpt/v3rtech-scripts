@@ -4,6 +4,17 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 ---
 
+## [6.1.0] - 2026-03-19
+
+### ✨ Integração do Cockpit e Atualização de Certificados
+
+- **lib/apps-data.sh:** Atualização e refatoração dos plugins do `Cockpit` (inclusão de suporte a podman, storaged e file-sharing).
+- **lib/install-apps-system.sh:** Adicionada rotina de pós-instalação para habilitar o serviço `cockpit.socket` via systemctl.
+- **lib/install-certificates.sh:** Implementada instalação automática da cadeia de certificados ICP-Brasil.
+- **Global:** Atualização do versionamento para v6.1.0 e revisão do Changelog.
+
+---
+
 ## [6.0.0] - 2026-03-06
 
 ### ✨ Paralelismo e Orquestração de Performance (e Hotfix de Instalação)
@@ -249,8 +260,8 @@ Se encontrar algum bug, por favor abra uma issue no repositório.
 
 ## 📊 Estatísticas
 
-- **Versão:** 6.0.0
-- **Data de Lançamento:** 2026-02-23
+- **Versão:** 6.1.0
+- **Data de Lançamento:** 2026-03-19
 - **Scripts Principais:** 20+
 - **Funções Auxiliares:** 50+
 - **Linhas de Código:** 3000+
@@ -273,4 +284,4 @@ MIT License - Veja LICENSE para detalhes
 
 ---
 
-**Última Atualização:** 2026-03-06
+**Última Atualização:** 2026-03-19
