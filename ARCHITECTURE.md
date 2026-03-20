@@ -1,4 +1,4 @@
-# Arquitetura - V3RTECH Scripts v6.0.0
+# Arquitetura - V3RTECH Scripts v7.0.0
 
 Documentação técnica detalhada da arquitetura do projeto.
 
@@ -6,7 +6,7 @@ Documentação técnica detalhada da arquitetura do projeto.
 
 ## 📐 Visão Geral da Arquitetura
 
-A V3RTECH Scripts v6.0.0 foi projetada com os seguintes princípios:
+A V3RTECH Scripts v7.0.0 foi projetada com os seguintes princípios:
 
 1. **Modularidade:** Cada script é independente e autossuficiente
 2. **Configuração Centralizada:** Estado compartilhado via arquivo de configuração

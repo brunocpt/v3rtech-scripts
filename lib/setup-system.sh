@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: setup-system.sh
-# Versão: 6.0.0
-# Data: 2026-03-06
+# Versão: 7.0.0
+# Data: 2026-03-20
 # Objetivo: Script completo para configuração de sistema
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -24,9 +24,7 @@
 # ==============================================================================
 
 # Carrega dependências
-BASE_DIR="/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts"
-[ ! -d "$BASE_DIR" ] && BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
-[ -z "$BASE_DIR" ] && BASE_DIR="$(cd "$(dirname "$0")/../" && pwd)"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 UTILS_DIR="$BASE_DIR/utils"
 
 source "$BASE_DIR/core/env.sh" || { echo "[ERRO] Não foi possível carregar core/env.sh"; exit 1; }
@@ -121,10 +119,10 @@ if id -nG "$REAL_USER" 2>/dev/null | grep -qw "$sudo_group"; then
         log "INFO" "Removendo sudoers anterior..."
         $SUDO rm -f "$sudoers_file"
     fi
-    
+
     SUDOERS_TMP=$($SUDO mktemp)
     echo "$REAL_USER ALL=(ALL) NOPASSWD:ALL" | $SUDO tee "$SUDOERS_TMP" > /dev/null
-    
+
     if $SUDO visudo -cf "$SUDOERS_TMP" &>/dev/null; then
         $SUDO install -m 0440 -o root -g root "$SUDOERS_TMP" "$sudoers_file"
         log "SUCCESS" "Sudo sem senha configurado para $REAL_USER"
@@ -384,7 +382,7 @@ log "INFO" "Flags de kernel a aplicar: $CMDLINE_ADD"
 # --- RAMO SYSTEMD-BOOT ---
 if $SUDO bootctl is-installed >/dev/null 2>&1; then
     log "INFO" "Bootloader detectado: systemd-boot"
-    
+
     # Ajusta timeout em /boot/loader/loader.conf
     if [ -f /boot/loader/loader.conf ]; then
         log "INFO" "Atualizando /boot/loader/loader.conf..."
@@ -395,7 +393,7 @@ if $SUDO bootctl is-installed >/dev/null 2>&1; then
             echo "timeout 1" | $SUDO tee -a /boot/loader/loader.conf > /dev/null
         fi
     fi
-    
+
     # Atualiza parâmetros de kernel nos arquivos de entrada
     if [ -d /boot/loader/entries ]; then
         log "INFO" "Atualizando parâmetros de kernel em /boot/loader/entries/..."
@@ -424,7 +422,7 @@ if $SUDO bootctl is-installed >/dev/null 2>&1; then
     else
         log "WARN" "systemd-boot detectado mas nenhum arquivo de configuração foi encontrado"
     fi
-    
+
     # Atualiza bootctl
     $SUDO bootctl update
 

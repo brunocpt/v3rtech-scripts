@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Arquivo: core/package-mgr.sh
-# Versão: 6.0.0
-# Data: 2026-03-06
+# Versão: 7.0.0
+# Data: 2026-03-20
 # Objetivo: Abstração dos gerenciadores de pacotes (multi-distro)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -221,9 +221,9 @@ configure_flatpak_overrides() {
         --filesystem=host-etc \
         --env=TMPDIR=/tmp ; then
         log "SUCCESS" "Overrides globais do Flatpak aplicados com sucesso."
-
     else
         log "WARN" "Falha ao aplicar alguns overrides globais do Flatpak."
+        return 1
     fi
 }
 
@@ -240,6 +240,14 @@ install_flatpak() {
         log "INFO" "Instalando Flatpak..."
         i flatpak || return 1
     fi
+
+    # Garante que o remote Flathub esteja configurado antes de instalar qualquer app
+    if ! flatpak remote-list 2>/dev/null | grep -q "^flathub"; then
+        log "INFO" "Adicionando remote Flathub..."
+        $SUDO flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo \
+            || log "WARN" "Falha ao adicionar remote Flathub"
+    fi
+
     log "INFO" "Instalando Flatpak: $flatpak_id"
 
     $SUDO flatpak install -y flathub "$flatpak_id"
@@ -250,8 +258,8 @@ install_flatpak() {
 # --- 8. FUNÇÃO: INSTALAR VIA PIPX ---
 
 install_pipx() {
-    local package="$1"
-    if [ -z "$package" ]; then
+    local packages_str="$1"
+    if [ -z "$packages_str" ]; then
         log "WARN" "install_pipx chamado sem nome de pacote"
         return 1
     fi
@@ -259,9 +267,12 @@ install_pipx() {
         log "INFO" "Instalando Pipx..."
         i pipx || return 1
     fi
-    log "INFO" "Instalando via Pipx: $package"
-    pipx install "$package"
-    return $?
+    local overall_status=0
+    for pkg in $packages_str; do
+        log "INFO" "Instalando via Pipx: $pkg"
+        pipx install "$pkg" || overall_status=1
+    done
+    return $overall_status
 }
 
 # --- 9. FUNÇÃO: DETECTAR GERENCIADOR DE PACOTES ---
@@ -333,9 +344,88 @@ is_installed() {
     return 0
 }
 
-# --- 11. EXPORTAÇÃO DE FUNÇÕES ---
+# --- 11. FUNÇÕES: INSTALAR APP (NATIVO / FLATPAK / ROTEADOR) ---
+#
+# Centralizadas aqui para evitar duplicação nos scripts install-apps-*.sh
+# Dependem de APP_MAP_* (populados por apps-data.sh) estarem no ambiente.
+
+install_native_app() {
+    local app_name="$1"
+    local package="${APP_MAP_NATIVE[$app_name]}"
+    if [ -z "$package" ]; then
+        log "DEBUG" "Sem pacote nativo para '$app_name' em $DISTRO_FAMILY"
+        return 1
+    fi
+    if is_installed "$package"; then
+        log "INFO" "Pacote '$package' ($app_name) já está instalado."
+        return 10
+    fi
+    log "INFO" "Instalando $app_name (nativo)..."
+    i "$package"
+    return $?
+}
+
+install_flatpak_app() {
+    local app_name="$1"
+    local flatpak_id="${APP_MAP_FLATPAK[$app_name]}"
+    if [ -z "$flatpak_id" ]; then return 1; fi
+    # flatpak info verifica instalações de sistema e de usuário
+    if flatpak info "$flatpak_id" &>/dev/null; then
+        log "INFO" "Flatpak '$flatpak_id' ($app_name) já está instalado."
+        return 10
+    fi
+    log "INFO" "Instalando $app_name (Flatpak)..."
+    install_flatpak "$flatpak_id"
+    return $?
+}
+
+install_app() {
+    local app_name="$1"
+    local app_method="${APP_MAP_METHOD[$app_name]}"
+    local prefer_native="${PREFER_NATIVE:-false}"
+    local install_status=1
+    local install_type=""
+
+    if [ "$app_method" = "custom" ]; then return 0; fi
+
+    log "STEP" "Processando $app_name..."
+
+    if [ "$app_method" = "pipx" ]; then
+        # Pacotes pipx ficam no campo flatpak_id; pode ser lista separada por espaço
+        local pipx_pkg="${APP_MAP_FLATPAK[$app_name]}"
+        install_pipx "$pipx_pkg"; install_status=$?; install_type="pipx"
+    elif [ "$app_method" = "flatpak" ]; then
+        # Instalação forçada via Flatpak, sem fallback
+        install_flatpak_app "$app_name"; install_status=$?; install_type="flatpak"
+    elif [ "$app_method" = "native" ]; then
+        # Instalação forçada via pacote nativo, sem fallback (ex: ferramentas de sistema)
+        install_native_app "$app_name"; install_status=$?; install_type="native"
+    elif [ "$prefer_native" = "true" ]; then
+        # auto: tenta nativo primeiro, cai em flatpak se falhar
+        install_native_app "$app_name"; install_status=$?; install_type="native"
+        if [ $install_status -ne 0 ] && [ $install_status -ne 10 ]; then
+            install_flatpak_app "$app_name"; install_status=$?; install_type="flatpak"
+        fi
+    else
+        # auto: tenta flatpak primeiro, cai em nativo se falhar
+        install_flatpak_app "$app_name"; install_status=$?; install_type="flatpak"
+        if [ $install_status -ne 0 ] && [ $install_status -ne 10 ]; then
+            install_native_app "$app_name"; install_status=$?; install_type="native"
+        fi
+    fi
+
+    if [ $install_status -eq 0 ] || [ $install_status -eq 10 ]; then
+        [ $install_status -eq 0 ] && log "SUCCESS" "$app_name instalado via $install_type"
+        return 0
+    fi
+    log "WARN" "Falha ao instalar $app_name"
+    return 1
+}
+
+# --- 12. EXPORTAÇÃO DE FUNÇÕES ---
 
 export -f \
+_check_cmd \
 i \
 r \
 up \
@@ -344,4 +434,7 @@ is_installed \
 install_flatpak \
 install_pipx \
 configure_flatpak_overrides \
-detect_package_manager
+detect_package_manager \
+install_native_app \
+install_flatpak_app \
+install_app

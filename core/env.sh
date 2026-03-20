@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Arquivo: core/env.sh
-# Versão: 6.1.0
-# Data: 2026-03-19
+# Versão: 7.0.0
+# Data: 2026-03-20
 # Objetivo: Variáveis globais, caminhos, cores e detecção de ambiente
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -90,7 +90,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
     # pois são detectadas dinamicamente no env.sh e não devem ser sobrescritas
     cat > "$CONFIG_FILE" << 'EOF'
 #!/bin/bash
-# Configuração V3RTECH Scripts v6.0.0
+# Configuração V3RTECH Scripts v7.0.0
 # Gerada automaticamente
 
 DISTRO_FAMILY=""
@@ -186,7 +186,7 @@ fi
 
 # --- 7. VERSÃO DO PROJETO ---
 
-SCRIPT_VERSION="6.1.0"
+SCRIPT_VERSION="7.0.0"
 
 # --- 8. EXPORTAÇÃO DE VARIÁVEIS CRÍTICAS ---
 
@@ -218,14 +218,16 @@ save_config() {
     [ -f "$CONFIG_FILE" ] && cp "$CONFIG_FILE" "$CONFIG_FILE.bak" 2>/dev/null || true
 
     # Atualiza ou adiciona a variável usando arquivo temporário (evita injeção via sed)
+    # O mv -f no final garante escrita atômica: o arquivo só é substituído quando
+    # todo o conteúdo já está pronto, evitando corrupção em execuções concorrentes.
     local tmp_file
     tmp_file=$(mktemp)
-    grep -v "^$key=" "$CONFIG_FILE" > "$tmp_file" 2>/dev/null || true
-    echo "$key=\"$value\"" >> "$tmp_file"
-    # Garante que LAST_UPDATE fique no final
-    grep -v "^LAST_UPDATE=" "$tmp_file" > "$CONFIG_FILE" 2>/dev/null || true
-    echo "LAST_UPDATE=\"$(date '+%Y-%m-%d %H:%M:%S')\""  >> "$CONFIG_FILE"
-    rm -f "$tmp_file"
+    {
+        grep -v "^$key=" "$CONFIG_FILE" 2>/dev/null | grep -v "^LAST_UPDATE=" || true
+        echo "$key=\"$value\""
+        echo "LAST_UPDATE=\"$(date '+%Y-%m-%d %H:%M:%S')\""
+    } > "$tmp_file"
+    mv -f "$tmp_file" "$CONFIG_FILE"
 }
 
 # --- 10. VALIDAÇÃO BÁSICA ---

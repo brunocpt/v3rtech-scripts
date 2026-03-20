@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: install-essentials.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
+# Versão: 7.0.0
+# Data: 2026-03-20
 # Objetivo: Instalar pacotes e aplicativos essenciais do sistema
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -21,8 +21,7 @@
 # ==============================================================================
 
 # Carrega dependências
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
-[ -z "$BASE_DIR" ] && BASE_DIR="$(cd "$(dirname "$0")/../" && pwd)"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 source "$BASE_DIR/core/env.sh" || { echo "[ERRO] Não foi possível carregar core/env.sh"; exit 1; }
 source "$BASE_DIR/core/logging.sh" || { echo "[ERRO] Não foi possível carregar core/logging.sh"; exit 1; }
@@ -47,38 +46,38 @@ section "Instalação de Pacotes Essenciais"
 # ==============================================================================
 
 case "$DISTRO_FAMILY" in
-    
+
     # ========== DEBIAN / UBUNTU ==========
     debian)
         log "STEP" "Instalando pacotes essenciais para Debian/Ubuntu..."
-        
+
         # Atualiza índices de pacotes
         log "INFO" "Atualizando índices de pacotes..."
         $SUDO apt update || log "WARN" "Falha ao atualizar índices"
-        
+
         # Instala pacotes essenciais em lotes
         debian_packages=(
             # Interface gráfica para diálogos
             "zenity" "yad"
-            
+
             # Desenvolvimento
             "build-essential" "git" "ccache" "pipx" "jq"
-            
+
             # Utilitários de sistema
             "curl" "wget" "duf" "eza" "bat" "bash-completion" "rsync" "parallel"
-            
+
             # Compactadores
             "exfatprogs" "arj" "p7zip-full" "unrar" "zip" "unzip"
-            
+
             # Editores e terminais
             "guake" "geany" "geany-plugins"
-            
+
             # Compressão de RAM
             "zram-tools"
-            
+
             # Processamento de imagem
             "imagemagick"
-            
+
             # Sistema de impressão
             "cups" "cups-client" "cups-bsd" "cups-filters"
             "foomatic-db-compressed-ppds" "openprinting-ppds"
@@ -87,24 +86,24 @@ case "$DISTRO_FAMILY" in
             "escputil" "printer-driver-cjet" "cups-backend-bjnp"
             "printer-driver-brlaser" "printer-driver-ptouch" "printer-driver-splix"
             "printer-driver-all"
-            
+
             # Internet
             "rclone"
-            
+
             # Acessibilidade
             "speech-dispatcher"
         )
-        
+
         # Instala cada pacote (continua mesmo se alguns falharem)
         for pkg in "${debian_packages[@]}"; do
             i "$pkg" || log "WARN" "Falha ao instalar: $pkg"
         done
         ;;
-    
+
     # ========== ARCH LINUX ==========
     arch)
         log "STEP" "Instalando pacotes essenciais para Arch Linux..."
-        
+
         # Garante que o Paru foi instalado pelo orquestrador
         if [ "$PREFER_NATIVE" = "true" ]; then
             if _check_cmd paru; then
@@ -115,25 +114,25 @@ case "$DISTRO_FAMILY" in
                 ensure_paru || log "WARN" "Falha ao garantir o Paru"
             fi
         fi
-        
+
         # Instala pacotes essenciais
         arch_packages=(
             # Interface gráfica para diálogos
             "zenity" "yad"
-            
+
             # Desenvolvimento
             "linux-tools" "kexec-tools" "git" "ccache" "python-pipx" "jq"
-            
+
             # Utilitários de sistema
             "curl" "wget" "duf" "eza" "bat" "acpi" "bc" "rsync"
             "lsb-release" "bchunk" "ntfs-3g" "bash-completion" "parallel"
-            
+
             # Editores e terminais
             "guake" "geany" "geany-plugins"
-            
+
             # Compactadores
             "exfatprogs" "arj" "p7zip" "unrar" "zip" "unzip"
-            
+
             # Sistema de impressão
             "cups" "cups-pdf" "cups-browsed"
             "gutenprint" "foomatic-db-engine" "foomatic-db"
@@ -141,22 +140,22 @@ case "$DISTRO_FAMILY" in
             "foomatic-db-nonfree-ppds" "foomatic-db-gutenprint-ppds"
             "epson-inkjet-printer-escpr" "cnijfilter2" "scangearmp2"
             "samsung-unified-driver" "cnrdrvcups-lb" "cups-bjnp"
-            
+
             # Processamento de imagem
             "imagemagick"
-            
+
             # Acessibilidade
             "speech-dispatcher"
-            
+
             # Utilitários
             "reflector"
 
             # Internet
             "rclone"
-            
+
             # Nota: Paru é instalado acima se PREFER_NATIVE=true
         )
-        
+
         # Instala cada pacote
         for pkg in "${arch_packages[@]}"; do
             i "$pkg" || log "WARN" "Falha ao instalar: $pkg"
@@ -168,55 +167,55 @@ case "$DISTRO_FAMILY" in
             $SUDO reflector --country Brazil,Chile,"United States" --protocol https,http --latest 12 --sort rate --verbose || log "WARN" "Falha ao otimizar mirrors"
         fi
         ;;
-    
+
     # ========== FEDORA ==========
     fedora)
         log "STEP" "Instalando pacotes essenciais para Fedora..."
-        
+
         # Instala pacotes essenciais
         fedora_packages=(
             # Interface gráfica para diálogos
             "zenity" "yad"
-            
+
             # Desenvolvimento
             "git" "ccache" "python3-pip" "jq"
-            
+
             # Utilitários de sistema
             "curl" "wget" "duf" "eza" "exa" "bat" "thefuck"
             "exfatprogs" "bash-completion" "rsync" "parallel"
-            
+
             # Editores e terminais
             "guake" "geany" "geany-plugins"
-            
+
             # Compactadores
             "arj" "p7zip" "p7zip-plugins" "unrar" "zip" "unzip"
-            
+
             # Sistema de impressão
             "cups-pdf" "gutenprint" "hplip" "hplip-gui"
             "escputil"
-            
+
             # Processamento de imagem
             "imagemagick"
-            
+
             # Dicionários
             "aspell-pt" "aspell-pt_BR" "ibrazilian"
             "translate-shell" "hyphen-pt" "hunspell-pt_BR"
             "man-pages-pt_BR" "hunspell-en_AU" "hunspell-en_CA"
             "hunspell-en_ZA" "hyphen-en"
-            
+
             # Internet
             "rclone"
-            
+
             # Acessibilidade
             "speech-dispatcher"
         )
-        
+
         # Instala cada pacote
         for pkg in "${fedora_packages[@]}"; do
             i "$pkg" || log "WARN" "Falha ao instalar: $pkg"
         done
         ;;
-    
+
     *)
         die "Distribuição não suportada: $DISTRO_FAMILY"
         ;;

@@ -2,9 +2,9 @@
 
 # ==============================================================================
 # Script: v3rtech-install.sh
-# Versão: 6.1.0
-# Data: 2026-03-19
-# Objetivo: Script-mestre orquestrador da suite V3RTECH Scripts v6.1.0
+# Versão: 7.0.0
+# Data: 2026-03-20
+# Objetivo: Script-mestre orquestrador da suite V3RTECH Scripts v7.0.0
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
 # ==============================================================================
@@ -317,6 +317,7 @@ configure_desktop() {
 
 # Instala todos os apps selecionados
 install_selected_apps() {
+    configure_flatpak_overrides
     bash "$LIB_DIR/install-apps-internet.sh" || true
     bash "$LIB_DIR/install-apps-office.sh" || true
     bash "$LIB_DIR/install-apps-dev.sh" || true

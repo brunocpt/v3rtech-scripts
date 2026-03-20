@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: install-certificates.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
+# Versão: 7.0.0
+# Data: 2026-03-20
 # Objetivo: Instalar certificados ICP-Brasil e ferramentas de assinatura digital
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -15,8 +15,7 @@
 #
 # ==============================================================================
 
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
-[ -z "$BASE_DIR" ] && BASE_DIR="$(cd "$(dirname "$0")/../" && pwd)"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 source "$BASE_DIR/core/env.sh" || { echo "[ERRO] Não foi possível carregar core/env.sh"; exit 1; }
 source "$BASE_DIR/core/logging.sh" || { echo "[ERRO] Não foi possível carregar core/logging.sh"; exit 1; }
@@ -42,11 +41,11 @@ case "$DISTRO_FAMILY" in
     debian)
         # Adiciona repositório SERPRO
         log "INFO" "Adicionando repositório SERPRO..."
-        
+
         # Baixa e instala chave de assinatura
         wget -qO- https://assinadorserpro.estaleiro.serpro.gov.br/repository/AssinadorSERPROpublic.asc | \
             $SUDO tee /etc/apt/trusted.gpg.d/AssinadorSERPROpublic.asc > /dev/null
-        
+
         # Adiciona repositório
         echo "Types: deb
 URIs: https://www.assinadorserpro.estaleiro.serpro.gov.br/repository/
@@ -55,22 +54,22 @@ Components: stable
 Architectures: amd64
 Signed-By: /etc/apt/trusted.gpg.d/AssinadorSERPROpublic.asc" | \
             $SUDO tee /etc/apt/sources.list.d/serpro.sources > /dev/null
-        
+
         # Atualiza e instala
         $SUDO apt update
         i "assinador-serpro" || log "WARN" "Falha ao instalar Assinador SERPRO"
         ;;
-    
+
     arch)
         log "WARN" "Assinador SERPRO não está disponível no repositório Arch"
         log "INFO" "Você pode instalar via AUR ou usar a versão AppImage"
         ;;
-    
+
     fedora)
         log "WARN" "Assinador SERPRO não está disponível no repositório Fedora"
         log "INFO" "Você pode instalar via AppImage ou compilar do código-fonte"
         ;;
-    
+
     *)
         die "Distribuição não suportada: $DISTRO_FAMILY"
         ;;

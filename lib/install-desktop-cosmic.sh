@@ -1,15 +1,14 @@
 #!/bin/bash
 # ==============================================================================
 # Script: install-desktop-cosmic.sh
-# Versão: 5.2.0
-# Data: 2026-03-05
+# Versão: 7.0.0
+# Data: 2026-03-20
 # Objetivo: Instalar COSMIC Desktop e Componentes Independentes (Arch/Ubuntu/Fedora)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
 # ==============================================================================
 
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
-[ -z "$BASE_DIR" ] && BASE_DIR="$(cd "$(dirname "$0")/../" && pwd)"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 source "$BASE_DIR/core/env.sh" || { echo "[ERRO] Não foi possível carregar core/env.sh"; exit 1; }
 source "$BASE_DIR/core/logging.sh" || { echo "[ERRO] Não foi possível carregar core/logging.sh"; exit 1; }

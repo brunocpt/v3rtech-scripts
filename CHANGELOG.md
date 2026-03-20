@@ -4,6 +4,42 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 ---
 
+## [7.0.0] - 2026-03-20
+
+### 🐛 Correções de Bugs e Melhorias de Robustez
+
+- **v3rtech-install.sh:**
+    - **Bug Fix (Flatpak Overrides):** `configure_flatpak_overrides()` agora é chamada no início de `install_selected_apps()`, antes dos scripts de categoria rodarem, garantindo que os overrides globais do Flatpak estejam ativos para todas as instalações.
+
+- **core/package-mgr.sh:**
+    - **Bug Fix (Roteamento de Método):** `install_app()` reformulada com quatro ramos explícitos: `pipx`, `flatpak` (forçado), `native` (forçado) e `auto` (respeita `PREFER_NATIVE` com fallback). Elimina a instalação errada de apps `pipx` como Flatpak.
+    - **Bug Fix (pipx):** `install_pipx()` agora itera sobre a string de pacotes, suportando múltiplos pacotes separados por espaço.
+    - **Bug Fix (native silencioso):** `install_native_app()` registra mensagem DEBUG quando não há pacote nativo para o app na distro atual, em vez de falhar silenciosamente.
+    - **Bug Fix (configure_flatpak_overrides):** Função agora retorna `1` corretamente no ramo de falha, em vez de sempre retornar `0`.
+    - **Bug Fix (_check_cmd não exportada):** `_check_cmd` adicionada ao bloco `export -f`, tornando-a disponível em subshells.
+
+- **core/env.sh:**
+    - **Bug Fix (escrita atômica):** `save_config()` reescrita para usar um único bloco `{ } > tmp_file` seguido de `mv -f`, eliminando a janela de corrupção que existia entre a limpeza e a escrita do arquivo de configuração.
+
+- **lib/apps-data.sh:**
+    - **Bug Fix (campo method):** Reclassificação completa do campo `method` em todos os apps: `"auto"` para apps com pacote nativo e Flatpak (respeita `PREFER_NATIVE` do usuário), `"native"` para ferramentas de sistema sem Flatpak, `"flatpak"` para apps exclusivamente Flatpak, `"pipx"` para apps Python. Wavebox recebeu `flatpak_id="io.wavebox.Wavebox"` e `method="auto"`. YT-DLP e Ventoy tiveram `flatpak_id` inválidos removidos.
+
+- **lib/install-apps-internet.sh:**
+    - **Bug Fix (GPU fix — mismatch de case):** Loop 1 (fix imediato pós-instalação) agora compara via `native_pkg` e `flatpak_id` em minúsculas, corrigindo a incompatibilidade entre nomes de display e padrões lowercase do array `CHROMIUM_APPS_GPU_FIX`.
+    - **Bug Fix (GPU fix — loop 2 nome de pacote):** Varredura final agora faz lookup reverso do nome de display antes de consultar `APP_MAP_NATIVE`, corrigindo nomes de pacotes errados no hook para Brave, Edge e Chrome no Debian.
+    - **Bug Fix (TARGET_DIR vazio em subshells):** Todas as 8 ocorrências de `$TARGET_DIR` substituídas por `$BASE_DIR`.
+    - **Bug Fix (condição morta):** Removida condição `|| [ "$category" = "Comunicação" ]` que nunca era verdadeira.
+
+- **lib/select-apps.sh:**
+    - **Bug Fix (selected-apps.conf truncado):** `process_selection()` agora grava em arquivo temporário e só substitui `selected-apps.conf` via `mv -f` quando ao menos um app válido é selecionado, preservando a seleção anterior se o usuário cancelar.
+    - **Bug Fix (YAD com sudo direto):** Bloco de instalação do YAD agora usa `$SUDO` e `log` em vez de `sudo` hardcoded e `echo`.
+
+- **Global (25 arquivos — Bug E):** Todos os scripts `lib/*.sh` tiveram o `BASE_DIR` hardcoded substituído por detecção dinâmica via `BASH_SOURCE[0]`, tornando os scripts portáteis e independentes do caminho de instalação.
+
+- **Sincronização Global v7.0.0:** Suite completa sincronizada para a versão `7.0.0` e data `2026-03-20`.
+
+---
+
 ## [6.1.0] - 2026-03-19
 
 ### ✨ Novas Ferramentas, Integração do Cockpit e Certificados

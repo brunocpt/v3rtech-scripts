@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: install-virtualbox.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
+# Versão: 7.0.0
+# Data: 2026-03-20
 # Objetivo: Instalar e configurar VirtualBox
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -16,8 +16,7 @@
 #
 # ==============================================================================
 
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
-[ -z "$BASE_DIR" ] && BASE_DIR="$(cd "$(dirname "$0")/../" && pwd)"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 source "$BASE_DIR/core/env.sh" || { echo "[ERRO] Não foi possível carregar core/env.sh"; exit 1; }
 source "$BASE_DIR/core/logging.sh" || { echo "[ERRO] Não foi possível carregar core/logging.sh"; exit 1; }
@@ -41,26 +40,26 @@ case "$DISTRO_FAMILY" in
     debian)
         # Adiciona repositório oficial
         log "INFO" "Adicionando repositório VirtualBox..."
-        
+
         # Chave GPG
         wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | $SUDO gpg --dearmor -o /etc/apt/trusted.gpg.d/oracle-virtualbox.gpg
-        
+
         # Repositório
         echo "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/oracle-virtualbox.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | \
             $SUDO tee /etc/apt/sources.list.d/virtualbox.list > /dev/null
-        
+
         $SUDO apt update
         i "virtualbox-7.0" || log "WARN" "Falha ao instalar VirtualBox"
         ;;
-    
+
     arch)
         i "virtualbox" "virtualbox-host-modules-arch" || log "WARN" "Falha ao instalar VirtualBox"
         ;;
-    
+
     fedora)
         i "VirtualBox" "kernel-devel" || log "WARN" "Falha ao instalar VirtualBox"
         ;;
-    
+
     *)
         die "Distribuição não suportada: $DISTRO_FAMILY"
         ;;

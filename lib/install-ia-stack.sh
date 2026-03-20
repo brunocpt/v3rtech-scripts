@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: lib/install-ia-stack.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
+# Versão: 7.0.0
+# Data: 2026-03-20
 # Objetivo: Instalar stack completa de IA (PyTorch, Whisper, AnythingLLM, Ollama)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -21,8 +21,7 @@
 set -e
 
 # Carrega dependências
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
-[ -z "$BASE_DIR" ] && BASE_DIR="$(cd "$(dirname "$0")/../" && pwd)"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 source "$BASE_DIR/core/env.sh" || { echo "[ERRO] Não foi possível carregar core/env.sh"; exit 1; }
 source "$BASE_DIR/core/logging.sh" || { echo "[ERRO] Não foi possível carregar core/logging.sh"; exit 1; }

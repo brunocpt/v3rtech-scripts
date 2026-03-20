@@ -1,15 +1,15 @@
 #!/bin/bash
 # ==============================================================================
 # Script: lib/install-apps-internet.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
+# Versão: 7.0.0
+# Data: 2026-03-20
 # Objetivo: Instalar aplicativos de Internet (navegadores, nuvem, comunicação)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
 # ==============================================================================
 
 # Carrega dependências
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$BASE_DIR/core/env.sh" || { echo "[ERRO] Não foi possível carregar core/env.sh"; exit 1; }
 source "$BASE_DIR/core/logging.sh" || { echo "[ERRO] Não foi possível carregar core/logging.sh"; exit 1; }
 source "$BASE_DIR/core/package-mgr.sh" || { echo "[ERRO] Não foi possível carregar core/package-mgr.sh"; exit 1; }
@@ -95,7 +95,7 @@ create_update_hook() {
             echo "Description = Re-applying GPU compositing fix for $app_name..." | sudo tee -a "$hook_file"
             echo "When = PostTransaction" | sudo tee -a "$hook_file"
             # O caminho para o script principal deve ser absoluto
-            echo "Exec = $TARGET_DIR/lib/install-apps-internet.sh --apply-fix $app_name" | sudo tee -a "$hook_file"
+            echo "Exec = $BASE_DIR/lib/install-apps-internet.sh --apply-fix $app_name" | sudo tee -a "$hook_file"
             log "SUCCESS" "Hook do pacman criado em '$hook_file'."
             ;;
         debian)
@@ -109,16 +109,16 @@ create_update_hook() {
             # O script precisa ser inteligente para aplicar o fix somente quando necessário.
             if ! grep -q "v3rtech-gpu-fix.sh" "$hook_file" 2>/dev/null; then
                 echo "DPkg::Post-Invoke { \"/usr/local/bin/v3rtech-gpu-fix.sh\"; };" | sudo tee "$hook_file"
-                
+
                 # Cria o script que será chamado pelo hook
                 local fix_script="/usr/local/bin/v3rtech-gpu-fix.sh"
                 echo "#!/bin/bash" | sudo tee "$fix_script"
                 echo "# Script para reaplicar fixes da V3RTECH" | sudo tee -a "$fix_script"
-                echo "source \"$TARGET_DIR/core/env.sh\"" | sudo tee -a "$fix_script"
-                echo "source \"$TARGET_DIR/core/logging.sh\"" | sudo tee -a "$fix_script"
+                echo "source \"$BASE_DIR/core/env.sh\"" | sudo tee -a "$fix_script"
+                echo "source \"$BASE_DIR/core/logging.sh\"" | sudo tee -a "$fix_script"
                 echo "log 'INFO' 'Hook do APT acionado. Verificando necessidade de aplicar fixes...'" | sudo tee -a "$fix_script"
                 # Chama o script de internet com a flag para aplicar o fix em todos os apps da lista
-                echo "bash \"$TARGET_DIR/lib/install-apps-internet.sh\" --apply-fix-all" | sudo tee -a "$fix_script"
+                echo "bash \"$BASE_DIR/lib/install-apps-internet.sh\" --apply-fix-all" | sudo tee -a "$fix_script"
                 sudo chmod +x "$fix_script"
                 log "SUCCESS" "Hook do APT criado. O script /usr/local/bin/v3rtech-gpu-fix.sh será executado após transações."
             else
@@ -159,91 +159,9 @@ fi
 
 # ==============================================================================
 # FUNÇÕES DE INSTALAÇÃO
+# As funções install_native_app, install_flatpak_app e install_app estão
+# centralizadas em core/package-mgr.sh e já estão disponíveis via export -f.
 # ==============================================================================
-install_native_app() {
-    local app_name="$1"
-    local package="${APP_MAP_NATIVE[$app_name]}"
-    if [ -z "$package" ]; then
-        log "WARN" "Pacote nativo não disponível para $app_name em $DISTRO_FAMILY"
-        return 1
-    fi
-    log "INFO" "Instalando $app_name (nativo)..."
-    i "$package"
-    if [ $? -eq 0 ]; then
-        log "SUCCESS" "$app_name instalado com sucesso"
-    else
-        log "WARN" "Falha ao instalar $app_name"
-        return 1
-    fi
-}
-
-install_flatpak_app() {
-    local app_name="$1"
-    local flatpak_id="${APP_MAP_FLATPAK[$app_name]}"
-    if [ -z "$flatpak_id" ]; then
-        log "WARN" "Flatpak ID não disponível para $app_name"
-        return 1
-    fi
-    log "INFO" "Instalando $app_name (Flatpak)..."
-    install_flatpak "$flatpak_id"
-    if [ $? -eq 0 ]; then
-        log "SUCCESS" "$app_name instalado com sucesso"
-    else
-        log "WARN" "Falha ao instalar $app_name"
-        return 1
-    fi
-}
-
-install_app() {
-    local app_name="$1"
-    local app_method="${APP_MAP_METHOD[$app_name]}"
-    local prefer_native="${PREFER_NATIVE:-false}"
-    local install_success=0
-
-    if [ "$app_method" = "flatpak" ]; then
-        install_flatpak_app "$app_name"
-        install_success=$?
-    elif [ "$app_method" = "pipx" ] || [ "$app_method" = "custom" ]; then
-        log "DEBUG" "$app_name será tratado por outro script (método: $app_method)"
-        return 0  # Não é um erro, apenas não será instalado aqui
-    else
-        if [ "$prefer_native" = "true" ]; then
-            install_native_app "$app_name"
-            install_success=$?
-            if [ $install_success -ne 0 ]; then
-                install_flatpak_app "$app_name"
-                install_success=$?
-            fi
-        else
-            install_flatpak_app "$app_name"
-            install_success=$?
-            if [ $install_success -ne 0 ]; then
-                install_native_app "$app_name"
-                install_success=$?
-            fi
-        fi
-    fi
-
-    # Se a instalação foi bem-sucedida, verifica se precisa do fix da GPU
-    if [ $install_success -eq 0 ]; then
-        log "SUCCESS" "$app_name instalado com sucesso"
-
-        # >>> INÍCIO DA MODIFICAÇÃO <<<
-        # Itera na lista de apps que precisam do fix
-        for chromium_app in "${CHROMIUM_APPS_GPU_FIX[@]}"; do
-            if [ "$app_name" == "$chromium_app" ]; then
-                apply_gpu_fix_and_create_hook "$app_name"
-                break  # Sai do loop assim que encontrar
-            fi
-        done
-        # >>> FIM DA MODIFICAÇÃO <<<
-
-        return 0
-    else
-        log "WARN" "Falha ao instalar $app_name"
-        return 1
-    fi
-}
 
 # ==============================================================================
 # MAIN
@@ -262,16 +180,29 @@ source "$SELECTED_APPS_FILE"
 log "STEP" "Instalando aplicativos de Internet selecionados..."
 
 installed_count=0
-for i in "${!APP_NAMES_ORDERED[@]}"; do
-    app_name="${APP_NAMES_ORDERED[$i]}"
+for app_idx in "${!APP_NAMES_ORDERED[@]}"; do
+    app_name="${APP_NAMES_ORDERED[$app_idx]}"
     category="${APP_MAP_CATEGORY[$app_name]}"
-    
-    if [ "$category" = "Internet" ] || [ "$category" = "Nuvem" ] || [ "$category" = "Comunicação" ]; then
-        var_name="SELECTED_APP_$i"
+
+    if [ "$category" = "Internet" ] || [ "$category" = "Nuvem" ]; then
+        var_name="SELECTED_APP_$app_idx"
         if declare -p "$var_name" &>/dev/null && [ "${!var_name}" = "true" ]; then
             log "DEBUG" "App '$app_name' selecionado para instalação"
-            install_app "$app_name"
-            ((installed_count++))
+            if install_app "$app_name"; then
+                ((installed_count++))
+                # Aplica fix de GPU para apps baseados em Chromium.
+                # Compara via native_pkg/flatpak_id (minúsculos) para ser independente
+                # do nome de exibição do app (ex: "Wavebox" vs padrão "wavebox").
+                local native_pkg="${APP_MAP_NATIVE[$app_name]:-}"
+                local flatpak_id="${APP_MAP_FLATPAK[$app_name]:-}"
+                for chromium_pattern in "${CHROMIUM_APPS_GPU_FIX[@]}"; do
+                    if [[ "${native_pkg,,}" == *"$chromium_pattern"* ]] || \
+                       [[ "${flatpak_id,,}" == *"$chromium_pattern"* ]]; then
+                        apply_gpu_fix_and_create_hook "$app_name"
+                        break
+                    fi
+                done
+            fi
         fi
     fi
 done
@@ -342,7 +273,7 @@ After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash $TARGET_DIR/lib/install-apps-internet.sh --apply-fix-all
+ExecStart=/bin/bash $BASE_DIR/lib/install-apps-internet.sh --apply-fix-all
 SERVICE_EOF
 
                     sudo tee "$timer_file" > /dev/null << TIMER_EOF
@@ -364,18 +295,29 @@ TIMER_EOF
                 fi
             fi
         else
-            # Cria hook para pacote nativo
-            package_name="${APP_MAP_NATIVE[$chromium_app]:-$chromium_app}"
-            
+            # Cria hook para pacote nativo.
+            # Busca o nome de exibição (chave de APP_MAP_NATIVE) pelo padrão lowercase,
+            # pois APP_MAP_NATIVE é indexado por nome de exibição ("Google Chrome", "Brave", etc.)
+            local display_name=""
+            for _app in "${APP_NAMES_ORDERED[@]}"; do
+                local _np="${APP_MAP_NATIVE[$_app]:-}"
+                local _fi="${APP_MAP_FLATPAK[$_app]:-}"
+                if [[ "${_np,,}" == *"$chromium_app"* ]] || [[ "${_fi,,}" == *"$chromium_app"* ]]; then
+                    display_name="$_app"
+                    break
+                fi
+            done
+            package_name="${APP_MAP_NATIVE[$display_name]:-$chromium_app}"
+
             case "$DISTRO_FAMILY" in
                 arch)
                     hook_dir="/etc/pacman.d/hooks"
                     hook_file="$hook_dir/v3rtech-gpu-fix-${package_name}.hook"
-                    
+
                     if [ ! -f "$hook_file" ]; then
                         log "INFO" "Criando hook do pacman para $package_name..."
                         sudo mkdir -p "$hook_dir"
-                        
+
                         sudo tee "$hook_file" > /dev/null << HOOK_EOF
 [Trigger]
 Operation = Install
@@ -386,7 +328,7 @@ Target = $package_name
 [Action]
 Description = Re-applying V3RTECH GPU compositing fix for $chromium_app...
 When = PostTransaction
-Exec = /bin/bash $TARGET_DIR/lib/install-apps-internet.sh --apply-fix $chromium_app
+Exec = /bin/bash $BASE_DIR/lib/install-apps-internet.sh --apply-fix $chromium_app
 HOOK_EOF
                         sudo chmod 644 "$hook_file"
                         log "SUCCESS" "Hook do pacman criado em $hook_file."
@@ -395,15 +337,15 @@ HOOK_EOF
                 debian)
                     hook_file="/etc/apt/apt.conf.d/99v3rtech-gpu-fix"
                     fix_script="/usr/local/bin/v3rtech-gpu-fix.sh"
-                    
+
                     if [ ! -f "$hook_file" ]; then
                         log "INFO" "Criando hook do dpkg/apt para $chromium_app..."
                         echo "DPkg::Post-Invoke { \"$fix_script\"; };" | sudo tee "$hook_file" > /dev/null
-                        
+
                         sudo tee "$fix_script" > /dev/null << FIX_SCRIPT_EOF
 #!/bin/bash
-if [ -d "$TARGET_DIR" ]; then
-    /bin/bash "$TARGET_DIR/lib/install-apps-internet.sh" --apply-fix-all
+if [ -d "$BASE_DIR" ]; then
+    /bin/bash "$BASE_DIR/lib/install-apps-internet.sh" --apply-fix-all
 fi
 FIX_SCRIPT_EOF
                         sudo chmod +x "$fix_script"
@@ -413,11 +355,11 @@ FIX_SCRIPT_EOF
                 fedora)
                     hook_dir="/etc/dnf/plugins/post_transaction_actions.d"
                     hook_file="$hook_dir/v3rtech-gpu-fix.action"
-                    
+
                     if [ ! -f "$hook_file" ]; then
                         log "INFO" "Criando hook do DNF para $chromium_app..."
                         sudo mkdir -p "$hook_dir"
-                        echo "*:* /bin/bash $TARGET_DIR/lib/install-apps-internet.sh --apply-fix-all" | sudo tee "$hook_file" > /dev/null
+                        echo "*:* /bin/bash $BASE_DIR/lib/install-apps-internet.sh --apply-fix-all" | sudo tee "$hook_file" > /dev/null
                         sudo chmod 644 "$hook_file"
                         log "SUCCESS" "Hook do DNF criado."
                     fi

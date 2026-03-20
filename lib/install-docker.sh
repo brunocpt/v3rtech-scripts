@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: install-docker.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
+# Versão: 7.0.0
+# Data: 2026-03-20
 # Objetivo: Instalar e configurar Docker e Docker Compose
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -16,8 +16,7 @@
 #
 # ==============================================================================
 
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
-[ -z "$BASE_DIR" ] && BASE_DIR="$(cd "$(dirname "$0")/../" && pwd)"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 source "$BASE_DIR/core/env.sh" || { echo "[ERRO] Não foi possível carregar core/env.sh"; exit 1; }
 source "$BASE_DIR/core/logging.sh" || { echo "[ERRO] Não foi possível carregar core/logging.sh"; exit 1; }
@@ -41,29 +40,29 @@ case "$DISTRO_FAMILY" in
     debian)
         # Remove instalações antigas
         $SUDO apt remove -y docker docker.io docker-engine 2>/dev/null || true
-        
+
         # Instala dependências
         i "ca-certificates" "curl" "gnupg" "lsb-release"
-        
+
         # Adiciona repositório oficial do Docker
         $SUDO mkdir -p /etc/apt/keyrings
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | $SUDO gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-        
+
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
             $SUDO tee /etc/apt/sources.list.d/docker.list > /dev/null
-        
+
         $SUDO apt update
         i "docker-ce" "docker-ce-cli" "containerd.io" "docker-buildx-plugin" "docker-compose-plugin"
         ;;
-    
+
     arch)
         i "docker" "docker-compose"
         ;;
-    
+
     fedora)
         i "docker" "docker-compose"
         ;;
-    
+
     *)
         die "Distribuição não suportada: $DISTRO_FAMILY"
         ;;
