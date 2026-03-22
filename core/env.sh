@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Arquivo: core/env.sh
-# Versão: 7.0.0
-# Data: 2026-03-20
+# Versão: 7.1.0
+# Data: 2026-03-22
 # Objetivo: Variáveis globais, caminhos, cores e detecção de ambiente
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -90,7 +90,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
     # pois são detectadas dinamicamente no env.sh e não devem ser sobrescritas
     cat > "$CONFIG_FILE" << 'EOF'
 #!/bin/bash
-# Configuração V3RTECH Scripts v7.0.0
+# Configuração V3RTECH Scripts v7.1.0
 # Gerada automaticamente
 
 DISTRO_FAMILY=""
@@ -186,7 +186,7 @@ fi
 
 # --- 7. VERSÃO DO PROJETO ---
 
-SCRIPT_VERSION="7.0.0"
+SCRIPT_VERSION="7.1.0"
 
 # --- 8. EXPORTAÇÃO DE VARIÁVEIS CRÍTICAS ---
 

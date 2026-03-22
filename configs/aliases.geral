@@ -275,7 +275,7 @@ SSH_KEY="/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/resources/ssh-k
 alias aws-cloudron='chmod 600 "$SSH_KEY" && ssh -i "$SSH_KEY" ubuntu@3.215.113.99'
 alias truenas-modal='chmod 600 "$SSH_KEY" && ssh -i "$SSH_KEY" modal@131.0.22.165 -p 8222'
 alias truenas-v3rtech='chmod 600 "$SSH_KEY" && ssh -i "$SSH_KEY" 189.50.92.154 -p 9222'
-alias sandros='chmod 600 "$SSH_KEY" && ssh -i "$SSH_KEY" bruno@189.50.92.154 -p 9223'
+alias sandros='chmod 600 "$SSH_KEY" && ssh -i "$SSH_KEY" root@189.50.92.154 -p 9223'
 alias pi='chmod 600 "$SSH_KEY" ; ssh -i "$SSH_KEY" pi@189.50.92.154 -p 222'
 alias v3gabi='ssh -i '$SSH_KEY' root@5.78.138.143 -p 8222'
 alias DL='sshpass -p br100171 ssh -oHostKeyAlgorithms=+ssh-dss admin@DNS-320L'

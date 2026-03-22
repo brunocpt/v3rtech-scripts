@@ -4,6 +4,46 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 ---
 
+## [7.1.0] - 2026-03-22
+
+### 🌐 Integração NFS4, Fallback CIFS e Suporte a Montagem KDE
+
+- **utils/cpd.sh (v5.1.0 → v6.0.0):**
+    - Reescrito com lógica de montagem `mount_dir()` com fallback automático NFS → CIFS.
+    - Título do progresso YAD atualizado para "CPD v6.0".
+
+- **utils/cpv.sh (v6.1.0 → v7.0.0):**
+    - Reescrito com lógica de montagem `mount_dir()` com fallback automático NFS → CIFS.
+    - Adicionada função `remove_empty_subdirs()` para limpeza de diretórios vazios após transferência.
+    - Comentários de implementação removidos para maior clareza.
+
+- **lib/setup-system.sh:**
+    - Adicionada instalação de `nfs-utils` e habilitação automática de `nfs-client.target` via `systemctl enable --now`.
+    - Em ambientes KDE, instala `kio-fuse` para permitir montagem de shares NFS/CIFS diretamente pelo Dolphin sem senha.
+
+- **lib/install-essentials.sh:**
+    - `nfs-utils` adicionado ao bloco de pacotes essenciais nas três distros suportadas (Arch, Debian, Fedora).
+    - Seção renomeada de "Internet" para "Rede".
+
+- **lib/install-desktop-kde.sh:**
+    - `kio-fuse` adicionado ao array de pacotes KDE nas três distros, habilitando montagem via Dolphin.
+
+- **configs/fstab.lan:**
+    - **Segurança:** DNS-320L migrado de credenciais inline (`username`/`password`) para arquivo `credentials-truenas`; rsize/wsize aumentados para 16 MB e `actimeo` para 60 s.
+    - **NFS4 como primário:** Todos os 6 shares TrueNAS (AppData, Backup, Downloads, Musicas, SOs, Videos) migrados para NFS4 (`vers=4.2`, rsize/wsize 128 KB, `hard,proto=tcp`), com entradas CIFS descomentadas como fallback ativo.
+
+- **configs/hosts:**
+    - Reorganizado e expandido: adicionados `truenas-modal` (131.0.22.165), `truenas-v3rtech` (IP público + local 192.168.0.12), `sandros`, `v3gabi` e `bpky.tplinkdns.com` (DDns Deco M5 Popov).
+    - Seção "Storages (NAS - Modal)" renomeada para "DNS-320L".
+
+- **configs/aliases.geral:**
+    - Alias `sandros` atualizado para usar usuário `root` em vez de `bruno`.
+
+- **.gitignore:**
+    - `configs/credentials-truenas` adicionado ao ignore para evitar rastreamento do arquivo de credenciais.
+
+---
+
 ## [7.0.0] - 2026-03-20
 
 ### 🐛 Correções de Bugs e Melhorias de Robustez

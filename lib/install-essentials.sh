@@ -87,8 +87,8 @@ case "$DISTRO_FAMILY" in
             "printer-driver-brlaser" "printer-driver-ptouch" "printer-driver-splix"
             "printer-driver-all"
 
-            # Internet
-            "rclone"
+            # Rede
+            "rclone" "nfs-utils"
 
             # Acessibilidade
             "speech-dispatcher"
@@ -150,8 +150,8 @@ case "$DISTRO_FAMILY" in
             # Utilitários
             "reflector"
 
-            # Internet
-            "rclone"
+            # Rede
+            "rclone" "nfs-utils"
 
             # Nota: Paru é instalado acima se PREFER_NATIVE=true
         )
@@ -203,8 +203,8 @@ case "$DISTRO_FAMILY" in
             "man-pages-pt_BR" "hunspell-en_AU" "hunspell-en_CA"
             "hunspell-en_ZA" "hyphen-en"
 
-            # Internet
-            "rclone"
+            # Rede
+            "rclone" "nfs-utils"
 
             # Acessibilidade
             "speech-dispatcher"

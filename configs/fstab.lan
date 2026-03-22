@@ -1,10 +1,32 @@
-# DNS-320L - Modal
-//DNS-320L/Volume_1           /mnt/LAN/DNS320L       cifs  username=bruno,password=br100171,uid=1000,gid=1000,serverino,cache=strict,actimeo=30,rsize=1048576,wsize=1048576,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=2.0  0  0
+
+# DNS-320L - Modal (CIFS apenas — dispositivo não suporta NFS)
+//DNS-320L/Volume_1           /mnt/LAN/DNS320L       cifs  credentials=/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs/credentials-truenas,uid=1000,gid=1000,serverino,cache=strict,actimeo=60,rsize=16777216,wsize=16777216,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=2.0  0  0
 
 # TrueNAS V3RTECH - Bruno
-//truenas-v3rtech-local/AppData       /mnt/LAN/AppData       cifs  username=bruno,password=br100171,uid=1000,gid=1000,serverino,cache=strict,actimeo=30,rsize=1048576,wsize=1048576,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
-//truenas-v3rtech-local/Backup        /mnt/LAN/Backup        cifs  username=bruno,password=br100171,uid=1000,gid=1000,serverino,cache=strict,actimeo=30,rsize=1048576,wsize=1048576,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
-//truenas-v3rtech-local/Downloads     /mnt/LAN/Downloads     cifs  username=bruno,password=br100171,uid=1000,gid=1000,serverino,cache=strict,actimeo=30,rsize=1048576,wsize=1048576,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
-//truenas-v3rtech-local/Musicas       /mnt/LAN/Musicas       cifs  username=bruno,password=br100171,uid=1000,gid=1000,serverino,cache=strict,actimeo=30,rsize=1048576,wsize=1048576,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
-//truenas-v3rtech-local/SOs           /mnt/LAN/SOs           cifs  username=bruno,password=br100171,uid=1000,gid=1000,serverino,cache=strict,actimeo=30,rsize=1048576,wsize=1048576,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
-//truenas-v3rtech-local/Videos        /mnt/LAN/Videos        cifs  username=bruno,password=br100171,uid=1000,gid=1000,serverino,cache=strict,actimeo=30,rsize=1048576,wsize=1048576,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+# Cada share tem entrada NFS (primária) e CIFS (fallback automático)
+
+# AppData
+truenas-v3rtech-local:/mnt/Dados/AppData        /mnt/LAN/AppData   nfs4  rw,relatime,vers=4.2,rsize=131072,wsize=131072,hard,proto=tcp,timeo=600,retrans=2,noauto,nofail,_netdev,x-mount.mkdir,users  0  0
+//truenas-v3rtech-local/AppData        /mnt/LAN/AppData   cifs  credentials=/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs/credentials-truenas,uid=1000,gid=1000,serverino,cache=strict,actimeo=60,rsize=16777216,wsize=16777216,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+
+# Backup
+truenas-v3rtech-local:/mnt/Dados/Backup         /mnt/LAN/Backup    nfs4  rw,relatime,vers=4.2,rsize=131072,wsize=131072,hard,proto=tcp,timeo=600,retrans=2,noauto,nofail,_netdev,x-mount.mkdir,users  0  0
+//truenas-v3rtech-local/Backup         /mnt/LAN/Backup    cifs  credentials=/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs/credentials-truenas,uid=1000,gid=1000,serverino,cache=strict,actimeo=60,rsize=16777216,wsize=16777216,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+
+# Downloads
+truenas-v3rtech-local:/mnt/Dados/Downloads      /mnt/LAN/Downloads nfs4  rw,relatime,vers=4.2,rsize=131072,wsize=131072,hard,proto=tcp,timeo=600,retrans=2,noauto,nofail,_netdev,x-mount.mkdir,users  0  0
+//truenas-v3rtech-local/Downloads      /mnt/LAN/Downloads cifs  credentials=/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs/credentials-truenas,uid=1000,gid=1000,serverino,cache=strict,actimeo=60,rsize=16777216,wsize=16777216,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+
+# Musicas
+truenas-v3rtech-local:/mnt/Midia/Musicas        /mnt/LAN/Musicas   nfs4  rw,relatime,vers=4.2,rsize=131072,wsize=131072,hard,proto=tcp,timeo=600,retrans=2,noauto,nofail,_netdev,x-mount.mkdir,users  0  0
+//truenas-v3rtech-local/Musicas        /mnt/LAN/Musicas   cifs  credentials=/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs/credentials-truenas,uid=1000,gid=1000,serverino,cache=strict,actimeo=60,rsize=16777216,wsize=16777216,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+
+# SOs
+truenas-v3rtech-local:/mnt/Dados/SOs            /mnt/LAN/SOs       nfs4  rw,relatime,vers=4.2,rsize=131072,wsize=131072,hard,proto=tcp,timeo=600,retrans=2,noauto,nofail,_netdev,x-mount.mkdir,users  0  0
+//truenas-v3rtech-local/SOs            /mnt/LAN/SOs       cifs  credentials=/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs/credentials-truenas,uid=1000,gid=1000,serverino,cache=strict,actimeo=60,rsize=16777216,wsize=16777216,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+
+# Videos
+truenas-v3rtech-local:/mnt/Midia/Videos        /mnt/LAN/Videos    nfs4  rw,relatime,vers=4.2,rsize=131072,wsize=131072,hard,proto=tcp,timeo=600,retrans=2,noauto,nofail,_netdev,x-mount.mkdir,users  0  0
+//truenas-v3rtech-local/Videos         /mnt/LAN/Videos    cifs  credentials=/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs/credentials-truenas,uid=1000,gid=1000,serverino,cache=strict,actimeo=60,rsize=16777216,wsize=16777216,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+
+

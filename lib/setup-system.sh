@@ -295,18 +295,34 @@ fi
 
 if [ -f "$FSTAB_LAN_FILE" ]; then
     i cifs-utils
+    i nfs-utils
+
+    # Habilita o cliente NFS (necessário para montar shares NFS4 via fstab/manual)
+    $SUDO systemctl enable --now nfs-client.target 2>/dev/null || \
+        log "WARN" "Não foi possível habilitar nfs-client.target (normal em sistemas sem systemd completo)"
+
+    # kio-fuse: permite montagem via clique no Dolphin (KDE) sem senha
+    if [ "$DESKTOP_ENV" = "kde" ]; then
+        i kio-fuse
+        log "INFO" "kio-fuse instalado — shares NFS/CIFS montáveis via Dolphin"
+    fi
+
     if grep -q "# === V3RTECH SCRIPTS: FSTAB MOUNTS BEGIN ===" /etc/fstab 2>/dev/null; then
         $SUDO sed -i '/# === V3RTECH SCRIPTS: FSTAB MOUNTS BEGIN ===/,/# === V3RTECH SCRIPTS: FSTAB MOUNTS END ===/d' /etc/fstab
     fi
     echo "# === V3RTECH SCRIPTS: FSTAB MOUNTS BEGIN ===" | $SUDO tee -a /etc/fstab > /dev/null
     cat "$FSTAB_LAN_FILE" | $SUDO tee -a /etc/fstab > /dev/null
     echo "# === V3RTECH SCRIPTS: FSTAB MOUNTS END ===" | $SUDO tee -a /etc/fstab > /dev/null
+
+    # Cria mountpoints para todas as entradas ativas (ignora linhas comentadas)
     while IFS= read -r line; do
         [[ -z "$line" || "$line" =~ ^# ]] && continue
         mount_point=$(echo "$line" | awk '{print $2}')
         if [[ "$mount_point" =~ ^/mnt/ ]]; then $SUDO mkdir -p "$mount_point"; fi
     done < "$FSTAB_LAN_FILE"
-    log "SUCCESS" "Mounts de rede configurados"
+
+    $SUDO systemctl daemon-reload
+    log "SUCCESS" "Mounts de rede configurados (NFS primário, CIFS fallback)"
 fi
 
 # ==============================================================================

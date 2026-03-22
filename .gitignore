@@ -20,6 +20,7 @@
 # Arquivos de Configuração Temporários
 /configs/.git-credentials
 /configs/github_pat.conf
+/configs/credentials-truenas
 /core/env-custom.sh
 
 # Se você quiser ignorar os zips de configuração pessoal (Recomendado se tiver senhas)

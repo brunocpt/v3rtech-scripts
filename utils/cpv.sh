@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: cpv.sh
-# Versão: 6.1.0 (Corrigida)
-# Data: 2026-03-07
+# Versão: 7.0.0
+# Data: 2026-03-22
+# Descrição: Move vídeos locais para o TrueNAS, preservando estrutura de pastas.
+#            Tenta montar via NFS (preferencial); usa CIFS como fallback.
 # ==============================================================================
 
 set -u
@@ -30,7 +32,7 @@ export -f log
 export log_file src_dir dest_dir
 
 # ------------------------------------------------------------------------------
-# FUNÇÃO DE TRANSFERÊNCIA (PRESERVA ESTRUTURA)
+# FUNÇÃO DE TRANSFERÊNCIA (EXPORTADA PARA O PARALLEL)
 # ------------------------------------------------------------------------------
 
 do_transfer_video() {
@@ -38,11 +40,9 @@ do_transfer_video() {
     local total="$2"
     local count="$3"
 
-    # Calcula o caminho relativo (ex: TVSeries/Sheriff Country/Season 01/arquivo.mkv)
     local rel="${file#$src_dir/}"
     local dest_path="$dest_dir/$rel"
 
-    # Cria a estrutura de pastas no destino antes de mover
     mkdir -p "$(dirname "$dest_path")"
 
     echo "#Transferindo ($count/$total): ${file##*/}"
@@ -54,39 +54,51 @@ do_transfer_video() {
 export -f do_transfer_video
 
 # ------------------------------------------------------------------------------
+# MONTAGEM COM FALLBACK NFS → CIFS
+# ------------------------------------------------------------------------------
+
+mount_dir(){
+    if mountpoint -q "$mount_point"; then
+        local proto
+        proto=$(findmnt -n -o FSTYPE "$mount_point" 2>/dev/null || echo "desconhecido")
+        log "Já montado via $proto: $mount_point"
+        return 0
+    fi
+
+    log "Tentando montar via NFS: $mount_point"
+    if mount -t nfs4 "$mount_point" >> "$log_file" 2>&1; then
+        log "Montado via NFS"
+        return 0
+    fi
+
+    log "NFS falhou — tentando CIFS como fallback"
+    if mount -t cifs "$mount_point" >> "$log_file" 2>&1; then
+        log "Montado via CIFS (fallback)"
+        return 0
+    fi
+
+    log "Erro: não foi possível montar $mount_point (NFS e CIFS falharam)"
+    exit 1
+}
+
+umount_dir(){
+    sleep 2
+    if mountpoint -q "$mount_point"; then
+        umount -l "$mount_point" || log "Aviso: Falha ao desmontar $mount_point"
+    fi
+}
+
+# ------------------------------------------------------------------------------
 # LÓGICA DE EXECUÇÃO
 # ------------------------------------------------------------------------------
 
 if [ -f "$LOCKFILE" ]; then
-  echo "cpv já está em execução."
-  exit 1
+    echo "cpv já está em execução."
+    exit 1
 fi
 
 trap 'rm -f "$LOCKFILE"' EXIT
 touch "$LOCKFILE"
-
-mount_dir(){
-  if ! mountpoint -q "$mount_point"; then
-    log "Montando $mount_point"
-    mount "$mount_point" || { log "Erro ao montar"; exit 1; }
-  fi
-}
-
-umount_dir(){
-  sleep 2
-  if mountpoint -q "$mount_point"; then
-    umount -l "$mount_point" || log "Aviso: Falha ao desmontar $mount_point"
-  fi
-}
-
-remove_empty_subdirs(){
-  log "Removendo diretórios vazios..."
-  for d in "${MAIN_DIRS[@]}"; do
-    base="$src_dir/$d"
-    [ -d "$base" ] || continue
-    find "$base" -mindepth 1 -type d -empty -delete >> "$log_file" 2>&1
-  done
-}
 
 parallel_rsync(){
     log "Construindo lista de arquivos"
@@ -106,6 +118,15 @@ parallel_rsync(){
         do_transfer_video {} "$total" "{#}"
 }
 
+remove_empty_subdirs(){
+    log "Removendo diretórios vazios..."
+    for d in "${MAIN_DIRS[@]}"; do
+        base="$src_dir/$d"
+        [ -d "$base" ] || continue
+        find "$base" -mindepth 1 -type d -empty -delete >> "$log_file" 2>&1
+    done
+}
+
 # ------------------------------------------------------------------------------
 # EXECUÇÃO COM YAD
 # ------------------------------------------------------------------------------
@@ -118,7 +139,6 @@ mount_dir
 (
     echo "#Executando fbr..."
     log "Executando fbr"
-    # Chamada do seu script de renomeação
     /mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/utils/fbr >> "$log_file" 2>&1
 
     echo "#Transferindo arquivos..."

@@ -72,7 +72,7 @@ case "$DISTRO_FAMILY" in
 
             # Utilitários
             "khotkeys" "kmenuedit" "ksysguard"
-            "kscreen" "bluedevil"
+            "kscreen" "bluedevil" "kio-fuse"
         )
 
         for pkg in "${kde_packages[@]}"; do
@@ -95,6 +95,9 @@ case "$DISTRO_FAMILY" in
 
             # Temas
             "breeze" "breeze-icons" "oxygen-icons"
+
+            # Utilitários
+             "kio-fuse"
         )
 
         for pkg in "${kde_packages[@]}"; do
@@ -117,6 +120,9 @@ case "$DISTRO_FAMILY" in
 
             # Temas
             "breeze-icon-theme" "breeze" "oxygen-icon-theme"
+
+            # Utilitários
+             "kio-fuse"
         )
 
         for pkg in "${kde_packages[@]}"; do
