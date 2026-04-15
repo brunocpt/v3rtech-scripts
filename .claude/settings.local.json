@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts status --short)",
+      "Bash(git -C /mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts diff v3rtech-install.sh)",
+      "Bash(git -C /mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts diff utils/cpd.sh)",
+      "Bash(git -C /mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts push origin main)",
+      "Bash(git fetch:*)"
+    ]
+  }
+}

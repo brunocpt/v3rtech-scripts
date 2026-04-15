@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: install-essentials.sh
-# Versão: 7.0.0
-# Data: 2026-03-20
+# Versão: 7.2.0
+# Data: 2026-04-15
 # Objetivo: Instalar pacotes e aplicativos essenciais do sistema
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -87,6 +87,9 @@ case "$DISTRO_FAMILY" in
             "printer-driver-brlaser" "printer-driver-ptouch" "printer-driver-splix"
             "printer-driver-all"
 
+            # Utilitários
+             "sane" "avahi" "nss-mdns" "sane-airscan"
+
             # Rede
             "rclone" "nfs-utils"
 
@@ -140,6 +143,8 @@ case "$DISTRO_FAMILY" in
             "foomatic-db-nonfree-ppds" "foomatic-db-gutenprint-ppds"
             "epson-inkjet-printer-escpr" "cnijfilter2" "scangearmp2"
             "samsung-unified-driver" "cnrdrvcups-lb" "cups-bjnp"
+            "iscan-plugin-network" "epson-inkjet-printer-escpr2"
+            "imagescan-plugin-networkscan" "epson-printer-utility"
 
             # Processamento de imagem
             "imagemagick"
@@ -148,7 +153,7 @@ case "$DISTRO_FAMILY" in
             "speech-dispatcher"
 
             # Utilitários
-            "reflector"
+            "reflector" "sane" "avahi" "nss-mdns" "sane-airscan"
 
             # Rede
             "rclone" "nfs-utils"
@@ -203,6 +208,9 @@ case "$DISTRO_FAMILY" in
             "man-pages-pt_BR" "hunspell-en_AU" "hunspell-en_CA"
             "hunspell-en_ZA" "hyphen-en"
 
+            # Utilitários
+             "sane" "avahi" "nss-mdns" "sane-airscan"
+
             # Rede
             "rclone" "nfs-utils"
 
@@ -252,6 +260,8 @@ echo "a4" | $SUDO tee /etc/papersize > /dev/null
 # Reinicia e habilita CUPS
 $SUDO systemctl restart cups 2>/dev/null || true
 $SUDO systemctl enable --now cups 2>/dev/null || true
+$SUDO systemctl enable --now avahi-daemon.socket 2>/dev/null || true
+$SUDO systemctl enable --now avahi-daemon.service 2>/dev/null || true
 
 log "SUCCESS" "CUPS configurado e ativado"
 

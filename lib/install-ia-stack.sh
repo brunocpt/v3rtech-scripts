@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: lib/install-ia-stack.sh
-# Versão: 7.0.0
-# Data: 2026-03-20
+# Versão: 7.2.0
+# Data: 2026-04-15
 # Objetivo: Instalar stack completa de IA (PyTorch, Whisper, AnythingLLM, Ollama)
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -232,6 +232,7 @@ setup_docker_compose() {
 # Configuração de Storage
 ANYTHINGLLM_STORAGE=$docker_dir/anythingllm_storage
 OLLAMA_STORAGE=$docker_dir/ollama_data
+OLLAMA_PORT=11434
 
 # Configuração de Segurança
 JWT_SECRET="$(openssl rand -hex 16)"
@@ -243,7 +244,12 @@ EOF
     log "SUCCESS" "Arquivo .env criado"
 
     # Cria docker-compose.yml
-    cat > "$docker_dir/docker-compose.yml" <<'EOF'
+    cat > "$docker_dir/compose.yml" <<'EOF'
+networks:
+  local-net:
+    driver: bridge
+    name: local-net
+
 services:
   ollama:
     image: ollama/ollama:latest
@@ -251,8 +257,13 @@ services:
     volumes:
       - ${OLLAMA_STORAGE}:/root/.ollama
     restart: always
+    ports:
+      - ${OLLAMA_PORT}:11434
     environment:
       - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_ORIGINS=*
+    networks:
+      - local-net
 EOF
 
     # Adiciona suporte GPU se disponível
@@ -269,7 +280,7 @@ EOF
     fi
 
     # Adiciona AnythingLLM
-    cat >> "$docker_dir/docker-compose.yml" <<'EOF'
+    cat >> "$docker_dir/compose.yml" <<'EOF'
 
   anythingllm:
     image: mintplexlabs/anythingllm:latest
@@ -284,9 +295,11 @@ EOF
     restart: always
     depends_on:
       - ollama
+    networks:
+      - local-net
 EOF
 
-    log "SUCCESS" "docker-compose.yml criado"
+    log "SUCCESS" "compose.yml criado"
 
     # Cria diretórios de storage
     mkdir -p "$docker_dir/anythingllm_storage" "$docker_dir/ollama_data"
@@ -326,7 +339,7 @@ download_models() {
 
     if [ "$HAS_GPU_NVIDIA" = "true" ] && [ "$TOTAL_RAM" -ge 30 ]; then
         log "INFO" "GPU NVIDIA com 30GB+ RAM: instalando modelos grandes"
-        models=("llama3.1:8b" "mistral-nemo" "deepseek-v2:lite")
+        models=("llama3.1:8b" "mistral-nemo" "deepseek-v2:lite" "qwen:latest" "qwen:14b" "qwen3:14b")
     elif [ "$TOTAL_RAM" -ge 14 ]; then
         log "INFO" "14GB+ RAM: instalando modelos médios"
         models=("llama3.1:8b" "phi3:latest")

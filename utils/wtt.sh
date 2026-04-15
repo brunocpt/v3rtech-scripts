@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: wtt.sh
-# Versão: 4.7.0
-# Data: 2026-02-25
+# Versão: 7.2.0
+# Data: 2026-04-15
 # Objetivo: Interface gráfica (YAD) para transcrição de áudio/vídeo via Whisper
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -103,12 +103,12 @@ process_all_files() {
     # Usamos printf com %b para interpretar \n corretamente
     local files_with_newlines
     files_with_newlines=$(printf '%s' "$input_files" | sed 's/!/\n/g')
-    
+
     local file_count=0
     while IFS= read -r file; do
         # Ignora linhas vazias
         [ -z "$file" ] && continue
-        
+
         ((file_count++))
         echo ""
         log "------------------------------------------------------------"
@@ -218,7 +218,7 @@ Total: $final_count arquivo(s)
 Log salvo em:
 $LOGFILE"
 
-yad --info --title="Conclusão" --text="$FINAL_MESSAGE" --width=600
+#yad --info --title="Conclusão" --text="$FINAL_MESSAGE" --width=600
 
 log "Script finalizado."
 exit 0

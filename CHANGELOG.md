@@ -4,6 +4,19 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 ---
 
+## [7.2.0] - 2026-04-15
+
+### ✨ Ferramentas, Rede e Ajustes
+
+- **lib/apps-data.sh:** Ativação do `BrowserOS` e inclusão da ferramenta corporativa agêntica `Claude Code`.
+- **lib/install-essentials.sh:** Adição de utilitários `sane`, `avahi`, `nss-mdns`, `sane-airscan` e plugins da Epson; habilitado `avahi-daemon.service` por padrão.
+- **lib/install-ia-stack.sh:** Stack migrada para gerenciamento corporativo via `compose.yml` utilizando `local-net`. Bindings de deploy Ollama expandidos porta (11434) para a rede, com novas matrizes Qwen e `qwen3:14b` ativas via GPU superior a 30GB.
+- **utils/wtt.sh:** Remoção do diálogo gráfico de alerta (`yad`) no encerramento evitando bloqueios passivos.
+- **configs/aliases.geral:** Inclusão de atalhos Rclone úteis para ambiente corporativo (`rc-up-nbti-gdrive`, `rc-up-v3rtech`). Depreciação de ssh-dss flag no host `DNS-320L`.
+- **configs/fstab.lan:** Adição de entrada de serviço para o diretório `/srv` em Storage TrueNAS, mantendo o fallback NFS/CIFS.
+
+---
+
 ## [7.1.0] - 2026-03-22
 
 ### 🌐 Integração NFS4, Fallback CIFS e Suporte a Montagem KDE
@@ -338,8 +351,8 @@ Se encontrar algum bug, por favor abra uma issue no repositório.
 
 ## 📊 Estatísticas
 
-- **Versão:** 6.1.0
-- **Data de Lançamento:** 2026-03-19
+- **Versão:** 7.2.0
+- **Data de Lançamento:** 2026-04-15
 - **Scripts Principais:** 20+
 - **Funções Auxiliares:** 50+
 - **Linhas de Código:** 3000+
@@ -362,4 +375,4 @@ MIT License - Veja LICENSE para detalhes
 
 ---
 
-**Última Atualização:** 2026-03-19
+**Última Atualização:** 2026-04-15

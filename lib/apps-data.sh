@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # Script: lib/apps-data.sh
-# Versão: 7.0.0
-# Data: 2026-03-20
+# Versão: 7.2.0
+# Data: 2026-04-15
 # Objetivo: Banco de dados centralizado de aplicativos para instalação
 # Autor: V3RTECH Tecnologia, Consultoria e Inovação
 # Website: https://v3rtech.com.br/
@@ -70,7 +70,7 @@ add_app() {
     APP_MAP_CATEGORY["$name"]="$category"
     APP_MAP_ACTIVE["$name"]="$active"
     APP_MAP_DESC["$name"]="$desc"
-    
+
     # Mantém ordem dos apps
     APP_NAMES_ORDERED+=("$name")
 
@@ -99,7 +99,7 @@ add_app "TRUE" "Internet" "Zen Browser" "Navegador zen com foco em privacidade e
 add_app "FALSE" "Internet" "Vivaldi" "Navegador Power User" "vivaldi-stable" "vivaldi" "vivaldi" "com.vivaldi.Vivaldi" "auto"
 add_app "FALSE" "Internet" "Opera" "Navegador com VPN" "" "opera" "" "com.opera.Opera" "auto"
 add_app "FALSE" "Internet" "Microsoft Edge" "Navegador Microsoft" "microsoft-edge-stable" "microsoft-edge-stable-bin" "microsoft-edge-stable" "com.microsoft.Edge" "auto"
-add_app "FALSE" "Internet" "BrowserOS" "The Open source agentic browser" "" "browseros-bin" "" "" "native"
+add_app "TRUE" "Internet" "BrowserOS" "The Open source agentic browser" "" "browseros-bin" "" "" "native"
 add_app "TRUE" "Internet" "Wavebox" "Navegador focado em trabalho" "wavebox" "wavebox" "wavebox" "io.wavebox.Wavebox" "auto"
 add_app "FALSE" "Internet" "Discord" "Chat e Voz" "discord" "discord" "discord" "com.discordapp.Discord" "flatpak"
 add_app "FALSE" "Internet" "MailViewer" "Visualizador EML/MSG" "" "" "" "io.github.alescdb.mailviewer" "flatpak"
@@ -196,5 +196,6 @@ add_app "TRUE" "Impressão" "Gutenprint" "Drivers Genéricos" "printer-driver-gu
 #add_app "FALSE" "IA" "OpenAI Whisper" "Reconhecimento de Fala" "" "" "" "openai-whisper" "pipx"  =====> Instalado pelo install-ia-stack.sh
 add_app "TRUE" "IA" "Subliminal" "Baixador de Legendas" "" "" "" "subliminal" "pipx"
 add_app "TRUE" "IA" "Trans" "Tradutor de Texto" "" "" "" "translate-shell googletrans" "pipx"
+add_app "TRUE" "IA" "Claude Code" "Ferramenta de codificação agêntica" "" "claude-code claude-desktop-bin" "" "" "native"
 
 log "SUCCESS" "Banco de dados de aplicativos carregado"

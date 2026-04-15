@@ -2,7 +2,7 @@
 # ==============================================================================
 # Projeto: v3rtech-scripts
 # Arquivo: aliases.geral
-# Versão: 2.2.0 (estrutura e robustez melhoradas)
+# Versão: 7.2.0 (estrutura e robustez melhoradas)
 # ==============================================================================
 
 
@@ -225,8 +225,6 @@ rcls() {
 # ------------------------------------------------------------------------------
 alias rc-down-bruno-geja='rclone copy GEJA-Pessoal: "/mnt/trabalho/Cloud/Bruno/Escotismo/GEJA" -u -P --exclude-from "$RC_EXCLUDE"'
 alias rc-down-geja-diretoria='rclone copy GEJA-Diretoria: "/mnt/trabalho/Cloud/GEJA/Diretoria/" -u -P --exclude-from "$RC_EXCLUDE"'
-#alias rc-up-bruno-geja='rclone copy "/mnt/trabalho/Cloud/GEJA/" GEJA-Pessoal: -u -P --exclude Diretoria/** --exclude "*.mp4" --exclude "*.mkv"'
-#alias rc-up-geja-diretoria='rclone copy "/mnt/trabalho/Cloud/GEJA/Diretoria/" GEJA-Diretoria: -u -P --exclude-from "$RC_EXCLUDE"'
 
 rc-up-bruno-geja() {
     rclone-upload "/mnt/trabalho/Cloud/GEJA/" "GEJA-Pessoal:"
@@ -262,6 +260,20 @@ rc-up-rit-gdrive() {
     }
 
 # ------------------------------------------------------------------------------
+# NBTI
+# ------------------------------------------------------------------------------
+rc-up-nbti-gdrive() {
+    rclone-upload "/mnt/trabalho/Cloud/NBTI" "NBTI-GDrive:"
+    }
+
+# ------------------------------------------------------------------------------
+# V3RTECH
+# ------------------------------------------------------------------------------
+rc-up-v3rtech() {
+    rclone-upload "/mnt/trabalho/Cloud/V3RTECH/" "V3RTECH:"
+    }
+
+# ------------------------------------------------------------------------------
 # OUTROS
 # ------------------------------------------------------------------------------
 #alias rc-down-gphotos='rclone sync GooglePhotos:album/FamiliaBPKY "/mnt/trabalho/Cloud/Compartilhado/Multimidia/Pessoais/FamiliaBPKY/" -u -P --exclude-from "$RC_EXCLUDE"'
@@ -278,7 +290,7 @@ alias truenas-v3rtech='chmod 600 "$SSH_KEY" && ssh -i "$SSH_KEY" 189.50.92.154 -
 alias sandros='chmod 600 "$SSH_KEY" && ssh -i "$SSH_KEY" root@189.50.92.154 -p 9223'
 alias pi='chmod 600 "$SSH_KEY" ; ssh -i "$SSH_KEY" pi@189.50.92.154 -p 222'
 alias v3gabi='ssh -i '$SSH_KEY' root@5.78.138.143 -p 8222'
-alias DL='sshpass -p br100171 ssh -oHostKeyAlgorithms=+ssh-dss admin@DNS-320L'
+alias DL='sshpass -p br100171 ssh admin@DNS-320L'
 
 # ==============================================================================
 # 10. GERENCIAMENTO DE PACOTES (Distro Agnostic)

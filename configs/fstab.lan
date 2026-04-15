@@ -21,6 +21,10 @@ truenas-v3rtech-local:/mnt/Dados/Downloads      /mnt/LAN/Downloads nfs4  rw,rela
 truenas-v3rtech-local:/mnt/Midia/Musicas        /mnt/LAN/Musicas   nfs4  rw,relatime,vers=4.2,rsize=131072,wsize=131072,hard,proto=tcp,timeo=600,retrans=2,noauto,nofail,_netdev,x-mount.mkdir,users  0  0
 //truenas-v3rtech-local/Musicas        /mnt/LAN/Musicas   cifs  credentials=/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs/credentials-truenas,uid=1000,gid=1000,serverino,cache=strict,actimeo=60,rsize=16777216,wsize=16777216,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
 
+# Server
+truenas-v3rtech-local:/mnt/Dados/srv            /mnt/LAN/srv       nfs4  rw,relatime,vers=4.2,rsize=131072,wsize=131072,hard,proto=tcp,timeo=600,retrans=2,noauto,nofail,_netdev,x-mount.mkdir,users  0  0
+//truenas-v3rtech-local/srv            /mnt/LAN/srv       cifs  credentials=/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs/credentials-truenas,uid=1000,gid=1000,serverino,cache=strict,actimeo=60,rsize=16777216,wsize=16777216,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
+
 # SOs
 truenas-v3rtech-local:/mnt/Dados/SOs            /mnt/LAN/SOs       nfs4  rw,relatime,vers=4.2,rsize=131072,wsize=131072,hard,proto=tcp,timeo=600,retrans=2,noauto,nofail,_netdev,x-mount.mkdir,users  0  0
 //truenas-v3rtech-local/SOs            /mnt/LAN/SOs       cifs  credentials=/mnt/trabalho/Cloud/Compartilhado/Linux/v3rtech-scripts/configs/credentials-truenas,uid=1000,gid=1000,serverino,cache=strict,actimeo=60,rsize=16777216,wsize=16777216,iocharset=utf8,noauto,nofail,_netdev,x-mount.mkdir,users,vers=3.1.1  0  0
